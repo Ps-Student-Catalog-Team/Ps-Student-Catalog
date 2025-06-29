@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPN 服务器状态监控</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { text-align: center; color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f5f5f5; }
+        .online { color: green; }
+        .offline { color: red; }
+        .refresh-btn { 
+            padding: 10px 15px; 
+            background: #4CAF50; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .refresh-btn:hover { background: #45a049; }
+    </style>
+</head>
+<body>
+    <h1>VPN 服务器状态监控</h1>
+    <button class="refresh-btn" onclick="fetchData()">刷新数据</button>
+    <div>最后更新时间: <span id="lastUpdate">尚未更新</span></div>
+    
+    <table id="statusTable">
+        <thead>
+            <tr>
+                <th>服务器名称</th>
+                <th>服务器地址</th>
+                <th>端口</th>
+                <th>状态</th>
+                <th>当前会话数</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 数据将通过JavaScript动态填充 -->
+        </tbody>
+    </table>
+
+    <script>
+        // 获取服务器状态数据
+        function fetchData() {
+            fetch('/api/vpn-status')
+                .then(response => response.json())
+                .then(data => {
+                    updateTable(data);
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
+                })
+                .catch(error => {
+                    console.error('获取数据失败:', error);
+                    alert('无法获取服务器数据');
+                });
+        }
+
+        // 更新表格数据
+        function updateTable(servers) {
+            const tbody = document.querySelector('#statusTable tbody');
+            tbody.innerHTML = ''; // 清空现有内容
+
+            servers.forEach(server => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${server.name}</td>
+                    <td>${server.host}</td>
+                    <td>${server.port}</td>
+                    <td class="${server.status}">${server.status === 'online' ? '在线' : '离线'}</td>
+                    <td>${server.sessions}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // 页面加载时获取数据
+        document.addEventListener('DOMContentLoaded', fetchData);
+        
+        // 每60秒自动刷新数据
+        setInterval(fetchData, 60000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生目录使用说明</title>
+    <style>
+        :root {
+            --primary-color: #2a2a2a;
+            --accent-color: #00ff9d;
+            --text-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            padding: 40px;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        /* 标题动画 */
+        h1 {
+            position: relative;
+            animation: typewriter 1.2s steps(12) 0.5s both,
+                       blinkCursor 0.8s infinite;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid var(--accent-color);
+            max-width: max-content;
+        }
+
+        p {
+            text-align:left;
+        }
+
+        /* 新增字体和排版优化 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;500;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans SC', system-ui, sans-serif;
+            line-height: 2.0;
+            letter-spacing: 0.5px;
+        }
+
+        /* 动态背景效果 */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, 
+                rgba(0, 255, 157, 0.1) 0%, 
+                transparent 60%);
+            pointer-events: none;
+            z-index: -1;
+            animation: pulse 8s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* 定义关键帧动画 */
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blinkCursor {
+            from, to { border-color: transparent }
+            50% { border-color: var(--accent-color) }
+        }
+
+        .container a {
+            color:rgb(0, 189, 73);
+        }
+
+        /* 文章内容入场动画 */
+        .container > *:not(h1) {
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
+            animation-delay: 1.8s; /* 等待标题动画完成 */
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container p:nth-child(1) { animation-delay: 2.0s; }
+        .container p:nth-child(2) { animation-delay: 2.2s; }
+        .container p:nth-child(3) { animation-delay: 2.4s; }
+        .container p:nth-child(4) { animation-delay: 2.6s; }
+        .container h2 { animation-delay: 2.8s; }
+
+        .container > * {
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 18px;
+        text-align: center;
+    }
+    th, td {
+        padding: 12px;
+        border: 1px solid #009105;
+    }
+    tr:hover {
+        background-color: #bbbbbb4e;
+    }
+
+    .name {
+        text-align: right;
+        margin-top: 20px;
+    }
+
+    .back-home-btn {
+        text-align: center;
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: rgb(0, 0, 0);
+        color: rgb(0, 145, 5);
+        text-decoration: none;
+        border-radius: 25px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        font-weight: 500;
+        border-color: #00ab6a;
+    }
+
+    .back-home-btn:hover {
+        background-color: transparent;
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+        box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>学生目录使用说明</h1>
+        <br>
+        <p style="line-height: 1.6; margin-bottom: 20px;">
+            欢迎来到 学生目录 2.0！本页面将详细介绍如何使用学生目录的各项功能。
+        </p>
+        <br>
+
+        <p>自学生目录创建以来，现已出具规模。但仍有许多访问者并不清楚学生目录的功能与使用方法。因此，我制作了此使用说明，以帮助访问者更好地使用学生目录。</p>
+        <br>
+        <p>简短来说，<strong>学生目录是一个部署在校园网内的，专供学生使用的平台。网站以为学生服务为宗旨，所有学生都可以享受学生目录的服务。</strong></p>
+        <br></vr>
+        <p>更多有关学生目录的信息，请参阅<a href="index.php">学生目录</a>的“关于”页面。</p>
+        <p>如果你遇到任何问题，请将问题发送至<a href="comment.html">留言簿</a>或联系网站管理员</p>
+        <br>
+
+        <h2>学生目录的功能</h2>
+        <p>校园网络接入服务</p>
+        <p>学生共享文件传输服务</p>
+        <p>其他工具</p>
+
+        <h2>如何访问学生目录</h2>
+        <p>学生目录部署在校园网内，使用想要访问学生目录，首先要接入校园网。</p>
+        <p>所有班级教室电脑在正常状态下都已经接入校园网，无需额外操作。</p>
+        <p>如果使用手机，则需要连接学校内的任意网络，连接网络即可，无需通过教师认证，有关教学楼中各楼层的WiFi密码，请参阅<a href="index.php">教程</a>中的校园网密码登记</p>
+        <p>接入校园网后再浏览器中输入校园网网址即可访问学生目录。</p>
+        <p>学生目录2.0更新后ip变更为10.88.202.71，旧网址10.88.202.54将不再使用。</p>
+        <br>
+
+        <h2>学生目录主界面</h2>
+        <p>主界面仍在开发中，如果有什么建议或意见，请将您的意见发送至<a href="comment.html">留言簿</a></p>
+        <p>主界面右侧按钮下方的圆圈代表当前校园网接入服务的质量，您可以通过颜色判断接入的状态，绿色代表良好，黄色代表中等，红色代表差。</p>
+        <br>
+
+        <h2>校园网络接入服务</h2>
+        <p>校园网络接入服务是学生目录的核心功能，它为学生提供校园网接入服务，并提供技术支持。</p>
+        <p>校园网络接入服务的质量直接影响到学生的上网体验，良好的接入服务可以让学生享受到校园网带来的便利，同时也能提高学生的上网体验。</p>
+        <p>关于如何使用校园网络接入服务，请参阅<a href="index.php">教程</a>中的相关内容。</p>
+        <br>
+
+        <h2>共享目录——文件共享服务</h2>
+        <p>学生共享目录2.0更新后无需密码即可访问共享目录，登录账号后可查看更多文件</p>
+        <p>请注意：<strong>共享目录仅供学生使用，请勿泄露账号密码！</strong>若遗忘账号密码，请联系管理员</p>
+        <p><i>提示：好好利用目录中的搜索功能课可以更加方便高效地找到你想要的目标哦</i></p>
+        <p>以下为不同账号之间的权限划分：</p>
+        <table border="1">
+            <tr>
+                <th>账号类型</th>
+                <th>权限描述</th>
+            </tr>
+            <tr>
+                <td>游客登录</td>
+                <td>仅可访问共享目录中的公开文件，登录后可查看更多文件</td>
+            </tr>
+            <tr>
+                <td>学生账号</td>
+                <td>可上传文件至共享目录，可提供密码查看所有文件</td>
+            </tr>
+        </table>
+        <p>期待您在学生目录中上传您的文件</p>
+        <br>
+
+        <h2>教程模块</h2>
+        <p>教程模块中包含了我们的一系列摸索的结果，希望能帮助到您。</p>
+        <p>这里有简洁明了的步骤，让你能在短时间内掌握一些技巧。如需提交教程，请将markdown格式的教程文件发送至<a href="comment.html">留言簿</a>，我们将在审核后发布。</p>
+        <p>部分教程内容有些敏感，所以我们设置了密码保护，如需获取请联系网站管理员</p>
+        <br>
+
+        <p>此界面整合了学生目录提供的一些小工具</p>
+        <p>如果你对工具有什么好的修改或添加建议，请将建议发送至<a href="comment.html">留言簿</a></p>
+        <p>如果您有自己制作的一些小东西，欢迎将上传至学生目录并在<a href="comment.html">留言簿</a>中说明，我们将添加加至工具栏展示</p>
+        <h3>时钟</h3>
+        <p>时钟功能可以显示当前时间</p>
+        <p>时钟的上方有引语，点击引语可以更换引语</p>
+        <p>双击网页的任意位置可以刷新网页</p>
+        <h3>特殊的时钟</h3>
+        <p>与时钟大体相同，不过引言内容由大家上传，大家可以在<a href="comment.html">留言簿</a>中上传引言，此页面仅供大家娱乐：）</p>
+        <h3>留言簿</h3>
+        <p>一个用于留言的网页，所有人都可以自由地发送与查看留言</p>
+        <p>留言内容将会被管理员审核，审核通过后才会显示在留言簿中</p>
+        <p>留言的发送是匿名的，不会显示发送者的真实姓名，发送时仅记录发送时间</p>
+        <P>留言簿支持切换主题功能，点击留言簿右上角的图标即可切换</P>
+        <p>请注意：<strong>请不要在留言簿中发布敏感信息</strong></p>
+        <br>
+
+        <p>感谢您的耐心阅读</p>
+        <p>学生目录2.0更新后，我们将会继续完善学生目录的功能，欢迎您提供宝贵的意见和建议</p>
+        <p>助您使用愉快！</p>
+        
+        <div class="name">
+            <p style="text-align: right;"><i>yuebi</i></p>
+            <p style="text-align: right;"><i>2025年3月9日 第三次修订</i></p>
+        </div>
+
+        <a href="index.php" class="back-home-btn">返回首页</a>
+    </div>
+</body>
+</html>

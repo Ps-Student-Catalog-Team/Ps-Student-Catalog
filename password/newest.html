@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最新密码发布页</title>
+    <link href="light-theme.css" rel="stylesheet">
+    <meta name="color-scheme" content="light">
+</head>
+<body>
+    <header>
+        <h1>VPN 状态页</h1>
+    </header>
+    <main>
+        <p>校园VPN的密码以后会定时更新啦！</p>
+        <p>以前一直不变确实不太好呢</p>
+        <p>以后更新的VPN密码将会记录在此</p>
+        <p>如果你发现无法连接VPN，记得回来看看哦。<em style="color: gray;">访问此网站无需VPN</em></p>
+        <div class="announcement">
+            <h3>重要公告</h3>
+            <p>阅读四月的学生目录<a class="link" href="https://psstunet.github.io/article/2504.html">月度报告</a>！</p>
+            <p><a class="link" href="https://blog.mfwt.top/index.php/archives/465/">网络小故逝</a></p>
+            <hr>
+            <p>更新了VPN状态页面φ(゜▽゜*)♪</p>
+            <p>以后VPN的最新密码将会同步在VPN状态页面</p>
+        </div>
+        <div class="password-info">
+            <p>最新密码发布时间：<span class="timestamp">2025-05-08 12:00:00</span></p>
+            <p>最新密码：<span class="password" id="password">iloveLZB!</span></p>
+            <button class="btn-toggle" id="copyButton">一键复制密码</button>
+        </div>
+        <div class="vpn-status" id="vpnStatus">
+            <h3>VPN服务器状态   <!--em style="font-size: medium;">此功能仍在开发中，敬请期待！（*＾-＾*）</em--></h3>
+            <div class="status-item" id="status_10.88.202.71">检测中...</div>
+            <div class="session-info" id="sessionInfo_10.88.202.71">会话数: 检测中...</div>
+            <div class="status-item" id="status_10.88.202.11">检测中...</div>
+            <div class="session-info" id="sessionInfo_10.88.202.11">会话数: 检测中...</div>
+            <div class="status-item" id="status_10.88.194.142">检测中...</div>
+            <div class="session-info" id="sessionInfo_10.88.194.142">会话数: 检测中...</div>
+            <div class="status-item" id="status_10.88.213.212">检测中...</div>
+            <div class="session-info" id="sessionInfo_10.88.213.212">会话数: 检测中...</div>
+        </div>
+        <!-- 动态背景粒子 -->
+        <div class="background-particles">
+            <canvas id="particles"></canvas>
+        </div>
+    </main>
+    <script src="copy-script.js"></script>
+    <script>
+    // VPN状态检测函数
+    async function checkVPNStatus(ip, elementId, sessionInfoId) {
+        const statusElement = document.getElementById(elementId);
+        const sessionInfoElement = document.getElementById(sessionInfoId);
+        try {
+            const response = await fetch(`http://10.88.202.71:3000/api/vpn-status?ip=${ip}`);
+            const data = await response.json();
+            // 新增IP地址显示（使用模板字符串优化可读性）
+            statusElement.innerHTML = data.online ? 
+                `✅ ${ip} 在线 <span style="color: green;">(延迟: ${data.ping}ms)</span>` : 
+                `❌ ${ip} 离线 <span style="color: red;">(最后在线: ${data.lastOnline})</span>`;
+
+            // 根据服务器状态应用相应的样式
+            statusElement.classList.remove('checking', 'offline', 'online');
+            sessionInfoElement.classList.remove('checking', 'offline-session', 'online-session');
+
+            if (data.online) {
+                statusElement.classList.add('online');
+                const sessionResponse = await fetch(`http://10.88.202.71:3000/api/vpn-users?ip=${ip}`);
+                const sessionData = await sessionResponse.json();
+                sessionInfoElement.innerHTML = `会话数: ${sessionData.sessionCount}`;
+                sessionInfoElement.classList.add('online-session');
+                sessionInfoElement.style.display = 'block'; // 显示会话数
+            } else {
+                statusElement.classList.add('offline');
+                sessionInfoElement.style.display = 'none'; // 不显示会话数
+            }
+        } catch (error) {
+            // 错误状态也显示IP
+            statusElement.innerHTML = `⚠ ${ip} 检测失败`;
+            statusElement.classList.remove('checking', 'online', 'offline');
+            statusElement.classList.add('checking');
+            sessionInfoElement.style.display = 'none'; // 不显示会话数
+        }
+    }
+    // 页面加载时执行检测
+    document.addEventListener('DOMContentLoaded', () => {
+        checkVPNStatus('10.88.194.142', 'status_10.88.194.142', 'sessionInfo_10.88.194.142');
+        checkVPNStatus('10.88.202.11', 'status_10.88.202.11', 'sessionInfo_10.88.202.11');
+        checkVPNStatus('10.88.202.71', 'status_10.88.202.71', 'sessionInfo_10.88.202.71');
+        checkVPNStatus('10.88.213.212', 'status_10.88.213.212', 'sessionInfo_10.88.213.212');
+    });
+
+    // 动态背景粒子效果
+    function initParticles() {
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 150;
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5']; // 五彩缤纷的颜色数组
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 2 - 1;
+                this.speedY = Math.random() * 2 - 1;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        animate();
+
+        // 处理窗口大小变化
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    }
+
+    // 初始化动态背景
+    document.addEventListener('DOMContentLoaded', initParticles);
+
+
+        // 动态背景粒子效果
+        function initParticles() {
+            const canvas = document.getElementById('particles');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const particleCount = 150;
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5']; // 五彩缤纷的颜色数组
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 1;
+                    this.speedX = Math.random() * 2 - 1;
+                    this.speedY = Math.random() * 2 - 1;
+                    this.color = colors[Math.floor(Math.random() * colors.length)];
+                }
+
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.y > canvas.height) this.y = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                }
+
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(particle => {
+                    particle.update();
+                    particle.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+
+            animate();
+
+            // 处理窗口大小变化
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+
+        // 初始化动态背景
+        document.addEventListener('DOMContentLoaded', initParticles);
+    </script>
+</body>
+</html>

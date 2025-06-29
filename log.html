@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生目录使用说明</title>
+    <style>
+        :root {
+            --primary-color: #2a2a2a;
+            --accent-color: #00ff9d;
+            --text-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            padding: 40px;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        /* 标题动画 */
+        h1 {
+            position: relative;
+            animation: typewriter 1.2s steps(12) 0.5s both,
+                       blinkCursor 0.8s infinite;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid var(--accent-color);
+            max-width: max-content;
+        }
+
+        p {
+            text-align:left;
+        }
+
+        /* 新增字体和排版优化 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;500;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans SC', system-ui, sans-serif;
+            line-height: 2.0;
+            letter-spacing: 0.5px;
+        }
+
+        /* 动态背景效果 */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, 
+                rgba(0, 255, 157, 0.1) 0%, 
+                transparent 60%);
+            pointer-events: none;
+            z-index: -1;
+            animation: pulse 8s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* 定义关键帧动画 */
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blinkCursor {
+            from, to { border-color: transparent }
+            50% { border-color: var(--accent-color) }
+        }
+
+        .container a {
+            color:rgb(0, 189, 73);
+        }
+
+        /* 文章内容入场动画 */
+        .container > *:not(h1) {
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
+            animation-delay: 1.8s; /* 等待标题动画完成 */
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container p:nth-child(1) { animation-delay: 2.0s; }
+        .container p:nth-child(2) { animation-delay: 2.2s; }
+        .container p:nth-child(3) { animation-delay: 2.4s; }
+        .container p:nth-child(4) { animation-delay: 2.6s; }
+        .container h2 { animation-delay: 2.8s; }
+
+        .container > * {
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 18px;
+        text-align: center;
+    }
+    th, td {
+        padding: 12px;
+        border: 1px solid #009105;
+    }
+    tr:hover {
+        background-color: #bbbbbb4e;
+    }
+
+    .name {
+        text-align: right;
+        margin-top: 20px;
+    }
+
+    .back-home-btn {
+        text-align: center;
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: rgb(0, 0, 0);
+        color: rgb(0, 145, 5);
+        text-decoration: none;
+        border-radius: 25px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        font-weight: 500;
+        border-color: #00ab6a;
+    }
+
+    .back-home-btn:hover {
+        background-color: transparent;
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+        box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>学生目录更新日志</h1>
+        <br>
+        <p style="line-height: 1.6; margin-bottom: 20px;">
+            欢迎来到 学生目录更新日志。
+        </p>
+        <br>
+
+        <h2>版本 2.0.0</h2>
+        <h4 class="name">2025-03-4</h4>
+        <p>学生目录2.0发布</p>
+        <p>新增VPN状态指示灯</p>
+        <p>新增VPN会话详细界面</p>
+        <p>修改了字体和排版优化</p>
+        <p>增加、修改了关键帧动画</p>
+        <p>新增文章内容入场动画</p>
+        <br>
+
+        <h2>版本 2.0.1</h2>
+        <h4 class="name">2025-03-11</h4>
+        <p>优化了网页的加载速度</p>
+        <p>调整链接样式与动画效果</p>
+        <p>优化VPN会话界面显示效果</p>
+        <br>
+
+        <a href="index.php" class="back-home-btn">返回首页</a>
+    </div>
+</body>
+</html>

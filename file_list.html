@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件下载列表</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 自定义样式 */
+                body {
+            position: relative; /* 设置为相对定位 */
+            background-color: #e8e8e8; /* 设置背景颜色 */
+            background-image: url('00029.png'); /* 设置背景图片 */
+            background-size: cover; /* 背景图片覆盖整个页面 */
+            background-repeat: no-repeat; /* 不重复背景图片 */
+            background-attachment: fixed; /* 固定背景图片 */
+        }
+
+        .background-overlay {
+            position: fixed; /* 固定定位，使遮罩覆盖整个视口 */
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(154, 154, 154, 0.5); /* 设置遮罩颜色和透明度 */
+            z-index: 0; /* 确保遮罩在背景上层，但低于其他内容 */
+        }
+
+        /* 界面元素的样式 */
+        .content {
+            position: relative; /* 确保内容在遮罩层之上 */
+            z-index: 1; /* 提高内容的z-index */
+        }
+
+
+        .file-item {
+            margin-bottom: 10px; /* 设置每个文件项之间的底部外边距 */
+        }
+        .file-type {
+            font-size: 0.9rem; /* 设置文件类型字体大小 */
+            color: #6c757d; /* 设置文件类型颜色 */
+        }
+        h1 {
+            font-size: 2.5rem; /* 设置字体大小 */
+            color: #9eabff; /* 设置字体颜色 */
+            text-align: center; /* 居中对齐 */
+            text-shadow: 2px 2px 5px #000000; /* 添加文本阴影 */
+            font-family: 'Arial', sans-serif; /* 设置字体样式 */
+            margin-bottom: 20px; /* 调整底部外边距 */
+        }
+    </style>
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <div class="container mt-4">
+        <a href="index.html">
+            <img src="img/logo_n.png" alt="网站Logo" class="logo"> <!-- 添加Logo -->
+        </a>
+        <br>
+        <h1 class="mb-4">In a lightning speed</h1>
+        <br>
+        
+        <div id="passwordContainer" class="text-center mb-4">
+            <label for="password" class="form-label" style="color: #fbfbfb;">请输入密码：</label>
+            <input type="password" id="password" class="form-control w-50 mx-auto" placeholder="输入密码">
+            <button id="submitPassword" class="btn btn-primary mt-2">提交</button>
+        </div>
+
+        <!-- 显示当前目录位置 -->
+        <div id="directoryLocation" class="alert alert-info" style="display: none;"></div>
+        
+        <!-- 文件上传表单 -->
+        <div id="uploadForm" class="mb-4" style="display: none;">
+            <h1 >上传文件</h1>
+            <form action="upload.php" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <input type="file" name="fileToUpload" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">上传文件</button>
+            </form>
+        </div>
+
+        <!-- 文件列表容器 -->
+        <div id="fileList" data-current-directory="./download" class="list-group" style="display: none;"></div>
+
+        
+    </div>
+
+    <!-- 引入必要的JavaScript文件 -->
+    <script src="scripts/jquery-3.5.1.slim.min.js"></script>
+    <script src="scripts/popper.min.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/file_list.js"></script>
+    <script src="js/pwd_file_list.js" ></script>
+
+</body>
+</html>
