@@ -587,10 +587,10 @@
                 <button class="nav-button" onclick='location.href=("http://10.88.202.71:5244")'>共享目录</button>
                 <button class="nav-button" onclick="navigateToTools()">更多工具</button>
                 <button class="nav-button" onclick="navigateToAbout()">关于</button>
-                <div style="display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto;">
+                <!--div style="display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto;">
                     <p style="margin: 0;">Status:</p>
                     <div class="circle green tooltip" style="margin-left: 10px;">
-                        <!--span class="tooltip-content">
+                        <span class="tooltip-content">
                                 if ($session_count < 5) {
                                     echo "<br>会话数较少，VPN质量较为稳定";
                                 } elseif ($session_count >= 5 && $session_count <= 8) {
@@ -599,9 +599,9 @@
                                     echo "<br>会话数较多，VPN速度可能较慢";
                                 }
                             ?>
-                        </span-->
+                        </span>
                     </div>
-                </div>
+                </div-->
 
                 <div style="text-align: center; margin-top: 10px;">
                     <a class="footer-link" style="color:rgb(0, 189, 73);" href="password\newest.html">查看当前VPN状态</a>
