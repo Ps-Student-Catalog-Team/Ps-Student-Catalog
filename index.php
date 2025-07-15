@@ -5,72 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学生目录</title>
     <script>
-    let currentTargetUrl = '';
+        let currentTargetUrl = '';
 
-    function checkPassword(targetUrl) {
-        currentTargetUrl = targetUrl;
-        const modal = document.getElementById('passwordModal');
-        modal.style.display = 'block';
-        document.getElementById('pwdInput').focus();
-    }
-
-    function submitPassword() {
-        const correctPassword = "qwe";
-        const input = document.getElementById('pwdInput');
-        const errorMsg = document.getElementById('errorMsg');
-        
-        if(input.value === correctPassword) {
-            window.location.href = currentTargetUrl;
-        } else {
-            errorMsg.textContent = "密码错误，请重新输入";
-            input.value = '';
-            input.focus();
+        function checkPassword(targetUrl) {
+            currentTargetUrl = targetUrl;
+            const modal = document.getElementById('passwordModal');
+            modal.style.display = 'block';
+            document.getElementById('pwdInput').focus();
         }
-    }
 
-    function closeModal() {
-        document.getElementById('passwordModal').style.display = 'none';
-        document.getElementById('errorMsg').textContent = '';
-    }
-
-    // 新增公告模态框逻辑
-    function showAnnouncementModal() {
-        const modal = document.getElementById('announcementModal');
-        modal.style.display = 'block';
-    }
-
-    function hideAnnouncementModal() {
-        const modal = document.getElementById('announcementModal');
-        modal.style.display = 'none';
-        // 隐藏模态框后显示主页内容
-        document.getElementById('home-page').style.display = 'flex';
-        // 显示底部链接
-        document.getElementById('updateLogLink').style.display = 'inline-block';
-        document.getElementById('moreContentLink').style.display = 'inline-block';
-    }
-
-
-
-    // 关闭模态框逻辑
-    document.addEventListener('DOMContentLoaded', showAnnouncementModal);
-
-    // 确保在 DOM 加载完成后执行
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('passwordModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
+        function submitPassword() {
+            const correctPassword = "qwe";
+            const input = document.getElementById('pwdInput');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            if(input.value === correctPassword) {
+                window.location.href = currentTargetUrl;
+            } else {
+                errorMsg.textContent = "密码错误，请重新输入";
+                input.value = '';
+                input.focus();
             }
+        }
+
+        function closeModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+            document.getElementById('errorMsg').textContent = '';
+        }
+
+        // 公告模态框
+        function showAnnouncementModal() {
+            const modal = document.getElementById('announcementModal');
+            modal.style.display = 'block';
+        }
+
+        function hideAnnouncementModal() {
+            const modal = document.getElementById('announcementModal');
+            modal.style.display = 'none';
+            // 隐藏模态框后显示主页内容
+            document.getElementById('home-page').style.display = 'flex';
+            // 显示底部链接
+            document.getElementById('updateLogLink').style.display = 'inline-block';
+            document.getElementById('moreContentLink').style.display = 'inline-block';
+        }
+
+
+
+        // 关闭模态框逻辑
+        document.addEventListener('DOMContentLoaded', showAnnouncementModal);
+
+        // 确保在 DOM 加载完成后执行
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('passwordModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+                if (e.key === 'Enter' && document.getElementById('passwordModal').style.display === 'block') {
+                    submitPassword();
+                }
+            });
         });
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-            if (e.key === 'Enter' && document.getElementById('passwordModal').style.display === 'block') {
-                submitPassword();
-            }
-        });
-    });
     </script>
 
     <style>
@@ -450,6 +450,7 @@
             background-color: var(--red-color);
         }
     </style>
+
     <!-- 密码样式 -->
     <style>
 
@@ -542,6 +543,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="announcement-modal" id="announcementModal">
