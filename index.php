@@ -584,7 +584,7 @@
 
             </div>
 
-            <div class="button-section">
+            <div class="button-section" style="margin-top: 40px;">
                 <button class="nav-button" onclick="navigateToTutorials()">教程</button>
                 <button class="nav-button" onclick='location.href=("http://10.88.202.71:5244")'>共享目录</button>
                 <button class="nav-button" onclick="navigateToTools()">更多工具</button>
