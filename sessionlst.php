@@ -200,7 +200,7 @@
 <body>
 <div class="markdown-container">
   <div class="fixed-buttons">
-    <a href="../index.php" class="floating-btn home-btn">返回首页</a>
+    <a href="../index.html" class="floating-btn home-btn">返回首页</a>
     <a href="javascript:history.back()" class="floating-btn back-btn">返回</a> 
   </div>
     <div class="container" style="align-items: center">
