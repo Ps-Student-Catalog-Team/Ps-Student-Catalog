@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="./img/favicon.ico" type="image/x-icon">
     <title>学生目录</title>
     <script>
         let currentTargetUrl = '';
@@ -40,26 +41,31 @@
         }
 
         function hideAnnouncementModal() {
+            let timeoutId;
             const modal = document.getElementById('announcementModal');
-            modal.style.display = 'none';
-            // 隐藏模态框后显示主页内容
-            document.getElementById('home-page').style.display = 'flex';
-            // 显示底部链接
-            document.getElementById('updateLogLink').style.display = 'inline-block';
-            document.getElementById('moreContentLink').style.display = 'inline-block';
-            
-            // 页面加载动画
-            // 创建进度条
-            const progress = document.createElement('div');
-            progress.className = 'progress-bar';
-            document.body.prepend(progress);
+            const content = modal.querySelector('.announcement-content');
+            content.classList.add('hide');
+            timeoutId = setTimeout(() => {  
+                modal.style.display = 'none';
+                // 隐藏模态框后显示主页内容
+                document.getElementById('home-page').style.display = 'flex';
+                // 显示底部链接
+                document.getElementById('updateLogLink').style.display = 'inline-block';
+                document.getElementById('moreContentLink').style.display = 'inline-block';
+                
+                // 页面加载动画
+                // 创建进度条
+                const progress = document.createElement('div');
+                progress.className = 'progress-bar';
+                document.body.prepend(progress);
 
-            // 初始化元素动画
-            setTimeout(() => {
-                document.querySelectorAll('.intro-section li').forEach(li => {
-                    li.style.visibility = 'visible';
-                });
-            }, 1000);
+                // 初始化元素动画
+                setTimeout(() => {
+                    document.querySelectorAll('.intro-section li').forEach(li => {
+                        li.style.visibility = 'visible';
+                    });
+                }, 1000);
+            }, 350); 
 
         }
 
@@ -316,7 +322,6 @@
 </script>
 
 <style>
-  
     body {
         font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;
         line-height: 1.8;
