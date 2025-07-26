@@ -6,6 +6,7 @@
     <link rel="icon" href="./img/favicon.ico" type="image/x-icon">
     <title>关于我们</title>
     <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -142,6 +143,27 @@
             color: #aaa;
         }
     </style>
+    <style>
+        .contact-icons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .contact-icons a {
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+        
+        .contact-icons a:hover {
+            transform: scale(1.2);
+            opacity: 1;
+            color: #fff;
+        }
+    </style>
 </head>
 <body>
     <a href="index.html" class="back-btn">返回首页</a>
@@ -155,6 +177,11 @@
                 <p class="member-role">主要开发者</p>
                 <p>项目创始人和核心开发者</p>
                 <p>喜欢听歌、敲代码 awa</p>
+                <div class="contact-icons">
+                    <a href="https://github.com/yuebittt" target="_blank" title="GitHub"><i class="fa fa-github"></i></a>
+                    <a href="https://yuebittt.github.io" target="_blank" title="博客"><i class="fa fa-rss"></i></a>
+                    <a href="mailto:yuebity@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
+                </div>
             </div>
             <div class="member-card">
                 <img src=".\img\logo\leo.jpg" alt="Leo" class="member-avatar">
@@ -162,6 +189,10 @@
                 <p class="member-role">开发者</p>
                 <p>开发者、负责服务器维护工作</p>
                 <p>一个爱飞无人机的男孩</p>
+                <div class="contact-icons">
+                    <a href="https://github.com/liyang090811" target="_blank" title="GitHub"><i class="fa fa-github"></i></a>
+                    <a href="mailto:wxliloveyou@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
+                </div>
             </div>
         </div>
     </div>
