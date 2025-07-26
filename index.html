@@ -47,6 +47,19 @@
             // 显示底部链接
             document.getElementById('updateLogLink').style.display = 'inline-block';
             document.getElementById('moreContentLink').style.display = 'inline-block';
+            
+            // 创建进度条
+            const progress = document.createElement('div');
+            progress.className = 'progress-bar';
+            document.body.prepend(progress);
+
+            // 初始化元素动画
+            setTimeout(() => {
+                document.querySelectorAll('.intro-section li').forEach(li => {
+                    li.style.visibility = 'visible';
+                });
+            }, 1000);
+
         }
 
 
@@ -113,8 +126,8 @@
                     <li style="padding: 10px 0;">✔ 校园网络接入服务</li>
                     <li style="padding: 10px 0;">✔ 学生共享文件传输服务</li>
                     <li style="padding: 10px 0;">✔ 其他技术支持<br><br></li> 
-                    <li style="padding: 10px 0;">前往 <a class="footer-link" style="color:rgb(0, 189, 73);" href="readme.html">学生目录使用说明</a></li>
-                    <li style="padding: 10px 0;">前往 <a class="footer-link" style="color:rgb(0, 189, 73);" href="index copy.html">旧版</a></li>
+                    <li style="padding: 10px 0;">初来乍到？ 前往 <a class="footer-link" style="color:rgb(0, 189, 73);" href="readme.html">学生目录使用说明</a></li>
+                    <li style="padding: 10px 0;">欢迎新一届高中牲入学(/≧▽≦)/</li>
                 </ul>
 
             </div>
@@ -273,7 +286,7 @@
     
     <!-- 页面底部链接 -->
 <div style="text-align: center; margin-top: 20px; padding: 30px 0;">
-    <a class="footer-link" id="updateLogLink" href="log.html" style="margin: 0 20px; display: none;">更新日志</a>
+    <a class="footer-link" id="updateLogLink" href="about_us.html" style="margin: 0 20px; display: none;">关于我们</a>
     <a class="footer-link" id="moreContentLink" href="https://psstunet.github.io/" style="margin: 0 20px; display: none;">更多内容</a>
 </div>
 
@@ -302,38 +315,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', showAnnouncementModal);
-
-        async function getStatus(ip) {
-                        try {
-                            const response = await fetch(`http://10.88.202.71:3000/api/vpn-users?ip=${ip}`);
-                            const data = await response.json();
-                            const sessionCount = data.sessionCount;
-
-                            const circle = document.getElementById('status-circle');
-
-                            if (sessionCount < 5) {
-                                circle.className = 'circle red tooltip';
-                                circle.innerHTML = '<span class="tooltip-content">会话数较少，VPN质量较为稳定</span>';
-                            } else if (sessionCount >= 5 && sessionCount <= 8) {
-                                circle.className = 'circle yellow tooltip';
-                                circle.innerHTML = '<span class="tooltip-content">会话数较多，VPN质量可能不稳定</span>';
-                            } else {
-                                circle.className = 'circle red tooltip';
-                                circle.innerHTML = '<span class="tooltip-content">会话数较多，VPN速度可能较慢</span>';
-                            }
-                        } catch (error) {
-                            console.error('Error fetching status:', error);
-                            const circle = document.getElementById('status-circle');
-                            circle.className = 'circle red tooltip';
-                            circle.innerHTML = '<span class="tooltip-content">无法获取VPN状态</span>';
-                        }
-                        //输出sessioncount至控制台
-                        console.log(sessionCount);
-                    }
-
-        // 调用函数获取状态，IP地址为 '10.88.202.71'
-        getStatus('10.88.202.71');
-
     </script>
 
 <style>
@@ -483,17 +464,6 @@
 <script>
     // 页面加载动画
     document.addEventListener('DOMContentLoaded', () => {
-        // 创建进度条
-        const progress = document.createElement('div');
-        progress.className = 'progress-bar';
-        document.body.prepend(progress);
-
-        // 初始化元素动画
-        setTimeout(() => {
-            document.querySelectorAll('.intro-section li').forEach(li => {
-                li.style.visibility = 'visible';
-            });
-        }, 1000);
 
     });
 
