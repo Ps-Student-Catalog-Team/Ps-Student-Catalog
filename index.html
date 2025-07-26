@@ -37,10 +37,6 @@
         function showAnnouncementModal() {
             const modal = document.getElementById('announcementModal');
             modal.style.display = 'flex';
-            // 使用requestAnimationFrame确保动画能正确触发
-            requestAnimationFrame(() => {
-                modal.classList.add('show');
-            });
         }
 
         function hideAnnouncementModal() {
