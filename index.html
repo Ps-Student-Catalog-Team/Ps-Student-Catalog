@@ -36,7 +36,11 @@
         // 公告模态框
         function showAnnouncementModal() {
             const modal = document.getElementById('announcementModal');
-            modal.style.display = 'block';
+            modal.style.display = 'flex';
+            // 使用requestAnimationFrame确保动画能正确触发
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+            });
         }
 
         function hideAnnouncementModal() {
@@ -48,6 +52,7 @@
             document.getElementById('updateLogLink').style.display = 'inline-block';
             document.getElementById('moreContentLink').style.display = 'inline-block';
             
+            // 页面加载动画
             // 创建进度条
             const progress = document.createElement('div');
             progress.className = 'progress-bar';
@@ -87,9 +92,6 @@
     </script>
 
     <link rel="stylesheet" href="./css/main.css">
-
-    <!-- 密码样式 -->
-
 </head>
 
 <body>
@@ -291,31 +293,31 @@
 </div>
 
 
-    <script>
-        function navigateToTutorials() {
-            document.getElementById('home-page').classList.add('slide-out');
-            document.getElementById('tutorial-page').classList.add('slide-in');
-        }
-      
-        function navigateToAbout() {
-            document.getElementById('home-page').classList.add('slide-out');
-            document.getElementById('about-page').classList.add('slide-in');
-        }
+<script>
+    function navigateToTutorials() {
+        document.getElementById('home-page').classList.add('slide-out');
+        document.getElementById('tutorial-page').classList.add('slide-in');
+    }
+    
+    function navigateToAbout() {
+        document.getElementById('home-page').classList.add('slide-out');
+        document.getElementById('about-page').classList.add('slide-in');
+    }
 
-        function navigateToTools() {
-            document.getElementById('home-page').classList.add('slide-out');
-            document.getElementById('tools-page').classList.add('slide-in');
-        }
+    function navigateToTools() {
+        document.getElementById('home-page').classList.add('slide-out');
+        document.getElementById('tools-page').classList.add('slide-in');
+    }
 
-        function goBack() {
-            document.getElementById('home-page').classList.remove('slide-out');
-            document.getElementById('tutorial-page').classList.remove('slide-in');
-            document.getElementById('about-page').classList.remove('slide-in');
-            document.getElementById('tools-page').classList.remove('slide-in');        
-        }
+    function goBack() {
+        document.getElementById('home-page').classList.remove('slide-out');
+        document.getElementById('tutorial-page').classList.remove('slide-in');
+        document.getElementById('about-page').classList.remove('slide-in');
+        document.getElementById('tools-page').classList.remove('slide-in');        
+    }
 
-        document.addEventListener('DOMContentLoaded', showAnnouncementModal);
-    </script>
+    document.addEventListener('DOMContentLoaded', showAnnouncementModal);
+</script>
 
 <style>
   
@@ -462,11 +464,6 @@
 </style>
 
 <script>
-    // 页面加载动画
-    document.addEventListener('DOMContentLoaded', () => {
-
-    });
-
     // 增强按钮点击效果
     document.querySelectorAll('.nav-button').forEach(button => {
         button.addEventListener('click', function(e) {
