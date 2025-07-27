@@ -46,7 +46,7 @@ body {
 }
 
 .nav-button {
-    background: #1a1a1a;
+    background: #29302d;
     border: 2px solid var(--accent-color);
     color: var(--accent-color);
     padding: 18px 30px;
@@ -169,6 +169,8 @@ body {
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    font-size: 1.3em;
+    line-height: 1.6;
 }
 
 .tutorial-grid {
@@ -238,6 +240,8 @@ body {
     .about-card {
         padding: 20px;
         max-width: 90%;
+        font-size: 1.1em;
+        line-height: 1.6;
     }
 }
 
@@ -630,6 +634,41 @@ body::after {
 html {
     scroll-behavior: smooth;
 }
+
+/* 增强内联元素样式 */
+code {
+    background: rgba(0, 255, 157, 0.1);
+    color: var(--accent-color);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 255, 157, 0.3);
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    text-shadow: 0 0 5px rgba(0, 255, 157, 0.3);
+}
+
+strong {
+    color: var(--accent-color);
+    text-shadow: 0 0 8px rgba(0, 255, 157, 0.3);
+}
+
+del {
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration-color: var(--accent-color);
+}
+
+em {
+    color:  #00ff9d;
+    font-style: italic;
+    text-shadow: 0 0 8px rgb(0, 0, 0);
+    transition: all 0.3s ease;
+}
+
+em:hover, i:hover {
+    color: var(--accent-color);
+    text-shadow: 0 0 12px rgba(0, 255, 157, 0.6);
+}
+
 /* 动态背景效果 */
 body::after {
     content: '';
@@ -715,4 +754,46 @@ body::after {
 
 html {
     scroll-behavior: smooth;
+}
+
+/* 列表项优化样式 */
+ul {
+    list-style-type: none;
+    padding-left: 1.5em;
+}
+
+li {
+    position: relative;
+    padding: 0.5em 0;
+    margin: 0.3em 0;
+    transition: all 0.3s ease;
+}
+
+li::before {
+    content: "→";
+    position: absolute;
+    left: -1.2em;
+    color: var(--accent-color);
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+}
+
+li:hover {
+    transform: translateX(10px);
+    color: var(--accent-color);
+}
+
+li:hover::before {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+li code {
+    transition: all 0.3s ease;
+}
+
+li:hover code {
+    background: rgba(0, 255, 157, 0.2);
+    box-shadow: 0 0 8px rgba(0, 255, 157, 0.3);
 }
