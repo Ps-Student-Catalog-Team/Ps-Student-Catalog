@@ -1,6 +1,36 @@
 # Ps-Student-Catalog
 The open source of Student Catalog built in senior high school "Ps"
 
+## Project Structure
+After reorganization, the project now has a clearer directory structure:
+
+```
+Ps-Student-Catalog/
+├── .gitignore
+├── README.md
+├── 整理计划.md
+├── 后续整理指南.md
+├── server/
+│   ├── server.js           # Main server file
+│   ├── package.json        # Project dependencies
+│   ├── package-lock.json   # Locked dependencies
+│   ├── lastOnlineTimes.json # VPN status data
+│   └── startnode.bat       # Server startup script
+├── public/
+│   ├── index.html          # VPN status monitoring page
+│   ├── student_catalog.html # Student catalog main page
+│   ├── about_us.html       # About us page
+│   ├── clock.html          # Clock page
+│   ├── clock2.html         # Alternative clock page
+│   ├── comment.html        # Comment page
+│   ├── css/                # CSS styles
+│   ├── js/                 # JavaScript files
+│   └── img/                # Image resources
+├── utils/                  # Utility scripts
+├── logs/                   # Log files
+└── other directories/      # Other project directories (to be organized)
+```
+
 ## Why we need a Student Catalog?
 The Teacher Directory is a special folder designed specifically for teachers. It is built on the school network using SMB (Server Message Block) technology, aiming to provide efficient and convenient file transfer services for the teaching staff. Each teacher has an independent account and password, allowing easy access to personal files and shared resources related to their subjects with the correct login information. Additionally, there used to be a temporary directory for urgent file storage for teachers (although this feature has now been removed).
 
