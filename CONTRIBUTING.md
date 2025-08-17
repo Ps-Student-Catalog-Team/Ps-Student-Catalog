@@ -10,7 +10,6 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 > - Refer this project in your project's readme
 > - Mention the project at local meetups and tell your friends/colleagues
 
-<!-- omit in toc -->
 ## Table of Contents
 
 - [I Have a Question](#i-have-a-question)
@@ -22,8 +21,6 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 - [Styleguides](#styleguides)
 - [Commit Messages](#commit-messages)
 - [Join The Project Team](#join-the-project-team)
-
-
 
 ## I Have a Question
 
