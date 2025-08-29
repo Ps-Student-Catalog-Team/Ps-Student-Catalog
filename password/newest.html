@@ -26,14 +26,14 @@
             <p>以后VPN的最新密码将会同步在VPN状态页面</p>
         </div>
         <div class="password-info">
-            <p>最新密码发布时间：<span class="timestamp">2025-05-08 12:00:00</span></p>
-            <p>最新密码：<span class="password" id="password">iloveLZB!</span></p>
+            <p>最新密码发布时间：<span class="timestamp">2025-08-29 00:00:00</span></p>
+            <p>最新密码：<span class="password" id="password">\@(^O^)@/</span></p>
             <button class="btn-toggle" id="copyButton">一键复制密码</button>
         </div>
         <div class="vpn-status" id="vpnStatus">
             <h3>VPN服务器状态<!--em style="font-size: medium;">此功能仍在开发中，敬请期待！（*＾-＾*）</em--></h3>
-            <div class="status-item" id="status_10.88.202.71">检测中...</div>
-            <div class="session-info" id="sessionInfo_10.88.202.71">会话数: 检测中...</div>
+            <div class="status-item" id="status_10.88.202.48">检测中...</div>
+            <div class="session-info" id="sessionInfo_10.88.202.48">会话数: 检测中...</div>
             <div class="status-item" id="status_10.88.202.11">检测中...</div>
             <div class="session-info" id="sessionInfo_10.88.202.11">会话数: 检测中...</div>
             <div class="status-item" id="status_10.88.194.142">检测中...</div>
@@ -53,7 +53,7 @@
         const statusElement = document.getElementById(elementId);
         const sessionInfoElement = document.getElementById(sessionInfoId);
         try {
-            const response = await fetch(`http://10.88.202.71:3000/api/vpn-status?ip=${ip}`);
+            const response = await fetch(`http://10.88.202.48:3000/api/vpn-status?ip=${ip}`);
             const data = await response.json();
             // 新增IP地址显示（使用模板字符串优化可读性）
             statusElement.innerHTML = data.online ? 
@@ -66,7 +66,7 @@
 
             if (data.online) {
                 statusElement.classList.add('online');
-                const sessionResponse = await fetch(`http://10.88.202.71:3000/api/vpn-users?ip=${ip}`);
+                const sessionResponse = await fetch(`http://10.88.202.48:3000/api/vpn-users?ip=${ip}`);
                 const sessionData = await sessionResponse.json();
                 sessionInfoElement.innerHTML = `会话数: ${sessionData.sessionCount}`;
                 sessionInfoElement.classList.add('online-session');
@@ -87,7 +87,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         checkVPNStatus('10.88.194.142', 'status_10.88.194.142', 'sessionInfo_10.88.194.142');
         checkVPNStatus('10.88.202.11', 'status_10.88.202.11', 'sessionInfo_10.88.202.11');
-        checkVPNStatus('10.88.202.71', 'status_10.88.202.71', 'sessionInfo_10.88.202.71');
+        checkVPNStatus('10.88.202.48', 'status_10.88.202.48', 'sessionInfo_10.88.202.48');
         checkVPNStatus('10.88.213.212', 'status_10.88.213.212', 'sessionInfo_10.88.213.212');
     });
 
