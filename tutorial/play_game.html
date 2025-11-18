@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows SMB共享服务使用指南(目前仍处于实验阶段)</title>
+    <style>
+        :root {
+            --primary-color: #2a2a2a;
+            --accent-color: #00ff9d;
+            --text-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans SC', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            line-height: 1.8;
+            letter-spacing: 0.8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, 
+                rgba(0, 255, 157, 0.1) 0%, 
+                transparent 60%);
+            pointer-events: none;
+            z-index: -1;
+            animation: pulse 8s infinite;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            width: 100%;
+            max-width: 1000px;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 0.3s forwards;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1, h2, h3, h4, h5, h6 { 
+            margin-top: 1.5rem; 
+            margin-bottom: 1rem; 
+            color: var(--text-color);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 2rem;
+            position: relative;
+            animation: typewriter 1.2s steps(12) 0.5s both, 
+                    blinkCursor 0.8s infinite;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid var(--accent-color);
+            max-width: max-content;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem;
+            color: var(--accent-color);
+            opacity: 0;
+            animation: slideIn 0.6s ease-out 1.8s forwards;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--accent-color);
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 2s forwards;
+        }
+        
+        p {
+            margin: 1rem 0;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 2s forwards;
+        }
+        
+        pre { 
+            background: rgba(255, 255, 255, 0.05); 
+            padding: 1rem; 
+            border-radius: 6px; 
+            overflow-x: auto; 
+            margin: 1rem 0;
+            border-left: 4px solid var(--accent-color);
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 2.2s forwards;
+        }
+        
+        code { 
+            background: rgba(255, 255, 255, 0.1); 
+            padding: 0.2rem 0.4rem; 
+            border-radius: 3px; 
+            font-family: 'Courier New', monospace;
+            color: var(--accent-color);
+        }
+        
+        blockquote { 
+            border-left: 4px solid rgba(0, 255, 157, 0.5); 
+            padding: 1rem 1.5rem; 
+            margin: 1.5rem 0; 
+            color: #b0b0b0;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0 6px 6px 0;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 2.2s forwards;
+        }
+        
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            margin: 1.5rem 0; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            opacity: 0;
+            animation: scaleIn 0.4s ease-out 2.2s forwards;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th, td { 
+            padding: 0.75rem; 
+            text-align: left; 
+            border-bottom: 1px solid rgba(0, 255, 157, 0.1);
+            transition: background 0.3s ease;
+        }
+        
+        th { 
+            background: rgba(0, 255, 157, 0.1); 
+            font-weight: 600;
+        }
+        
+        tr {
+            transition: background 0.5s ease;
+        }
+        
+        tr:hover {
+            background: rgba(0, 255, 157, 0.2);
+            animation: hoverBackground 0.5s forwards;
+        }
+        
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 2.2s forwards;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .important-note {
+            background-color: rgba(0, 255, 157, 0.1);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0 6px 6px 0;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 2.2s forwards;
+        }
+        
+        .server-info {
+            background-color: rgba(0, 255, 157, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 2.2s forwards;
+        }
+        
+        .server-info ul {
+            margin: 0;
+        }
+        
+        .step {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background-color: rgba(0, 255, 157, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 2.2s forwards;
+        }
+        
+        .step h4 {
+            margin-top: 0;
+            color: var(--accent-color);
+        }
+        
+        .warning {
+            background-color: rgba(243, 156, 18, 0.1);
+            border-left: 4px solid #f39c12;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0 6px 6px 0;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 2.2s forwards;
+        }
+        
+        img {
+            max-width: 80%;
+            height: auto;
+            display: block;
+            margin: 1.5rem auto;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: zoom-in;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 157, 0.2);
+        }
+        
+        .image-placeholder {
+            background-color: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            margin: 1.5rem 0;
+            color: #777;
+            flex-direction: column;
+            padding: 10px;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 2.2s forwards;
+        }
+        
+        .image-placeholder img {
+            transform: scale(0.9);
+            transform-origin: center;
+            transition: transform 0.3s ease;
+        }
+        
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+            position: relative;
+            padding: 5px 0;
+            transition: all 0.3s ease;
+        }
+        
+        a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background: currentColor;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        a:hover {
+            color: #00ff9d;
+            transform: translateY(-2px);
+        }
+        
+        a:hover::after {
+            width: 100%;
+            left: 0;
+        }
+        
+        .contact-info {
+            background-color: rgba(0, 255, 157, 0.1);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 2rem;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 2.2s forwards;
+        }
+        
+        .author-info {
+            text-align: right;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #b0b0b0;
+            font-style: italic;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 2.2s forwards;
+        }
+        
+        /* 动画效果 */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        @keyframes blinkCursor {
+            from, to { border-color: transparent }
+            50% { border-color: var(--accent-color) }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes hoverBackground {
+            0% { background-color: rgba(0, 255, 157, 0.05); }
+            100% { background-color: rgba(0, 255, 157, 0.2); }
+        }
+
+        /* 图片全屏查看 */
+        .img-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(42, 42, 42, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            cursor: zoom-out;
+        }
+
+        .img-overlay img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(0, 255, 157, 0.3);
+            animation: scaleUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes scaleUp {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            table {
+                font-size: 0.9rem;
+            }
+            
+            .image-placeholder {
+                height: auto;
+                min-height: 150px;
+            }
+            
+            img {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Windows 校园 SMB 共享服务使用指南</h1>
+        
+        <div class="important-note">
+            <p><strong>重要提示：</strong> 如需添加游戏等资源，请联系管理员处理！</p>
+        </div>
+        
+        <h2>一、核心信息（必看）</h2>
+        
+        <div class="server-info">
+            <ul>
+                <li>服务器地址：<code>\\10.88.202.73</code>（复制即用，勿漏反斜杠）</li>
+                <li>登录凭据：
+                    <ul>
+                        <li>用户名：<strong>user</strong></li>
+                        <li>密码：<strong>暂无</strong></li>
+                    </ul>
+                </li>
+                <li>适用网络：仅支持「校园网络」<del>（校外无法连接）</del>（只是只有50mbps的速度。。。你懂的）</li>
+            </ul>
+        </div>
+        
+        <h2>二、两种连接方法（任选其一）</h2>
+        
+        <h3>方法一：直接通过文件资源管理器访问（推荐）</h3>
+        
+        <div class="step">
+            <h4>步骤 1</h4>
+            <p>打开浏览器，并登录Alist</p>
+            <p><a href="http://10.88.202.73:5244" title="学生目录">学生目录</a></p>
+        </div>
+        <div class="image-placeholder">
+            <img src="../img/play_game/1.png" alt="登录界面">
+            <!--<small>（如果图片无法显示，请联系管理员）</small>!-->
+        </div>
+        <div class="step">
+            <h4>步骤 2</h4>
+            <p>若没有密码，请点击以访客登录，点击"临时"文件夹，里面有一个文件叫"游戏.exe"。下载并点击，会弹出一个选择界面。</p>
+        </div>
+        
+        <div class="image-placeholder">
+            <img src="../img/play_game/2.png" alt="游戏.exe">
+            <!--<small>（如果图片无法显示，请联系管理员）</small>!-->
+        </div>
+        
+        <div class="step">
+            <h4>步骤 3</h4>
+            <p>最后再点击解压后里面的"游戏"。用户名及密码请参照<strong>核心信息</strong></p>
+            <p>PS：你想拥有专属的账户嘛？欢迎联系我们</p>
+        </div>
+        
+        <h3>方法二：映射网络驱动器</h3>
+        
+        <ol>
+            <li>打开「文件资源管理器」，右键点击左侧「此电脑」；</li>
+            <li>选择「映射网络驱动器」；</li>
+            <li>在「文件夹」输入框中，粘贴地址：<code>\\10.88.202.73\游戏</code></li>
+            <li>勾选「使用其他凭据连接」，点击「完成」；</li>
+            <li>弹出认证窗口，输入用户名「user」、密码「暂无」，勾选「记住我的凭据」，点击「确定」；</li>
+            <li>成功后，「此电脑」会新增「网络驱动器图标」，下次直接双击即可打开，无需重复连接。</li>
+        </ol>
+        
+        <h2>三、常见问题解决（连接失败看这里）</h2>
+        
+        <div class="warning">
+            <ol>
+                <li>? 无法连接服务器？
+                    <p>检查：是否已正确输；</p>
+                </li>
+                <li>? 地址报错？
+                    <p>核对：服务器地址是否为 <code>\\10.88.202.73</code>（勿少输反斜杠、勿输错数字）；</p>
+                </li>
+                <li>? 登录失败？
+                    <p>确认：用户名是「user」，密码为「暂无」（若无法登录，联系管理员确认）；</p>
+                </li>
+                <li>? 仍无法连接？
+                    <p>尝试：退出文件资源管理器后重新操作，或重新输入凭据。</p>
+                </li>
+                 <li>ps：有一些游戏由于不支持SMB协议，无法正常启动，请打开游戏根目录直接启动或<del>使用方法二<del>进行打开
+                </li>
+            </ol>
+        </div>
+        
+        <h2>四、注意事项</h2>
+        
+        <ol>
+            <li>勾选「记住我的凭据」后，同一台电脑下次无需重复输入账号密码；</li>
+            <li>请勿修改/删除共享文件夹内的文件，避免影响所有用户使用。</li>
+        </ol>
+        
+        <!-- 添加教师账号信息表格 -->
+        <h2>五、已经支持的软件、游戏</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>创建日期</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>原神</td>
+                    <td>2025年11月7日</td>
+                    
+                </tr>
+                <tr>
+                    <td>崩坏·星琼铁道</td>
+                    <td>2025年11月7日</td>
+                </tr>
+                <tr>
+                    <td>战争雷霆</td>
+                    <td>2025年11月7日</td>
+                </tr>
+                <tr>
+                    <td>第五人格</td>
+                    <td>2025年11月9日</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="contact-info">
+            <p>若想添加游戏，请将游戏名称写在纸上并放到高一二班10214柜子</p>
+        </div>
+        
+        <div class="author-info">
+            <i>作者：辰艾</i><br>
+            <i>日期：2025年11月8日</i>
+        </div>
+    </div>
+
+    <script>
+        // 图片全屏查看功能
+        document.querySelectorAll('img').forEach(img => {
+            img.addEventListener('click', () => {
+                const overlay = document.createElement('div');
+                overlay.className = 'img-overlay';
+                
+                const clonedImg = img.cloneNode();
+                clonedImg.style.cursor = 'zoom-out';
+                
+                overlay.appendChild(clonedImg);
+                document.body.appendChild(overlay);
+                document.body.style.overflow = 'hidden'; // 禁用滚动
+
+                // 关闭全屏
+                const close = () => {
+                    overlay.remove();
+                    document.body.style.overflow = '';
+                };
+
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) close();
+                });
+
+                // ESC键关闭
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') close();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

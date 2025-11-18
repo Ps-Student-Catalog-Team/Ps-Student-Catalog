@@ -111,13 +111,12 @@ app.get('/api/vpn-users', async (req, res) => {
         }
 
         // 解析输出以获取有效会话数
-    
         const sessionMatch = stdout.match(/会话数\s*\|\s*([0-9]+)/);
         const sessionCount = sessionMatch ? parseInt(sessionMatch[1], 10) : 0;
 
         res.json({
             ip: req.query.ip,
-            sessionCount: sessionCount + 0
+            sessionCount: sessionCount - 1
         });
     });
 });
