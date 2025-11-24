@@ -10,6 +10,14 @@ const app = express();
 // 启用CORS中间件
 app.use(cors());
 
+// 添加静态文件服务
+app.use(express.static(path.join(__dirname, '..')));
+
+// 解析JSON请求体
+app.use(express.json());
+// 解析URL编码的请求体
+app.use(express.urlencoded({ extended: true }));
+
 // 添加健康检查端点
 app.get('/health', (req, res) => {
     res.status(200).send('Service Healthy');

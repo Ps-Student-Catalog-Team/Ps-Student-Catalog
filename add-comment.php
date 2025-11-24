@@ -14,11 +14,12 @@ if ($conn->connect_error) {
     die(json_encode(['success' => false, 'error' => $conn->connect_error]));
 }
 
-// 获取留言内容
+// 获取留言内容和用户名
 $comment = $_POST['comment'];
+$username = $_POST['username'];
 
 // 插入留言到数据库
-$sql = "INSERT INTO comments (comment) VALUES ('$comment')";
+$sql = "INSERT INTO comments (comment, username) VALUES ('$comment', '$username')";
 
 if ($conn->query($sql) === TRUE) {
     echo json_encode(['success' => true]);

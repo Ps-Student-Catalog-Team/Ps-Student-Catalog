@@ -255,10 +255,15 @@
     <body class="dark-theme">
         <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
     <h1>欢迎来到留言区</h1>
+    <div style="text-align: center; margin: 10px; color: var(--primary-color);">
+        <span id="userInfo"></span>
+        <button id="loginBtn" onclick="window.location.href='login.html'" style="margin-left: 10px;">登录</button>
+        <button id="logoutBtn" onclick="logout()" style="margin-left: 10px; display: none;">登出</button>
+    </div>
     <div id="comments">
         <!-- 留言将会显示在这里 -->
     </div>
-    <div id="inputArea">
+    <div id="inputArea" style="display: none;">
         <textarea id="commentInput" placeholder="留下你的留言..."></textarea>
         <button onclick="addComment()">发送留言</button>
     </div>
@@ -275,8 +280,35 @@
             const isDark = document.body.classList.toggle('dark-theme');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
         }
+        
+        // 检查登录状态
+        function checkLogin() {
+            const isLoggedIn = localStorage.getItem('loggedIn') === 'true';
+            const username = localStorage.getItem('username');
+            
+            if (isLoggedIn && username) {
+                document.getElementById('userInfo').textContent = `欢迎，${username}`;
+                document.getElementById('loginBtn').style.display = 'none';
+                document.getElementById('logoutBtn').style.display = 'inline';
+                document.getElementById('inputArea').style.display = 'block';
+            } else {
+                document.getElementById('userInfo').textContent = '';
+                document.getElementById('loginBtn').style.display = 'inline';
+                document.getElementById('logoutBtn').style.display = 'none';
+                document.getElementById('inputArea').style.display = 'none';
+            }
+        }
+        
+        // 登出函数
+        function logout() {
+            localStorage.removeItem('username');
+            localStorage.removeItem('loggedIn');
+            checkLogin();
+        }
+        
         // 页面加载时，读取并显示已有的留言
         window.onload = function() {
+            checkLogin();
             fetchComments();
         };
 
@@ -284,6 +316,7 @@
         function addComment() {
             var commentInput = document.getElementById('commentInput');
             var commentText = commentInput.value.trim();
+            var username = localStorage.getItem('username');
 
             if(commentText) {
                 fetch('add-comment.php', {
@@ -291,7 +324,7 @@
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: 'comment=' + encodeURIComponent(commentText)
+                    body: 'comment=' + encodeURIComponent(commentText) + '&username=' + encodeURIComponent(username)
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -326,17 +359,27 @@
                             var commentElement = document.createElement('div');
                             commentElement.className = 'comment';
 
-                            // 创建留言内容和时间
-                            var commentContent = document.createElement('p');
-                            commentContent.className = 'comment-text';
-                            commentContent.textContent = comment.comment;
+                            // 创建留言内容、用户名和时间
+                            var commentInfo = document.createElement('div');
+                            commentInfo.style.marginBottom = '5px';
+                            
+                            var commentUser = document.createElement('strong');
+                            commentUser.style.color = 'var(--primary-color)';
+                            commentUser.textContent = comment.username + ': ';
+                            
+                            var commentText = document.createElement('span');
+                            commentText.className = 'comment-text';
+                            commentText.textContent = comment.comment;
+                            
+                            commentInfo.appendChild(commentUser);
+                            commentInfo.appendChild(commentText);
 
                             var commentTime = document.createElement('small');
                             commentTime.className = 'comment-time';
                             commentTime.textContent = formatTimestamp(comment.timestamp); // 格式化时间戳
 
                             // 将内容和时间加到留言元素中
-                            commentElement.appendChild(commentContent);
+                            commentElement.appendChild(commentInfo);
                             commentElement.appendChild(commentTime);
                             commentsDiv.appendChild(commentElement);
                         });

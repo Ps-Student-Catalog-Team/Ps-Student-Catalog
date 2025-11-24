@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 留言簿</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --comment-bg: #2d2d2d;
+            --input-bg: #333;
+            --border-color: #404040;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --primary-color: #5fa3ff;
+            --button-hover-color: #4a8dd8;
+            --placeholder-color: #888;
+            --error-color: #ff6b6b;
+            --success-color: #51cf66;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--comment-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 95%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 12px rgba(95, 163, 255, 0.2);
+            outline: none;
+        }
+
+        .form-group input::placeholder {
+            color: var(--placeholder-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            color: #fff;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: var(--button-hover-color);
+        }
+
+        .toggle-form {
+            text-align: center;
+            margin-top: 15px;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .toggle-form:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            color: var(--error-color);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            color: var(--success-color);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #registerForm {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>留言簿</h1>
+        
+        <!-- 登录表单 -->
+        <div id="loginForm">
+            <div class="error" id="loginError"></div>
+            <div class="form-group">
+                <label for="loginUsername">用户名</label>
+                <input type="text" id="loginUsername" placeholder="请输入用户名" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">密码</label>
+                <input type="password" id="loginPassword" placeholder="请输入密码" required>
+            </div>
+            <button onclick="login()">登录</button>
+            <div class="toggle-form" onclick="toggleForm()">还没有账号？点击注册</div>
+        </div>
+
+        <!-- 注册表单 -->
+        <div id="registerForm">
+            <div class="error" id="registerError"></div>
+            <div class="form-group">
+                <label for="registerUsername">用户名</label>
+                <input type="text" id="registerUsername" placeholder="请输入用户名" required>
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">密码</label>
+                <input type="password" id="registerPassword" placeholder="请输入密码" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">确认密码</label>
+                <input type="password" id="confirmPassword" placeholder="请再次输入密码" required>
+            </div>
+            <button onclick="register()">注册</button>
+            <div class="toggle-form" onclick="toggleForm()">已有账号？点击登录</div>
+        </div>
+    </div>
+
+    <script>
+        function toggleForm() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            
+            if (loginForm.style.display === 'none') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            }
+        }
+
+        function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorDiv = document.getElementById('loginError');
+            
+            if (!username || !password) {
+                errorDiv.textContent = '用户名和密码不能为空';
+                return;
+            }
+            
+            fetch('login.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 登录成功，保存用户信息并跳转到留言页
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('loggedIn', 'true');
+                    window.location.href = 'comment.html';
+                } else {
+                    errorDiv.textContent = data.error || '登录失败';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                errorDiv.textContent = '登录失败，请重试';
+            });
+        }
+
+        function register() {
+            const username = document.getElementById('registerUsername').value.trim();
+            const password = document.getElementById('registerPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+            const errorDiv = document.getElementById('registerError');
+            
+            if (!username || !password || !confirmPassword) {
+                errorDiv.textContent = '所有字段不能为空';
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                errorDiv.textContent = '两次输入的密码不一致';
+                return;
+            }
+            
+            fetch('register.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 注册成功，自动登录并跳转
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('loggedIn', 'true');
+                    window.location.href = 'comment.html';
+                } else {
+                    errorDiv.textContent = data.error || '注册失败';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                errorDiv.textContent = '注册失败，请重试';
+            });
+        }
+    </script>
+</body>
+</html>
