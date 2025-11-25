@@ -17,14 +17,15 @@ if ($conn->connect_error) {
 $data = json_decode(file_get_contents('php://input'), true);
 
 // 检查数据是否存在
-if (!$data || !isset($data['username']) || !isset($data['password'])) {
+if (!$data || !isset($data['username'])) {
     die(json_encode(["success" => false, "error" => "请求参数错误"]));
 }
 
 $username = $data['username'];
 
-// 使用用户提供的密码
-$password = isset($data['password']);
+// 生成随机密码
+$password = generateRandomPassword(12);
+
 // 调用AList API创建账户
 function createAlistUser($username, $password) {
     // 配置AList API信息
