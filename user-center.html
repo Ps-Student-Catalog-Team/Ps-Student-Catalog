@@ -166,6 +166,18 @@
         </header>
 
         <div class="content-section">
+            <h2>AList 账户</h2>
+            <div style="text-align: center; margin: 20px 0;">
+                <p>是否需要在 AList 上创建账户？</p>
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="createAlistAccount()">是</button>
+                    <button class="btn" onclick="cancelAlistCreation()" style="margin-left: 10px; background-color: #e2e8f0; color: #4a5568;">暂不</button>
+                </div>
+                <div id="alistResult" style="margin-top: 20px; font-weight: bold;"></div>
+            </div>
+        </div>
+
+        <div class="content-section">
             <h2>我的留言</h2>
             <div class="comments-container" id="commentsContainer">
                 <div class="loading">加载中...</div>
@@ -199,8 +211,19 @@
                     body: JSON.stringify({ username })
                 });
 
+                if (!response.ok) {
+                    throw new Error('网络响应错误: ' + response.status);
+                }
+
                 const comments = await response.json();
                 const container = document.getElementById('commentsContainer');
+
+                // 检查是否有错误信息
+                if (comments.error) {
+                    console.error('加载留言失败:', comments.error);
+                    container.innerHTML = `<div class="no-comments">加载留言失败：${comments.error}</div>`;
+                    return;
+                }
 
                 if (comments.length === 0) {
                     container.innerHTML = '<div class="no-comments">您还没有发送过留言</div>';
@@ -218,7 +241,7 @@
                 `).join('');
             } catch (error) {
                 console.error('加载留言失败:', error);
-                document.getElementById('commentsContainer').innerHTML = '<div class="no-comments">加载留言失败，请稍后重试</div>';
+                document.getElementById('commentsContainer').innerHTML = `<div class="no-comments">加载留言失败，请稍后重试：${error.message}</div>`;
             }
         }
 
@@ -226,6 +249,44 @@
         function logout() {
             localStorage.removeItem('username');
             window.location.href = 'login.html';
+        }
+
+        // 创建AList账户
+        async function createAlistAccount() {
+            const username = localStorage.getItem('username');
+            const resultDiv = document.getElementById('alistResult');
+            
+            try {
+                resultDiv.textContent = '正在创建AList账户...';
+                
+                const response = await fetch('create-alist-account.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.textContent = `AList账户创建成功！用户名：${username}，密码：${data.password}`;
+                    resultDiv.style.color = '#48bb78';
+                } else {
+                    resultDiv.textContent = `创建失败：${data.error}`;
+                    resultDiv.style.color = '#f56565';
+                }
+            } catch (error) {
+                resultDiv.textContent = `创建失败：${error.message}`;
+                resultDiv.style.color = '#f56565';
+            }
+        }
+
+        // 取消创建AList账户
+        function cancelAlistCreation() {
+            const resultDiv = document.getElementById('alistResult');
+            resultDiv.textContent = '已取消创建AList账户';
+            resultDiv.style.color = '#718096';
         }
 
         // 页面加载时检查登录状态
