@@ -14,8 +14,8 @@ if ($conn->connect_error) {
     die(json_encode(['success' => false, 'error' => $conn->connect_error]));
 }
 
-// 获取留言数据，包含时间戳
-$sql = "SELECT comment, timestamp FROM comments ORDER BY timestamp DESC"; // 按时间降序排列
+// 获取留言数据，包含用户名和时间戳
+$sql = "SELECT username, comment, timestamp FROM comments ORDER BY timestamp DESC"; // 按时间降序排列
 
 $result = $conn->query($sql);
 
