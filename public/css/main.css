@@ -15,12 +15,14 @@ body {
     background-color: var(--primary-color);
     color: var(--text-color);
     overflow-x: hidden;
+    touch-action: pan-y;
 }
 
 .container {
     display: flex;
     min-height: 87vh;
     position: relative;
+    overflow: hidden;
 }
 
 /* 首页样式 */
