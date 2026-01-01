@@ -5,6 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="./img/favicon.ico" type="image/x-icon">
     <title>学生目录</title>
+    <!-- 自定义导航栏样式 -->
+    <style>
+        /* 自定义窗口标题栏 - 匹配应用科技主题 */
+        .custom-titlebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: #2a2a2a;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            -webkit-app-region: drag;
+            z-index: 1000;
+            border-bottom: 2px solid var(--accent-color);
+            box-shadow: 0 2px 10px rgba(0, 255, 157, 0.1);
+        }
+        
+        .custom-titlebar h1 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            -webkit-app-region: drag;
+            color: var(--accent-color);
+            text-shadow: 0 0 8px rgba(0, 255, 157, 0.3);
+        }
+        
+        .titlebar-controls {
+            display: flex;
+            gap: 4px;
+            -webkit-app-region: no-drag;
+        }
+        
+        .titlebar-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            border-radius: 4px;
+            background: transparent;
+            color: var(--accent-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px rgba(0, 255, 157, 0.1);
+        }
+        
+        .titlebar-btn:hover {
+            background: rgba(0, 255, 157, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .titlebar-btn.close:hover {
+            background: rgba(255, 95, 87, 0.2);
+            border-color: #ff5f57;
+            color: #ff5f57;
+            box-shadow: 0 0 10px rgba(255, 95, 87, 0.3);
+        }
+        
+        /* 主内容区域需要留出标题栏空间 */
+        #home-page, #tutorial-page, #about-page, #tools-page {
+            margin-top: 40px;
+        }
+        
+        /* 适配公告模态框 */
+        .announcement-modal {
+            margin-top: 40px;
+        }
+    </style>
     <!--link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"-->
     <script>
         let currentTargetUrl = '';
@@ -74,30 +149,71 @@
 
         // 关闭模态框逻辑
         document.addEventListener('DOMContentLoaded', showAnnouncementModal);
-
-        // 确保在 DOM 加载完成后执行
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('passwordModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeModal();
-                }
-            });
-
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeModal();
-                }
-                if (e.key === 'Enter' && document.getElementById('passwordModal').style.display === 'block') {
-                    submitPassword();
-                }
-            });
+    
+    // 确保在 DOM 加载完成后执行
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('passwordModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
         });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+            if (e.key === 'Enter' && document.getElementById('passwordModal').style.display === 'block') {
+                submitPassword();
+            }
+        });
+        
+        // 窗口控制按钮功能
+        if (typeof window.require !== 'undefined') {
+            try {
+                const electron = window.require('electron');
+                const ipcRenderer = electron.ipcRenderer;
+                
+                // 最小化按钮
+                document.getElementById('minimizeBtn').addEventListener('click', () => {
+                    ipcRenderer.send('window:minimize');
+                });
+                
+                // 最大化/恢复按钮
+                document.getElementById('maximizeBtn').addEventListener('click', () => {
+                    ipcRenderer.send('window:maximize');
+                });
+                
+                // 关闭按钮
+                document.getElementById('closeBtn').addEventListener('click', () => {
+                    ipcRenderer.send('window:close');
+                });
+            } catch (error) {
+                console.log('Not running in Electron environment:', error);
+            }
+        }
+    });
     </script>
 
     <link rel="stylesheet" href="./public/css/main.css">
 </head>
 
 <body>
+    <!-- 自定义窗口标题栏 -->
+    <div class="custom-titlebar">
+        <h1>Ps-Student-Catalog</h1>
+        <div class="titlebar-controls">
+            <button class="titlebar-btn" id="minimizeBtn" title="最小化">
+                <i class="fas fa-window-minimize"></i>
+            </button>
+            <button class="titlebar-btn" id="maximizeBtn" title="最大化/恢复">
+                <i class="fas fa-window-maximize"></i>
+            </button>
+            <button class="titlebar-btn close" id="closeBtn" title="关闭">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
     <div class="container">
         <div class="announcement-modal" id="announcementModal">
             <div class="announcement-content">

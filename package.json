@@ -21,8 +21,14 @@
     "appId": "com.example.psstudentcatalog",
     "productName": "Ps-Student-Catalog",
     "win": {
-      "target": "nsis",
-      "icon": "img/favicon.ico"
+      "target": "portable"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility"
+    },
+    "directories": {
+      "output": "dist"
     },
     "files": [
       "**/*",
@@ -31,7 +37,8 @@
       "!tutorial/**/*",
       "!password/**/*",
       "!parsedown-1.7.4/**/*"
-    ]
+    ],
+    "asar": true
   },
   "config": {
     "commitizen": {
