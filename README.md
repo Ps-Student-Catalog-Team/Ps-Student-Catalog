@@ -2,79 +2,106 @@
 The open source of Student Catalog built in senior high school "Ps"
 
 ## Project Structure
-After reorganization, the project now has a clearer directory structure:
 
 ```
 Ps-Student-Catalog/
 ├── .gitignore
 ├── README.md
-├── 整理计划.md
+├── CONTRIBUTING.md
 ├── 后续整理指南.md
-├── server/
-│   ├── server.js           # Main server file
-│   ├── package.json        # Project dependencies
-│   ├── package-lock.json   # Locked dependencies
-│   ├── lastOnlineTimes.json # VPN status data
-│   └── startnode.bat       # Server startup script
-├── public/
-│   ├── index.html          # VPN status monitoring page
-│   ├── student_catalog.html # Student catalog main page
-│   ├── about_us.html       # About us page
-│   ├── clock.html          # Clock page
-│   ├── clock2.html         # Alternative clock page
-│   ├── comment.html        # Comment page
-│   ├── css/                # CSS styles
-│   ├── js/                 # JavaScript files
-│   └── img/                # Image resources
-├── utils/                  # Utility scripts
-├── logs/                   # Log files
-└── other directories/      # Other project directories (to be organized)
+├── main.js                 # Electron main process file
+├── package.json            # Project dependencies and scripts
+├── package-lock.json       # Locked dependencies
+├── index.html              # Main website page
+├── about_us.html           # About us page
+├── clock.html              # Clock page
+├── clock2.html             # Alternative clock page
+├── comment.html            # Comment page
+├── login.html              # Login page
+├── css/                    # CSS styles
+├── js/                     # JavaScript files
+├── img/                    # Image resources
+├── fonts/                  # Font files
+├── ErrorFiles/             # Error pages
+├── server/                 # Backend server files
+├── public/                 # Public website files
+├── tutorial/               # Tutorial files
+└── other directories/      # Other project directories
 ```
 
-## Why we need a Student Catalog?
-The Teacher Directory is a special folder designed specifically for teachers. It is built on the school network using SMB (Server Message Block) technology, aiming to provide efficient and convenient file transfer services for the teaching staff. Each teacher has an independent account and password, allowing easy access to personal files and shared resources related to their subjects with the correct login information. Additionally, there used to be a temporary directory for urgent file storage for teachers (although this feature has now been removed).
+## About the Project
 
-However, in this vast campus, the student community also requires the convenience of file storage and transfer. Unfortunately, the school currently does not provide dedicated file transfer services for students, which has caused numerous inconveniences in file management for students on campus. Whether it's the easy-to-lose USB drives or the inefficiency and inconvenience caused by aging or poorly functioning Universal Serial Bus (USB) connections, both have severely restricted the efficiency and convenience of file transfer for students on campus.
+The Student Catalog is a platform designed to provide file storage and transfer services for students,弥补ing the gap left by the school's lack of dedicated student file services. Built using web technologies and now with Electron support for desktop application usage, it offers a convenient and efficient way for students to manage their files.
 
-Perhaps due to oversight by the school, or due to limitations stemming from technological, economic, or other factors, the absence of a student directory has become an urgent issue in need of resolution. It is in light of these circumstances that we are introducing the "Student Directory Plan."
+### Key Features
+- File upload and download functionality
+- Tutorial viewing capabilities
+- User-friendly web interface
+- Desktop application support via Electron
+- Multiple utility pages (clocks, comments, etc.)
 
-Given the far larger number of students compared to teachers, the planning and construction of the student directory naturally require more thorough and outstanding efforts. After in-depth comparison and analysis, I have chosen a website as the best platform for the student directory. Compared to SMB services, websites are highly praised for their outstanding compatibility, smoothness, aesthetics, and flexibility.
+## Getting Started
 
-Utilizing Apache technology, I have successfully set up a server on the classroom computer and configured the port to 80. Therefore, by simply accessing the IP address of my class (10.88.202.54), you can easily access the student directory.
+### Web Version
+You can access the web version by opening `index.html` in your browser or by setting up the backend server:
 
-As this plan did not receive direct support from the school, every step has been filled with challenges, and all the website code has been independently completed by me. I sincerely welcome valuable suggestions from everyone to help me continually improve and optimize the student directory.
+```bash
+cd server
+npm install
+node server.js
+```
 
-Currently, the student directory has features for file upload, download, and viewing tutorials, with more functions continuously being enhanced. Stay tuned for more updates!
+### Electron Desktop Application
 
-For any ideas or suggestions, feel free to reach out to me directly or contact me via email at classicmcnet@outlook.com
+#### Prerequisites
+- Node.js installed on your system
+- npm package manager
 
+#### Installation
 
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-教师目录，一个专为教师设计的特殊文件夹，它依托SMB技术构建于校园网之上，旨在为教师群体提供高效便捷的文件传输服务。每位教师均拥有独立的账号与密码，凭借正确的登录信息，即可轻松访问个人文件及所属科目的共享资源。此外，还曾设有临时目录，供教师紧急存放文件之用（但该功能现已移除）。
+2. Start the Electron application:
+   ```bash
+   npm start
+   ```
 
-然而，在这所广阔的校园里，学生群体同样需要文件存储与传输的便利。遗憾的是，学校目前并未向学生提供专门的文件传输服务，这给学生们在校内的文件管理带来了诸多不便。无论是易丢失的U盘，还是因老化、接触不良而频出问题的通用串行总线，都严重制约了学生在校内文件传输的效率和便捷性。
+3. Build the application for Windows:
+   ```bash
+   npm run build:win
+   ```
 
-或许是由于校方的疏忽，或是受技术、经济等因素的限制，学生目录的缺失成为了亟待解决的问题。正是在这样的背景下，我们推出了“学生目录计划”。
+## Available Scripts
 
-鉴于学生人数远超教师，学生目录的规划与建设自然应更加周全与出色。经过深入比较与分析，我选择了网站作为学生目录的最佳载体，相较于SMB服务，网站以其卓越的兼容性、流畅性、美观性和灵活性而备受赞誉。
+- `npm start` - Start the Electron application
+- `npm run build` - Build the Electron application for all platforms
+- `npm run build:win` - Build the Electron application specifically for Windows
 
-借助Apache技术，我在班级电脑上成功搭建了一台服务器，并将端口设置为80。因此，只需访问我所在班级的IP地址（10.88.202.54），即可轻松访问学生目录。
+## Why We Need a Student Catalog
 
-由于该计划未获得学校的直接支持，所以每一步都充满了挑战，网站的所有代码均由我一人独立完成。我诚挚地欢迎各位提出宝贵建议，以帮助我不断完善和优化学生目录。
+The school provides SMB-based file transfer services for teachers but lacks similar services for students. This creates inconvenience for students who need to transfer files between devices on campus. The Student Catalog addresses this issue by providing:
 
-目前，学生目录已具备文件上传、下载及教程查看等功能，更多功能正在不断完善中。敬请期待！
+- A web-based platform accessible from any device on the network
+- A desktop application option for even greater convenience
+- A user-friendly interface for easy file management
+- Reliable file storage and transfer capabilities
 
-如有任何建议或疑问，欢迎与我联系，或通过邮件classicmcnet@outlook.com与我取得联系。
+## Development
 
+All code has been independently developed and is open source. Contributions are welcome to help improve and expand the functionality of the Student Catalog.
 
-## So we did it!
-We have successfully built a Student Catalog using the open source platform, Apache, and configured it to run on the classroom computer. We have also set up various services. 
+## Contact
 
-It's not perfect, but it's a start. We will continue to improve and optimize the website, and welcome any suggestions or feedback from everyone.
+For any ideas or suggestions, feel free to reach out via email at classicmcnet@outlook.com
 
-The project took a long time to complete, but we are proud of our achievement.Enjoy Student Catalog :)
+## License
+
+This project is open source and available under the MIT License.
 
 
 Yuebi
 
-2025.6.29
+2026.01.01
