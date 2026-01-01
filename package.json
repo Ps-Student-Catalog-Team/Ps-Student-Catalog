@@ -1,10 +1,37 @@
 {
+  "name": "ps-student-catalog",
+  "version": "1.0.0",
+  "description": "Student Catalog Electron App",
+  "main": "main.js",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.2"
   },
   "devDependencies": {
-    "cz-conventional-changelog": "^3.3.0"
+    "cz-conventional-changelog": "^3.3.0",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12"
+  },
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.example.psstudentcatalog",
+    "productName": "Ps-Student-Catalog",
+    "win": {
+      "target": "nsis",
+      "icon": "img/favicon.ico"
+    },
+    "files": [
+      "**/*",
+      "!server/**/*",
+      "!status/**/*",
+      "!tutorial/**/*",
+      "!password/**/*",
+      "!parsedown-1.7.4/**/*"
+    ]
   },
   "config": {
     "commitizen": {
