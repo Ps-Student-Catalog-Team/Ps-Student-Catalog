@@ -8,4 +8,4 @@ yarn-error.log*
 .yarn/
 .env
 lastOnlineTimes.json
-lastOnlineTimes.json
+dist/
