@@ -259,7 +259,7 @@
 
             <div class="button-section" style="margin-top: 40px;">
                 <button class="nav-button" onclick="navigateToTutorials()">教程</button>
-                <button class="nav-button" onclick='location.href=("http://10.88.202.48:5244")'>共享目录</button>
+                <button class="nav-button" onclick='location.href=("http://10.88.202.73:5244")'>共享目录</button>
                 <button class="nav-button" onclick="navigateToTools()">更多工具</button>
                 <button class="nav-button" onclick="navigateToAbout()">关于</button>
                 <!--div style="display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto;">
@@ -445,6 +445,11 @@
                     <h3>countdown</h3>
                     <p>高考倒计时awa（以当届高三生为准）</p>
                     <a href="./Countdown/index.html" class="btn btn-outline-primary">进入</a>
+                </div>
+                <div class="tutorial-card">
+                    <h3>用户中心</h3>
+                    <p>查看您发送的留言</p>
+                    <a href="user-center.html" class="btn btn-outline-primary">进入</a>
                 </div>
             </div>
         </div>
@@ -698,7 +703,7 @@
 
     
 </script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href=".\public\css\all.min.css" onload="this.classList.add('loaded')" onerror="this.remove()">
 
 </body>
 </html>
