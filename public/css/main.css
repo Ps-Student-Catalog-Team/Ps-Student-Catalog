@@ -841,3 +841,16 @@ li:hover code {
     background: rgba(0, 255, 157, 0.2);
     box-shadow: 0 0 8px rgba(0, 255, 157, 0.3);
 }
+
+/* 鼠标选中特效 */
+::selection {
+    background-color: rgba(0, 255, 157, 0.3);
+    color: var(--accent-color);
+    text-shadow: 0 0 8px rgba(0, 255, 157, 0.8);
+}
+
+::-moz-selection {
+    background-color: rgba(0, 255, 157, 0.3);
+    color: var(--accent-color);
+    text-shadow: 0 0 8px rgba(0, 255, 157, 0.8);
+}
