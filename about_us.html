@@ -99,6 +99,14 @@
             animation-delay: 0.9s;
         }
         
+        .member-card:nth-child(3) {
+            animation-delay: 1.1s;
+        }
+        
+        .member-card:nth-child(4) {
+            animation-delay: 1.3s;
+        }
+        
         .member-card {
             background: rgba(26, 26, 26, 0.8);
             border: 2px solid var(--accent-color);
@@ -142,8 +150,7 @@
             margin-bottom: 15px;
             color: #aaa;
         }
-    </style>
-    <style>
+
         .contact-icons {
             margin-top: 20px;
             display: flex;
@@ -155,15 +162,14 @@
             color: var(--accent-color);
             font-size: 1.5rem;
             transition: all 0.3s ease;
-            opacity: 0.8;
-        }
         
-        .contact-icons a:hover {
-            transform: scale(1.2);
-            opacity: 1;
-            color: #fff;
-        }
-    </style>
+        /* 模态框样式 */
+        .member-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100    </style>
 </head>
 <body>
     <a href="index.html" class="back-btn">返回首页</a>
@@ -173,7 +179,7 @@
         <div class="team-members">
             <div class="member-card">
                 <img src="./public/img/logo/yuebi.jpg" alt="yuebi" class="member-avatar">
-                <h2 class="member-name">yuebi</h2>
+                <h2 class="member-name">Yuebi</h2>
                 <p class="member-role">主要开发者</p>
                 <p>项目创始人和核心开发者</p>
                 <p>喜欢听歌、敲代码 awa</p>
@@ -184,16 +190,51 @@
                 </div>
             </div>
             <div class="member-card">
+                <img src="./public/img/logo/yuebi.jpg" alt="John" class="member-avatar">
+                <h2 class="member-name">王小编</h2>
+                <p class="member-role">开发者</p>
+                <p></p>
+                <p><p style="text-decoration: line-through;">x</p>
+                <p></p>
+                <div class="contact-icons">
+                    <a href="https://github.com/liyang090811" target="_blank" title="GitHub"><i class="fa fa-github"></i></a>
+                    <a href="mailto:wxliloveyou@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
+                </div>
+            </div>
+            <div class="member-card">
                 <img src="./public/img/logo/leo.jpg" alt="Leo" class="member-avatar">
                 <h2 class="member-name">Leo</h2>
                 <p class="member-role">开发者</p>
-                <p>开发者、负责服务器维护工作</p>
+                <p>负责服务器维护工作，现已转学</p>
                 <p>一个爱飞无人机的男孩</p>
                 <div class="contact-icons">
                     <a href="https://github.com/liyang090811" target="_blank" title="GitHub"><i class="fa fa-github"></i></a>
                     <a href="mailto:wxliloveyou@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
                 </div>
             </div>
+            <div class="member-card">
+                <img src="./public/img/logo/yuebi.jpg" alt="chenai" class="member-avatar">
+                <h2 class="member-name">辰艾</h2>
+                <p class="member-role">开发者</p>
+                <p>是现任负责维护服务器的学牲</p>
+                <p>平时喜欢玩第！五！人！格！（虽然挺菜）<p style="text-decoration: line-through;">x</p>
+                <p></p>
+                <div class="contact-icons">
+                    <a href="https://github.com/liyang090811" target="_blank" title="GitHub"><i class="fa fa-github"></i></a>
+                    <a href="mailto:wxliloveyou@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
+                </div>
+            </div>
+            <!--div class="member-card">
+                <img src="./public/img/logo/leo.jpg" alt="Leo" class="member-avatar">
+                <h2 class="member-name">name</h2>
+                <p class="member-role">role</p>
+                <p></p>
+                <p></p>
+                <div class="contact-icons">
+                    <a href="https://github.com/liyang090811" target="_blank" title="GitHub"><i class="fa fa-github"></i></a>
+                    <a href="mailto:wxliloveyou@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
+                </div>
+            </div-->
         </div>
     </div>
 </body>
