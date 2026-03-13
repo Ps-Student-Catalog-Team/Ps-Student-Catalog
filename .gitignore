@@ -7,5 +7,4 @@ yarn-error.log*
 .npm
 .yarn/
 .env
-lastOnlineTimes.json
-dist/
+lastOnlineTimes.json*

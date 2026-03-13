@@ -249,11 +249,76 @@
                 padding-bottom: 120px;
             }
         }
+        #loginBtn {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: var(--secondary-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#loginBtn:hover {
+    background-color: var(--secondary-color-hover);
+}
+
+body.dark-theme #loginBtn {
+    background-color: #007BFF;
+}
+
+body.dark-theme #loginBtn:hover {
+    background-color: #0056b3;
+}
+#logoutBtn {
+    padding: 8px 15px; /* 减小内边距 */
+    font-size: 14px; /* 减小字体大小 */
+    color: #fff;
+    background-color: var(--secondary-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: none; /* 默认情况下隐藏登出按钮 */
+}
+
+#logoutBtn:hover {
+    background-color: var(--secondary-color-hover);
+}
+
+body.dark-theme #logoutBtn {
+    background-color: #dc3545; /* 深色主题下的背景颜色 */
+}
+
+body.dark-theme #logoutBtn:hover {
+    background-color: #c82333; /* 深色主题下的悬停颜色 */
+}
+.home-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.home-button:hover {
+    background-color: var(--button-hover-color);
+}
+
+
     </style>
     
     </head>
     <body class="dark-theme">
         <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+        <button class="home-button" onclick="window.location.href='index.html'">返回首页</button>
     <h1>欢迎来到留言区</h1>
     <div style="text-align: center; margin: 10px; color: var(--primary-color);">
         <span id="userInfo"></span>

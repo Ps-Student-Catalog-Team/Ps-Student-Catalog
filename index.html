@@ -102,7 +102,7 @@
         <div class="announcement-modal" id="announcementModal">
             <div class="announcement-content">
                 <h2>公告</h2>
-                <p>阅读十一月的学生目录月度报告！</p>
+                <p>阅读十二、一月的学生目录月度报告！</p>
                 <p><a class="footer-link" href="https://psstunet.github.io/">点击查看</a></p>
                 <hr>
                 <!--p style="text-decoration: line-through;">教师目录近期出现问题。</p-->
@@ -143,9 +143,10 @@
 
             <div class="button-section" style="margin-top: 40px;">
                 <button class="nav-button" onclick="navigateToTutorials()">教程</button>
-                <button class="nav-button" onclick='location.href=("http://10.88.202.48:5244")'>共享目录</button>
+                <button class="nav-button" onclick='location.href=("http://10.88.202.73:5244")'>共享目录</button>
                 <button class="nav-button" onclick="navigateToTools()">更多工具</button>
                 <button class="nav-button" onclick="navigateToAbout()">关于</button>
+                <button class="download-mc-btn" onclick='window.open("http://10.88.202.73:5244/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C/Minecraft.zip")'>下载mc</button>
                 <!--div style="display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto;">
                     <p style="margin: 0;">Status:</p>
                     <div class="circle green tooltip" style="margin-left: 10px;">
@@ -187,6 +188,13 @@
                     <p>介绍了如何使用正确的方法在学校访问互联网</p>
                     <a href="tutorial/show.php?file=web.md" class="btn btn-outline-primary">查看教程</a> <!-- 使用 outline按钮样式 -->
                 </div>
+                
+                <div class="tutorial-card">
+                     <h3>更好的在学校中上网</h3>
+                    <p>如何在学校内通过电脑移动热点上网</p>
+                    <a href="tutorial/show.php?file=wed3.md" class="btn btn-outline-primary">查看教程</a> <!-- 使用 outline按钮样式 -->
+                </div>
+                
                 <div class="tutorial-card">
                     <h3>教师目录密码</h3>
                     <p>教师目录密码登记</p>
@@ -204,8 +212,6 @@
                     <p>包含了如何连接我们的Minecraft服务器</p>
                     <a href="tutorial/show.php?file=minecraft_server.md" class="btn btn-outline-primary">查看教程</a> <!-- 使用 outline按钮样式 -->
                 </div>
-                
-
 
             </div>
             
@@ -329,6 +335,16 @@
                     <h3>countdown</h3>
                     <p>高考倒计时awa（以当届高三生为准）</p>
                     <a href="./Countdown/index.html" class="btn btn-outline-primary">进入</a>
+                </div>
+                <div class="tutorial-card">
+                    <h3>用户中心</h3>
+                    <p>查看您发送的留言</p>
+                    <a href="user-center.html" class="btn btn-outline-primary">进入</a>
+                </div>
+                <div class="tutorial-card">
+                    <h3>我的世界管理</h3>
+                    <p>用我的世界管理服务器</p>
+                    <a href="http://10.88.202.73:23333/#/login" class="btn btn-outline-primary">进入</a>
                 </div>
             </div>
         </div>
@@ -595,7 +611,7 @@
 
     
 </script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href=".\public\css\all.min.css" onload="this.classList.add('loaded')" onerror="this.remove()">
 
 </body>
 </html>
