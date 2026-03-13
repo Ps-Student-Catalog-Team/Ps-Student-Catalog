@@ -169,6 +169,147 @@
             position: fixed;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .member-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: rgba(26, 26, 26, 0.95);
+            border: 3px solid var(--accent-color);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 255, 157, 0.3);
+            transform: translateY(-30px);
+            transition: transform 0.4s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .member-modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .modal-close:hover {
+            background-color: rgba(0, 255, 157, 0.1);
+            transform: scale(1.1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-color);
+            margin-right: 30px;
+        }
+
+        .modal-header-text {
+            flex: 1;
+        }
+
+        .modal-name {
+            font-size: 2.2rem;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .modal-role {
+            font-size: 1.3rem;
+            color: #aaa;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .modal-body {
+            margin-top: 20px;
+        }
+
+        .modal-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #ddd;
+            margin-bottom: 25px;
+        }
+
+        .modal-contact {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-contact h3 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .modal-contact-icons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .modal-contact-icons a {
+            color: var(--accent-color);
+            font-size: 1.8rem;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+
+        .modal-contact-icons a:hover {
+            transform: scale(1.2);
+            opacity: 1;
+            color: #fff;
+        }
+
+        /* 点击卡片时的效果 */
+        .member-card {
+            cursor: pointer;
+        }
+
+        /* 模态框样式 */
+        .member-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100    </style>
 </head>
 <body>
@@ -224,7 +365,7 @@
                     <a href="mailto:wxliloveyou@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
                 </div>
             </div>
-            <!--div class="member-card">
+            <!--div class="member-card">在
                 <img src="./public/img/logo/leo.jpg" alt="Leo" class="member-avatar">
                 <h2 class="member-name">name</h2>
                 <p class="member-role">role</p>
