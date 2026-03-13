@@ -6,7 +6,7 @@
     <link rel="icon" href="./public/img/favicon.ico" type="image/x-icon">
     <title>关于我们</title>
     <link rel="stylesheet" href="./public/css/main.css">
-    <link rel="stylesheet" href="./css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -162,6 +162,7 @@
             color: var(--accent-color);
             font-size: 1.5rem;
             transition: all 0.3s ease;
+        }
         
         /* 模态框样式 */
         .member-modal {
@@ -303,14 +304,7 @@
         .member-card {
             cursor: pointer;
         }
-
-        /* 模态框样式 */
-        .member-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100    </style>
+    </style>
 </head>
 <body>
     <a href="index.html" class="back-btn">返回首页</a>
@@ -318,7 +312,7 @@
         <h1 class="team-title">本网站的开发者</h1>
         
         <div class="team-members">
-            <div class="member-card">
+            <div class="member-card" data-member="yuebi">
                 <img src="./public/img/logo/yuebi.jpg" alt="yuebi" class="member-avatar">
                 <h2 class="member-name">Yuebi</h2>
                 <p class="member-role">主要开发者</p>
@@ -330,19 +324,19 @@
                     <a href="mailto:yuebity@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
                 </div>
             </div>
-            <div class="member-card">
-                <img src="./public/img/logo/yuebi.jpg" alt="John" class="member-avatar">
+            <div class="member-card" data-member="stromhier">
+                <img src="./public/img/logo/john.png" alt="John" class="member-avatar">
                 <h2 class="member-name">Stromhier</h2>
                 <p class="member-role">开发者</p>
                 <p></p>
-                <p><p style="text-decoration: line-through;">x</p>
+                <p style="text-decoration: line-through;">x</p>
                 <p></p>
                 <div class="contact-icons">
-                    <a href="https://github.com/liyang090811" target="_blank" title="GitHub"><i class="fa fa-github"></i></a>
-                    <a href="mailto:wxliloveyou@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
+                    <!--a href="https://github.com/liyang090811" target="_blank" title="GitHub"><i class="fa fa-github"></i></a>
+                    <a href="mailto:wxliloveyou@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a-->
                 </div>
             </div>
-            <div class="member-card">
+            <div class="member-card" data-member="leo">
                 <img src="./public/img/logo/leo.jpg" alt="Leo" class="member-avatar">
                 <h2 class="member-name">Leo</h2>
                 <p class="member-role">开发者</p>
@@ -353,7 +347,7 @@
                     <a href="mailto:wxliloveyou@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
                 </div>
             </div>
-            <div class="member-card">
+            <div class="member-card" data-member="chenai">
                 <img src="./public/img/logo/chenai.jpeg" alt="chenai" class="member-avatar">
                 <h2 class="member-name">辰艾</h2>
                 <p class="member-role">开发者</p>
@@ -362,7 +356,7 @@
                 <p></p>
                 <div class="contact-icons">
                     <a href="https://github.com/zmmmawzfl" target="_blank" title="GitHub"><i class="fa fa-github"></i></a>
-                    <a href="hekaiyu2009@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
+                    <a href="mailto:hekaiyu2009@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
                 </div>
             </div>
             <!--div class="member-card">在
@@ -378,5 +372,158 @@
             </div-->
         </div>
     </div>
+
+    <!-- 模态框 -->
+    <div class="member-modal" id="modal-yuebi">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div class="modal-header">
+                <img src="./public/img/logo/yuebi.jpg" alt="Yuebi" class="modal-avatar">
+                <div class="modal-header-text">
+                    <h2 class="modal-name">Yuebi</h2>
+                    <p class="modal-role">主要开发者</p>
+                </div>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">
+                    Yuebi是项目的创始人和核心开发者，负责网站的整体架构和主要功能开发。他热爱编程，擅长前端和后端技术，
+                    致力于打造一个功能完善、用户友好的学生目录网站。在空闲时间，他喜欢听音乐、敲代码，享受编程带来的乐趣。
+                </p>
+                <p class="modal-description">
+                    作为项目的领导者，Yuebi不仅负责技术实现，还协调团队成员的工作，确保项目顺利进行。
+                    他的专业知识和热情为项目的成功奠定了坚实的基础。
+                </p>
+            </div>
+            <div class="modal-contact">
+                <h3>联系方式</h3>
+                <div class="modal-contact-icons">
+                    <a href="https://github.com/yuebittt" target="_blank" title="GitHub"><i class="fa fa-github"></i></a>
+                    <a href="https://yuebittt.github.io" target="_blank" title="博客"><i class="fa fa-rss"></i></a>
+                    <a href="mailto:yuebity@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="member-modal" id="modal-stromhier">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div class="modal-header">
+                <img src="./public/img/logo/yuebi.jpg" alt="Stromhier" class="modal-avatar">
+                <div class="modal-header-text">
+                    <h2 class="modal-name">Stromhier</h2>
+                    <p class="modal-role">开发者</p>
+                </div>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">
+                    Stromhier是团队中的开发者，虽然信息较少，但他为项目的发展做出了贡献。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="member-modal" id="modal-leo">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div class="modal-header">
+                <img src="./public/img/logo/leo.jpg" alt="Leo" class="modal-avatar">
+                <div class="modal-header-text">
+                    <h2 class="modal-name">Leo</h2>
+                    <p class="modal-role">开发者</p>
+                </div>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">
+                    Leo负责服务器维护工作，是团队中的技术支持专家。他对服务器配置和网络安全有深入的了解，
+                    确保网站的稳定运行。虽然他已经转学，但他的贡献仍然对项目产生着积极的影响。
+                </p>
+                <p class="modal-description">
+                    除了技术工作，Leo还喜欢无人机飞行，是一个热爱科技和户外活动的男孩。
+                </p>
+            </div>
+            <div class="modal-contact">
+                <h3>联系方式</h3>
+                <div class="modal-contact-icons">
+                    <a href="https://github.com/liyang090811" target="_blank" title="GitHub"><i class="fa fa-github"></i></a>
+                    <a href="mailto:wxliloveyou@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="member-modal" id="modal-chenai">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div class="modal-header">
+                <img src="./public/img/logo/chenai.jpeg" alt="辰艾" class="modal-avatar">
+                <div class="modal-header-text">
+                    <h2 class="modal-name">辰艾</h2>
+                    <p class="modal-role">开发者</p>
+                </div>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">
+                    辰艾是现任负责维护服务器的开发者，虽然他自称是"学牲"，但他对技术工作充满热情。
+                    他负责网站的日常维护和更新，确保网站能够正常运行。
+                </p>
+                <p class="modal-description">
+                    在空闲时间，辰艾喜欢玩《第五人格》游戏，虽然他谦虚地认为自己玩得不太好，
+                    但这并不影响他对游戏的热爱。
+                </p>
+            </div>
+            <div class="modal-contact">
+                <h3>联系方式</h3>
+                <div class="modal-contact-icons">
+                    <a href="https://github.com/zmmmawzfl" target="_blank" title="GitHub"><i class="fa fa-github"></i></a>
+                    <a href="mailto:hekaiyu2009@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取所有成员卡片
+        const memberCards = document.querySelectorAll('.member-card');
+        // 获取所有模态框
+        const modals = document.querySelectorAll('.member-modal');
+        // 获取所有关闭按钮
+        const closeButtons = document.querySelectorAll('.modal-close');
+
+        // 为每个卡片添加点击事件
+        memberCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const member = card.getAttribute('data-member');
+                const modal = document.getElementById(`modal-${member}`);
+                modal.classList.add('active');
+            });
+        });
+
+        // 为每个关闭按钮添加点击事件
+        closeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const modal = button.closest('.member-modal');
+                modal.classList.remove('active');
+            });
+        });
+
+        // 点击模态框外部关闭
+        modals.forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // 按ESC键关闭模态框
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modals.forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+    </script>
 </body>
 </html>
