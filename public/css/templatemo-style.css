@@ -46,6 +46,19 @@ p {
 	margin-bottom: 50px;
 }
 
+/* 鼠标选中特效 */
+::selection {
+    background-color: rgba(0, 255, 157, 0.3);
+    color: #00ff9d;
+    text-shadow: 0 0 8px rgba(0, 255, 157, 0.8);
+}
+
+::-moz-selection {
+    background-color: rgba(0, 255, 157, 0.3);
+    color: #00ff9d;
+    text-shadow: 0 0 8px rgba(0, 255, 157, 0.8);
+}
+
 .tm-section-title {
 	font-size: 2.6rem;
     margin-bottom: 2rem;	

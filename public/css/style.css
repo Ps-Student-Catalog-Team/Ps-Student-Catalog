@@ -24,6 +24,18 @@ body{background-image: url(1.jpg);} :root {
           perspective: 1000px;
 }
 
+::selection {
+  background-color: rgba(11, 253, 253, 0.3);
+  color: #0BFDFD;
+  text-shadow: 0 0 5px rgba(11, 253, 253, 0.8);
+}
+
+::-moz-selection {
+  background-color: rgba(11, 253, 253, 0.3);
+  color: #0BFDFD;
+  text-shadow: 0 0 5px rgba(11, 253, 253, 0.8);
+}
+
 .digit {
   height: 20vmin;
   width: 10vmin;

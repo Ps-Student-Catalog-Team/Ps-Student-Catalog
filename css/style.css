@@ -816,3 +816,15 @@ body, html {
   content: '';
   display: block;
 }
+
+::selection {
+  background-color: rgba(11, 253, 253, 0.3);
+  color: #0BFDFD;
+  text-shadow: 0 0 5px rgba(11, 253, 253, 0.8);
+}
+
+::-moz-selection {
+  background-color: rgba(11, 253, 253, 0.3);
+  color: #0BFDFD;
+  text-shadow: 0 0 5px rgba(11, 253, 253, 0.8);
+}
