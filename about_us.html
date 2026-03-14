@@ -71,11 +71,21 @@
         
         .team-title {
             font-size: 2.5rem;
-            margin-bottom: 40px;
+            margin-bottom: 10px;
             color: var(--accent-color);
             text-align: center;
             opacity: 0;
             animation: slideDown 0.6s ease-out 0.5s forwards;
+            text-shadow: 0 0 4px rgba(0, 255, 157, 0.5), 0 0 8px rgba(0, 255, 157, 0.3);
+        }
+        
+        .team-subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 0.7s forwards;
         }
         
         .team-members {
@@ -363,6 +373,7 @@
     <a href="index.html" class="back-btn">返回首页</a>
     <div class="team-section">
         <h1 class="team-title">本网站的开发者</h1>
+        <p class="team-subtitle">点击成员卡片以获取更多信息</p>
         
         <div class="team-members">
             <div class="member-card" data-member="yuebi">
