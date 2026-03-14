@@ -35,9 +35,43 @@
             document.getElementById('errorMsg').textContent = '';
         }
 
-        // 公告模态框
-        function showAnnouncementModal() {
+        let isFirstAnnouncement = true;
+        const ANNOUNCEMENT_KEY = 'announcementDismissedTime';
+        const ANNOUNCEMENT_EXPIRE_HOURS = 3;
+
+        function shouldShowAnnouncement() {
+            const dismissedTime = localStorage.getItem(ANNOUNCEMENT_KEY);
+            console.log('dismissedTime:', dismissedTime);
+            if (!dismissedTime) return true;
+            
+            const hoursPassed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60);
+            console.log('hoursPassed:', hoursPassed);
+            return hoursPassed >= ANNOUNCEMENT_EXPIRE_HOURS;
+        }
+
+        function showAnnouncementModal(forceShow = false) {
+            if (!forceShow && !shouldShowAnnouncement()) {
+                isFirstAnnouncement = false;
+                document.getElementById('home-page').style.display = 'flex';
+                document.getElementById('announcementLink').style.display = 'inline-block';
+                document.getElementById('updateLogLink').style.display = 'inline-block';
+                document.getElementById('moreContentLink').style.display = 'inline-block';
+                
+                const progress = document.createElement('div');
+                progress.className = 'progress-bar';
+                document.body.prepend(progress);
+
+                setTimeout(() => {
+                    document.querySelectorAll('.intro-section li').forEach(li => {
+                        li.style.visibility = 'visible';
+                    });
+                }, 1000);
+                return;
+            }
+            
             const modal = document.getElementById('announcementModal');
+            const content = modal.querySelector('.announcement-content');
+            content.classList.remove('hide');
             modal.style.display = 'flex';
         }
 
@@ -48,24 +82,25 @@
             content.classList.add('hide');
             timeoutId = setTimeout(() => {  
                 modal.style.display = 'none';
-                // 隐藏模态框后显示主页内容
-                document.getElementById('home-page').style.display = 'flex';
-                // 显示底部链接
-                document.getElementById('updateLogLink').style.display = 'inline-block';
-                document.getElementById('moreContentLink').style.display = 'inline-block';
+                localStorage.setItem(ANNOUNCEMENT_KEY, Date.now().toString());
                 
-                // 页面加载动画
-                // 创建进度条
-                const progress = document.createElement('div');
-                progress.className = 'progress-bar';
-                document.body.prepend(progress);
+                if (isFirstAnnouncement) {
+                    isFirstAnnouncement = false;
+                    document.getElementById('home-page').style.display = 'flex';
+                    document.getElementById('announcementLink').style.display = 'inline-block';
+                    document.getElementById('updateLogLink').style.display = 'inline-block';
+                    document.getElementById('moreContentLink').style.display = 'inline-block';
+                    
+                    const progress = document.createElement('div');
+                    progress.className = 'progress-bar';
+                    document.body.prepend(progress);
 
-                // 初始化元素动画
-                setTimeout(() => {
-                    document.querySelectorAll('.intro-section li').forEach(li => {
-                        li.style.visibility = 'visible';
-                    });
-                }, 1000);
+                    setTimeout(() => {
+                        document.querySelectorAll('.intro-section li').forEach(li => {
+                            li.style.visibility = 'visible';
+                        });
+                    }, 1000);
+                }
             }, 350); 
 
         }
@@ -73,7 +108,11 @@
 
 
         // 关闭模态框逻辑
-        document.addEventListener('DOMContentLoaded', showAnnouncementModal);
+        console.log('Script loaded, preparing to show announcement');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded triggered');
+            showAnnouncementModal();
+        });
 
         // 确保在 DOM 加载完成后执行
         document.addEventListener('DOMContentLoaded', () => {
@@ -112,7 +151,7 @@
                 <p>以后VPN的最新密码将会同步在VPN状态页面</p>
                 <!--p>或联系管理员邮箱classicmcnet@outlook.com最迟在3个工作日内回复</p-->
                 <p style="font-size: 0.8em; margin-top: 10px;color:rgb(8, 255, 102)"><i>本网站仅向学生提供服务<br>使用服务产生的一切后果由使用者承担</i></p>
-                <button class="btn-accept" onclick="hideAnnouncementModal() ">确认</button>
+                <button class="btn-accept" onclick="hideAnnouncementModal()">确认</button>
             </div>
         </div>
 
@@ -147,7 +186,7 @@
                 <button class="nav-button" onclick='location.href=("http://10.88.202.73:5244")'>共享目录</button>
                 <button class="nav-button" onclick="navigateToTools()">更多工具</button>
                 <button class="nav-button" onclick="navigateToAbout()">关于</button>
-                <button class="download-mc-btn" onclick='window.open("http://10.88.202.73:5244/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C/Minecraft.zip")'>下载mc</button>
+                <!--button class="download-mc-btn" onclick='window.open("http://10.88.202.73:5244/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C/Minecraft.zip")'>下载mc</button-->
                 <!--div style="display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto;">
                     <p style="margin: 0;">Status:</p>
                     <div class="circle green tooltip" style="margin-left: 10px;">
@@ -228,6 +267,20 @@
                     </div>
                     <div class="modal-footer">
                         <button class="btn-confirm" onclick="submitPassword()">确认</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 更新确认模态框 -->
+            <div class="announcement-modal" id="updateModal" style="display: none;">
+                <div class="announcement-content">
+                    <h2>拉取同步最新更改</h2>
+                    <p>确定要拉取同步最新更改吗？</p>
+                    <p>此操作将会从 GitHub 仓库拉取最新的代码更改。</p>
+                    <div id="updateResult" style="margin: 20px 0;"></div>
+                    <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+                        <button class="btn-confirm" onclick="confirmPullUpdates()">确认</button>
+                        <button class="btn-confirm" onclick="closeUpdateModal()">取消</button>
                     </div>
                 </div>
             </div>
@@ -355,9 +408,10 @@
     <!-- 页面底部链接 -->
 <div class="footer-container">
     <a class="footer-link footer-links" href="https://github.com/yuebittt/Ps-Student-Catalog" target="_blank" title="GitHub仓库" style="position: absolute; bottom: 10px; left: 20px; font-size: 0.8em; color: #666;"><i class="fa fa-github"></i></a>
+    <a class="footer-link footer-links" id="announcementLink" href="javascript:void(0)" onclick="showAnnouncementModal(true)" style="display: none;">查看公告</a>
     <a class="footer-link footer-links" id="updateLogLink" href="about_us.html" style="display: none;">关于我们</a>
     <a class="footer-link footer-links" id="moreContentLink" href="https://psstunet.github.io/" style="display: none;">更多内容</a>
-    <span class="version-info" style="position: absolute; bottom: 10px; right: 20px; font-size: 0.8em; color: #666;">版本: 2.3.4</span>
+    <a class="version-info" href="javascript:void(0)" onclick="pullUpdates()" style="position: absolute; bottom: 10px; right: 20px; font-size: 0.8em; color: #666; cursor: pointer; text-decoration: underline;">版本: 2.3.4</a>
 </div>
 
 
@@ -396,8 +450,6 @@
             btn.textContent = '收起 ↑';
         }
     }
-
-    document.addEventListener('DOMContentLoaded', showAnnouncementModal);
 </script>
 
 <style>
@@ -577,6 +629,32 @@
         from { width: 0; }
         to { width: 100%; }
     }
+
+    /* 更新确认弹窗样式 */
+    #updateModal pre {
+        background-color: rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+        max-height: 200px;
+        font-family: monospace;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    #updateModal .btn-confirm {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        background-color: var(--accent-color);
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    #updateModal .btn-confirm:hover {
+        background-color: #00cc80;
+    }
 </style>
 
 <script>
@@ -610,9 +688,43 @@
         });
     });
 
+    // 拉取同步最新更改的函数
+    function pullUpdates() {
+        // 打开确认弹窗
+        const modal = document.getElementById('updateModal');
+        const resultDiv = document.getElementById('updateResult');
+        resultDiv.innerHTML = '';
+        modal.style.display = 'flex';
+    }
+
+    // 执行拉取更新命令
+    function confirmPullUpdates() {
+        const resultDiv = document.getElementById('updateResult');
+        resultDiv.innerHTML = '<p>正在拉取同步最新更改，请稍候...</p>';
+        
+        // 发送请求到服务器
+        fetch('/api/pull-updates')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    resultDiv.innerHTML = `<p style="color: green;">拉取同步成功！</p><pre>${data.output}</pre><button class="btn-confirm" onclick="closeUpdateModal(); location.reload();">刷新页面</button>`;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">拉取同步失败：</p><pre>${data.error}\n\n${data.details || ''}</pre><button class="btn-confirm" onclick="closeUpdateModal();">关闭</button>`;
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<p style="color: red;">拉取同步失败：</p><pre>${error.message}</pre><button class="btn-confirm" onclick="closeUpdateModal();">关闭</button>`;
+            });
+    }
+
+    // 关闭更新弹窗
+    function closeUpdateModal() {
+        document.getElementById('updateModal').style.display = 'none';
+    }
+
     
 </script>
-    <link rel="stylesheet" href=".\public\css\all.min.css" onload="this.classList.add('loaded')" onerror="this.remove()">
+
 
 </body>
 </html>

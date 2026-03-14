@@ -129,6 +129,26 @@ app.get('/api/vpn-users', async (req, res) => {
     });
 });
 
+// 添加拉取同步最新更改的端点
+app.get('/api/pull-updates', (req, res) => {
+    console.log(`[${new Date().toISOString()}] 执行 git pull 命令`);
+    
+    // 执行 git pull 命令
+    exec('git pull', { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`[ERROR] 执行 git pull 错误: ${error.message}`);
+            return res.status(500).json({ error: 'Failed to pull updates', details: error.message });
+        }
+        if (stderr) {
+            console.error(`[ERROR] git pull 输出错误: ${stderr}`);
+            // 即使有stderr，也尝试返回stdout，因为git pull可能会在stderr中输出一些信息
+        }
+        
+        console.log(`[INFO] git pull 执行成功: ${stdout}`);
+        res.json({ success: true, message: 'Updates pulled successfully', output: stdout });
+    });
+});
+
 // 绑定到所有网络接口
 app.listen(3000, '0.0.0.0', () => {
     console.log('Server running on http://0.0.0.0:3000');

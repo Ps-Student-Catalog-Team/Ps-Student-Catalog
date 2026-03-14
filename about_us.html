@@ -71,11 +71,21 @@
         
         .team-title {
             font-size: 2.5rem;
-            margin-bottom: 40px;
+            margin-bottom: 10px;
             color: var(--accent-color);
             text-align: center;
             opacity: 0;
             animation: slideDown 0.6s ease-out 0.5s forwards;
+            text-shadow: 0 0 4px rgba(0, 255, 157, 0.5), 0 0 8px rgba(0, 255, 157, 0.3);
+        }
+        
+        .team-subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 0.7s forwards;
         }
         
         .team-members {
@@ -357,12 +367,77 @@
         .member-card {
             cursor: pointer;
         }
+
+        /* 手机屏幕适配 */
+        @media (max-width: 768px) {
+            .modal-content {
+                padding: 20px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            .modal-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .modal-avatar {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+            
+            .modal-name {
+                font-size: 1.8rem;
+            }
+            
+            .modal-role {
+                font-size: 1.1rem;
+            }
+            
+            .modal-description {
+                font-size: 1rem;
+            }
+            
+            .modal-close {
+                top: 10px;
+                right: 10px;
+                font-size: 1.5rem;
+                width: 30px;
+                height: 30px;
+            }
+        }
+
+        /* 小屏幕手机适配 */
+        @media (max-width: 480px) {
+            .modal-content {
+                padding: 15px;
+            }
+            
+            .modal-avatar {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .modal-name {
+                font-size: 1.5rem;
+            }
+            
+            .modal-role {
+                font-size: 1rem;
+            }
+            
+            .modal-description {
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+        }
     </style>
 </head>
 <body>
     <a href="index.html" class="back-btn">返回首页</a>
     <div class="team-section">
         <h1 class="team-title">本网站的开发者</h1>
+        <p class="team-subtitle">点击成员卡片以获取更多信息</p>
         
         <div class="team-members">
             <div class="member-card" data-member="yuebi">
@@ -405,8 +480,8 @@
                 <h2 class="member-name">辰艾</h2>
                 <p class="member-role">开发者</p>
                 <p>是现任负责维护服务器的学牲</p>
-                <p>平时喜欢玩第！五！人！格！<del style="text-decoration-color: white;">虽然挺菜</del></p>
-                <p></p>
+                <p>平时喜欢玩第！五！人！格！</p>
+                <del>虽然挺菜</del>
                 <div class="contact-icons">
                     <a href="https://github.com/zmmmawzfl" target="_blank" title="GitHub"><i class="fa fa-github"></i></a>
                     <a href="mailto:hekaiyu2009@outlook.com" title="邮件"><i class="fa fa-envelope"></i></a>
@@ -442,16 +517,16 @@
                     你好呀，我是悦笔
                 </p>
                 <p class="modal-description">
-                    2026届毕业生，学生目录项目创建者之一。我热衷于探索计算机领域的知识，尤其擅长 C++ 和 Web 开发，对 区块链、人工智能 与 计算机网络 也有深入的实践与兴趣。这个网站正是由我独立开发的
+                    2026届毕业生，学生目录项目创建者之一。我热衷于探索计算机领域的知识，尤其擅长 <strong>C++ 和 Web 开发</strong>，对 <strong>区块链、人工智能 与 计算机网络</strong> 也有深入的实践与兴趣。这个网站正是由我独立开发的
                 </p>
                 <p class="modal-description">
-                    是一个 旅行者、开拓者、探索者、绳匠
+                    是一个 <em>旅行者、开拓者、探索者、绳匠</em>
                 </p>    
                 <p class="modal-description">
-                    开发过各类软件项目，欢迎访问我的 GitHub 主页 来看看呀
+                    开发过各类软件项目，欢迎访问我的 <a href="https://github.com/yuebittt" target="_blank" class="footer-link">GitHub 主页</a> 来看看呀
                 </p>
                 <p class="modal-description">
-                    如需交流，欢迎加我 QQ（邮件回复可能稍慢，但我会及时查看哦）
+                    如需交流，欢迎加我 <strong>QQ</strong>（邮件回复可能稍慢，但我会及时查看哦）
                 </p>
             </div>
             <div class="modal-contact">

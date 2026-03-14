@@ -76,18 +76,19 @@ body {
     backdrop-filter: blur(3px);
     justify-content: center;
     align-items: center;
+    z-index: 1000;
 }
 
 .announcement-content {
     background: #00181922;
-    width: max-content;
+    width: 90%;
+    max-width: 500px;
     padding: 25px;
     border-radius: 12px;
     border: 1px solid #3d3d3d;
     color: var(--text-color);
     box-shadow: 0 0 20px rgba(0, 255, 157, 0.1);
     margin: auto; 
-    margin-top: 257px;
     text-align: center;
     animation: slideUp 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
     opacity: 0;
@@ -122,7 +123,9 @@ body {
 
 @media (max-width: 768px) {
     .announcement-content {
-        margin-left: 37px;
+        width: 95%;
+        max-width: 400px;
+        padding: 20px;
     }
 }
 .btn-accept {
@@ -234,6 +237,7 @@ body {
     .button-section {
         padding-left: 0;
         flex: 0 0 auto;
+        margin-bottom: 100px; /* 增加底部边距，防止被footer遮挡 */
     }
 
     .nav-button {
@@ -245,6 +249,17 @@ body {
         max-width: 90%;
         font-size: 1.1em;
         line-height: 1.6;
+    }
+
+    /* 调整footer在移动端的样式 */
+    .footer-container {
+        padding-top: 20px;
+        padding-bottom: 10px;
+    }
+
+    .footer-links {
+        margin: 0 10px;
+        font-size: 0.9em;
     }
 }
 
