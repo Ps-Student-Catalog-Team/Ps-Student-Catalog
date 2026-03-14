@@ -270,6 +270,20 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- 更新确认模态框 -->
+            <div class="announcement-modal" id="updateModal" style="display: none;">
+                <div class="announcement-content">
+                    <h2>拉取同步最新更改</h2>
+                    <p>确定要拉取同步最新更改吗？</p>
+                    <p>此操作将会从 GitHub 仓库拉取最新的代码更改。</p>
+                    <div id="updateResult" style="margin: 20px 0;"></div>
+                    <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+                        <button class="btn-confirm" onclick="confirmPullUpdates()">确认</button>
+                        <button class="btn-confirm" onclick="closeUpdateModal()">取消</button>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <!-- 关于页 -->
@@ -397,7 +411,7 @@
     <a class="footer-link footer-links" id="announcementLink" href="javascript:void(0)" onclick="showAnnouncementModal(true)" style="display: none;">查看公告</a>
     <a class="footer-link footer-links" id="updateLogLink" href="about_us.html" style="display: none;">关于我们</a>
     <a class="footer-link footer-links" id="moreContentLink" href="https://psstunet.github.io/" style="display: none;">更多内容</a>
-    <span class="version-info" style="position: absolute; bottom: 10px; right: 20px; font-size: 0.8em; color: #666;">版本: 2.3.4</span>
+    <a class="version-info" href="javascript:void(0)" onclick="pullUpdates()" style="position: absolute; bottom: 10px; right: 20px; font-size: 0.8em; color: #666; cursor: pointer; text-decoration: underline;">版本: 2.3.4</a>
 </div>
 
 
@@ -615,6 +629,32 @@
         from { width: 0; }
         to { width: 100%; }
     }
+
+    /* 更新确认弹窗样式 */
+    #updateModal pre {
+        background-color: rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+        max-height: 200px;
+        font-family: monospace;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    #updateModal .btn-confirm {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        background-color: var(--accent-color);
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    #updateModal .btn-confirm:hover {
+        background-color: #00cc80;
+    }
 </style>
 
 <script>
@@ -647,6 +687,40 @@
             card.style.setProperty('--mouse-y', `${y}px`);
         });
     });
+
+    // 拉取同步最新更改的函数
+    function pullUpdates() {
+        // 打开确认弹窗
+        const modal = document.getElementById('updateModal');
+        const resultDiv = document.getElementById('updateResult');
+        resultDiv.innerHTML = '';
+        modal.style.display = 'flex';
+    }
+
+    // 执行拉取更新命令
+    function confirmPullUpdates() {
+        const resultDiv = document.getElementById('updateResult');
+        resultDiv.innerHTML = '<p>正在拉取同步最新更改，请稍候...</p>';
+        
+        // 发送请求到服务器
+        fetch('/api/pull-updates')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    resultDiv.innerHTML = `<p style="color: green;">拉取同步成功！</p><pre>${data.output}</pre><button class="btn-confirm" onclick="closeUpdateModal(); location.reload();">刷新页面</button>`;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">拉取同步失败：</p><pre>${data.error}\n\n${data.details || ''}</pre><button class="btn-confirm" onclick="closeUpdateModal();">关闭</button>`;
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<p style="color: red;">拉取同步失败：</p><pre>${error.message}</pre><button class="btn-confirm" onclick="closeUpdateModal();">关闭</button>`;
+            });
+    }
+
+    // 关闭更新弹窗
+    function closeUpdateModal() {
+        document.getElementById('updateModal').style.display = 'none';
+    }
 
     
 </script>
