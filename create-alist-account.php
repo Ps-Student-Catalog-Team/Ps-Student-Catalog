@@ -1,190 +1,127 @@
 <?php
 header('Content-Type: application/json');
 
-// 连接数据库
+// --- 数据库配置 ---
 $servername = "localhost";
 $username_db = "root";
 $password_db = "114514";
 $dbname = "commentdb";
 
 $conn = new mysqli($servername, $username_db, $password_db, $dbname);
-
 if ($conn->connect_error) {
     die(json_encode(["success" => false, "error" => "数据库连接失败"]));
 }
 
-// 获取POST数据
+// --- 获取POST数据 ---
 $data = json_decode(file_get_contents('php://input'), true);
-
-// 检查数据是否存在
 if (!$data || !isset($data['username'])) {
     die(json_encode(["success" => false, "error" => "请求参数错误"]));
 }
 
 $username = $data['username'];
-
-// 生成随机密码
 $password = generateRandomPassword(12);
 
-// 获取AList管理员令牌
+// --- 核心逻辑 ---
+
+/**
+ * 获取 AList 管理员 Token
+ */
 function getAlistToken() {
-    $alist_login_url = 'http://localhost:5244/api/auth/login'; // AList登录API地址
-    $admin_username = 'admin'; // 管理员用户名
-    $admin_password = 'adm1n5'; // 管理员密码
-    
-    // 登录请求数据
+    $login_url = 'http://127.0.0.1:5244/api/auth/login'; // 建议用 127.0.0.1 避免 DNS 解析
     $login_data = [
-        'username' => $admin_username,
-        'password' => $admin_password
+        'username' => 'admin', 
+        'password' => 'adm1n5' 
     ];
-    
-    // 初始化curl
-    $ch = curl_init();
-    
-    // 设置curl选项
-    curl_setopt($ch, CURLOPT_URL, $alist_login_url);
+
+    $ch = curl_init($login_url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($login_data));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json'
-    ]);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
     
-    // 执行请求
     $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    
-    // 检查curl错误
-    if (curl_errno($ch)) {
-        $error_msg = curl_error($ch);
-        curl_close($ch);
-        error_log("CURL登录错误: $error_msg");
-        return false;
-    }
-    
-    // 关闭curl
+    $res_data = json_decode($response, true);
     curl_close($ch);
-    
-    // 记录响应信息用于调试
-    error_log("AList登录API响应状态码: $http_code");
-    error_log("AList登录API响应内容: $response");
-    
-    // 检查响应
-    if ($http_code == 200) {
-        $result = json_decode($response, true);
-        if ($result === null) {
-            error_log("JSON解析失败: $response");
-            return false;
-        }
-        if (isset($result['data']['token'])) {
-            return $result['data']['token'];
-        }
+
+    if (isset($res_data['data']['token'])) {
+        return $res_data['data']['token'];
     }
-    
     return false;
 }
 
-// 调用AList API创建账户
+/**
+ * 调用 AList API 创建账户
+ */
 function createAlistUser($username, $password) {
-    // 配置AList API信息
-    $alist_api_url = 'http://localhost:5244/api/admin/user'; // AList API地址
+    // 注意：v3 版本创建用户接口是 /api/admin/user/create
+    $api_url = 'http://127.0.0.1:5244/api/admin/user/create'; 
     
-    // 先获取管理员令牌
-    $alist_token = getAlistToken();
-    if (!$alist_token) {
-        error_log("获取AList令牌失败");
-        return false;
-    }
-    
-    // API请求数据
+    $token = getAlistToken();
+    if (!$token) return ["success" => false, "msg" => "无法获取管理员Token"];
+
     $api_data = [
         'username' => $username,
         'password' => $password,
-        'base_path' => '/'.$username,
-        'role' => 'user',
-        'permission' => [
-            'admin' => false,
-            'write' => true,
-            'read' => true
-        ]
+        'base_path' => '/' . $username,
+        'role' => 0,          // 0 为普通用户
+        'permission' => 0,    // 0 为基础权限，若需上传权限通常设为较高数值
+        'disabled' => false
     ];
-    
-    // 初始化curl
-    $ch = curl_init();
-    
-    // 设置curl选项
-    curl_setopt($ch, CURLOPT_URL, $alist_api_url);
+
+    $ch = curl_init($api_url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($api_data));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . $alist_token
+        'Authorization: ' . $token // 注意：通常不加 Bearer
     ]);
-    
-    // 执行请求
+
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    
-    // 检查curl错误
-    if (curl_errno($ch)) {
-        $error_msg = curl_error($ch);
-        curl_close($ch);
-        error_log("CURL错误: $error_msg");
-        return false;
-    }
-    
-    // 关闭curl
     curl_close($ch);
-    
-    // 记录响应信息用于调试
-    error_log("AList API响应状态码: $http_code");
-    error_log("AList API响应内容: $response");
-    
-    // 检查响应
-    if ($http_code == 200) {
-        $result = json_decode($response, true);
-        if ($result === null) {
-            error_log("JSON解析失败: $response");
-            return false;
-        }
-        return $result['code'] == 200;
-    }
-    
-    return false;
-}
 
-// 生成随机密码
-function generateRandomPassword($length = 12) {
-    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
-    $password = '';
-    for ($i = 0; $i < $length; $i++) {
-        $password .= $chars[rand(0, strlen($chars) - 1)];
-    }
-    return $password;
-}
+    $result = json_decode($response, true);
 
-try {
-    // 检查curl扩展是否可用
-    if (!function_exists('curl_init')) {
-        echo json_encode(["success" => false, "error" => "服务器未安装curl扩展，无法调用AList API"]);
-        exit;
-    }
-    
-    // 调用AList API创建账户
-    $success = createAlistUser($username, $password);
-    
-    if ($success) {
-        // 返回成功结果
-        echo json_encode(["success" => true, "password" => $password]);
+    if ($http_code == 200 && isset($result['code']) && $result['code'] == 200) {
+        return ["success" => true];
     } else {
-        // 返回失败结果
-        echo json_encode(["success" => false, "error" => "AList账户创建失败，请检查AList API配置和网络连接"]);
+        // 返回 AList 的具体报错原因，方便排查
+        $error_msg = $result['message'] ?? "未知API错误 (HTTP $http_code)";
+        return ["success" => false, "msg" => $error_msg];
+    }
+}
+
+/**
+ * 生成随机密码
+ */
+function generateRandomPassword($length = 12) {
+    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
+    return substr(str_shuffle(str_repeat($chars, 5)), 0, $length);
+}
+
+// --- 执行任务 ---
+try {
+    if (!function_exists('curl_init')) {
+        throw new Exception("服务器未安装 curl 扩展");
+    }
+
+    $res = createAlistUser($username, $password);
+
+    if ($res['success']) {
+        echo json_encode([
+            "success" => true, 
+            "username" => $username, 
+            "password" => $password
+        ]);
+    } else {
+        echo json_encode([
+            "success" => false, 
+            "error" => "AList创建失败: " . $res['msg']
+        ]);
     }
 } catch (Exception $e) {
-    // 返回异常信息
     echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
 
-// 关闭数据库连接
 $conn->close();
