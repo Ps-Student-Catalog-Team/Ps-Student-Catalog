@@ -53,7 +53,6 @@ function getAlistToken() {
  * 调用 AList API 创建账户
  */
 function createAlistUser($username, $password) {
-    // 注意：v3 版本创建用户接口是 /api/admin/user/create
     $api_url = 'http://127.0.0.1:5244/api/admin/user/create'; 
     
     $token = getAlistToken();
@@ -63,7 +62,7 @@ function createAlistUser($username, $password) {
         'username' => $username,
         'password' => $password,
         'base_path' => '/' . $username,
-        'role' => 0,          // 0 为普通用户
+        'role' => [0],          // 0 为普通用户
         'permission' => 0,    // 0 为基础权限，若需上传权限通常设为较高数值
         'disabled' => false
     ];
@@ -74,7 +73,7 @@ function createAlistUser($username, $password) {
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($api_data));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: ' . $token // 注意：通常不加 Bearer
+        'Authorization: ' . $token 
     ]);
 
     $response = curl_exec($ch);
@@ -84,12 +83,15 @@ function createAlistUser($username, $password) {
     $result = json_decode($response, true);
 
     if ($http_code == 200 && isset($result['code']) && $result['code'] == 200) {
-        return ["success" => true];
-    } else {
-        // 返回 AList 的具体报错原因，方便排查
-        $error_msg = $result['message'] ?? "未知API错误 (HTTP $http_code)";
-        return ["success" => false, "msg" => $error_msg];
+    return ["success" => true];
+} else {
+    $error_msg = $result['message'] ?? "未知API错误 (HTTP $http_code)";
+    // 判断是否唯一约束错误
+    if (strpos($error_msg, 'UNIQUE constraint failed') !== false) {
+        $error_msg = "用户名已存在，请使用其他用户名";
     }
+    return ["success" => false, "msg" => $error_msg];
+}
 }
 
 /**
