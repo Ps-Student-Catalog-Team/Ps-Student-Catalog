@@ -198,7 +198,7 @@
                     // 登录成功，保存用户信息并跳转到留言页
                     localStorage.setItem('username', username);
                     localStorage.setItem('loggedIn', 'true');
-                    window.location.href = 'comment.html';
+                    window.location.href = 'user-center.html';
                 } else {
                     errorDiv.textContent = data.error || '登录失败';
                 }
