@@ -28,9 +28,10 @@ $sql = "SELECT comment, created_at FROM comments WHERE username = ? ORDER BY cre
 $stmt = $conn->prepare($sql);
 
 if (!$stmt) {
-    die(json_encode(["error" => "SQL预处理失败"]));
+    // 返回具体的 SQL 错误信息
+    die(json_encode(["error" => "SQL预处理失败: " . $conn->error]));
 }
-
+    
 $stmt->bind_param("s", $username);
 
 if (!$stmt->execute()) {
