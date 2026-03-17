@@ -318,7 +318,7 @@ body.dark-theme #logoutBtn:hover {
     </head>
     <body class="dark-theme">
         <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
-        <button class="home-button" onclick="window.location.href='index.html'">返回首页</button>
+        <button class="home-button" onclick="window.location.href='user-center.html'">返回</button>
     <h1>欢迎来到留言区</h1>
     <div style="text-align: center; margin: 10px; color: var(--primary-color);">
         <span id="userInfo"></span>
@@ -368,7 +368,7 @@ body.dark-theme #logoutBtn:hover {
         function logout() {
             localStorage.removeItem('username');
             localStorage.removeItem('loggedIn');
-            checkLogin();
+            window.location.href = 'login.html'; // 重定向到登录页面
         }
         
         // 页面加载时，读取并显示已有的留言

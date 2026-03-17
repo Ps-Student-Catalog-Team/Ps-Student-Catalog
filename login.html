@@ -238,7 +238,7 @@
                     // 注册成功，自动登录并跳转
                     localStorage.setItem('username', username);
                     localStorage.setItem('loggedIn', 'true');
-                    window.location.href = 'comment.html';
+                    window.location.href = 'user-center.html';
                 } else {
                     errorDiv.textContent = data.error || '注册失败';
                 }
