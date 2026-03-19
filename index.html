@@ -405,6 +405,9 @@
 
     </div>
     
+    <!-- 鼠标跟随元素 -->
+    <div class="mouse-follower"></div>
+
     <!-- 页面底部链接 -->
 <div class="footer-container">
     <a class="footer-link footer-links" href="https://github.com/Ps-Student-Catalog-Team/Ps-Student-Catalog" target="_blank" title="GitHub仓库" style="position: absolute; bottom: 10px; left: 20px; font-size: 0.8em; color: #666;"><i class="fa fa-github"></i></a>
@@ -655,6 +658,36 @@
     #updateModal .btn-confirm:hover {
         background-color: #00cc80;
     }
+
+    /* 鼠标跟随动画 */
+    .mouse-follower {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #00ff9d;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transition: transform 0.1s ease-out, width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+        opacity: 0.7;
+        transform-origin: center center;
+    }
+
+    .mouse-follower:hover {
+        width: 30px;
+        height: 30px;
+        opacity: 0.9;
+    }
+
+    .mouse-follower.active {
+        width: 40px;
+        height: 40px;
+        opacity: 0.5;
+        background: rgba(0, 255, 157, 0.2);
+        transform-origin: center center;
+    }
 </style>
 
 <script>
@@ -721,6 +754,49 @@
     function closeUpdateModal() {
         document.getElementById('updateModal').style.display = 'none';
     }
+
+    // 鼠标跟随动画
+    document.addEventListener('DOMContentLoaded', () => {
+        const follower = document.querySelector('.mouse-follower');
+        let mouseX = 0, mouseY = 0;
+        let followerX = 0, followerY = 0;
+
+        function animateFollower() {
+            // 计算跟随元素的新位置（更快的跟随效果）
+            followerX += (mouseX - followerX) * 0.3;
+            followerY += (mouseY - followerY) * 0.3;
+            
+            // 动态获取当前尺寸并计算偏移量，确保以中心定位
+            const currentWidth = follower.offsetWidth;
+            const currentHeight = follower.offsetHeight;
+            const offsetX = currentWidth / 2;
+            const offsetY = currentHeight / 2;
+            
+            // 应用位置
+            follower.style.transform = `translate(${followerX - offsetX}px, ${followerY - offsetY}px)`;
+            
+            requestAnimationFrame(animateFollower);
+        }
+
+        // 鼠标移动事件
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // 鼠标按下事件
+        document.addEventListener('mousedown', () => {
+            follower.classList.add('active');
+        });
+
+        // 鼠标释放事件
+        document.addEventListener('mouseup', () => {
+            follower.classList.remove('active');
+        });
+
+        // 开始动画
+        animateFollower();
+    });
 
     
 </script>
