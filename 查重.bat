@@ -1,0 +1,1 @@
+powershell -Command "Get-ChildItem -Recurse -File | Where-Object { $_.FullName -notlike '*\.git\*' -and $_.FullName -notlike '*\node_modules\*' } | Group-Object Name | Where-Object { $_.Count -gt 1 } | ForEach-Object { $_.Name; $_.Group | ForEach-Object { '    ' + $_.FullName + ' (修改时间: ' + $_.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss') + ')' } }" > 同名文件列表_排除后.txt
