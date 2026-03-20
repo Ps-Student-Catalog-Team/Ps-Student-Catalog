@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言簿</title>
+    <style>
+        :root {
+            --bg-color: #f9fafb;
+            --text-color: #333;
+            --comment-bg: #fff;
+            --input-bg: #fff;
+            --border-color: #f0f0f0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --primary-color: #4a90e2;
+            --button-hover-color: #357abd;
+            --placeholder-color: #aaa;
+            --input-focus-border: #4a90e2;
+            --input-focus-shadow: rgba(74, 144, 226, 0.2);
+            --button-shadow: rgba(0, 0, 0, 0.1);
+            
+        }
+
+        .dark-theme {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --comment-bg: #2d2d2d;
+            --input-bg: #333;
+            --border-color: #404040;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --primary-color: #5fa3ff;
+            --button-hover-color: #4a8dd8;
+            --placeholder-color: #888;
+            --input-focus-border: #7ab1ff;
+            --input-focus-shadow: rgba(122, 177, 255, 0.2);
+            --button-shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-y: scroll;
+            padding-bottom: 185px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            padding: 20px;
+            margin: 0;
+            background-color: var(--comment-bg);
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        #comments {
+            max-width: 1200px;
+            margin: 20px auto;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: var(--comment-bg);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        .comment {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--comment-bg);
+        }
+
+        .comment-text {
+            /* 保持原有样式，颜色使用继承 */
+            color: inherit;
+        }
+
+        #inputArea {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            max-width: 800px;  /* 比留言区1200px窄 */
+            margin: 0 auto;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        #inputArea textarea {
+            background-color: var(--input-bg);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        #inputArea textarea::placeholder {
+            color: var(--placeholder-color);
+        }:root {
+            --bg-color: #f9fafb;
+            --text-color: #333;
+            --comment-bg: #fff;
+            --input-bg: #fff;
+            --border-color: #f0f0f0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --primary-color: #4a90e2;
+            --button-hover-color: #357abd;
+            --placeholder-color: #aaa;
+        }
+
+        .dark-theme {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --comment-bg: #2d2d2d;
+            --input-bg: #333;
+            --border-color: #404040;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --primary-color: #5fa3ff;
+            --button-hover-color: #4a8dd8;
+            --placeholder-color: #888;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-y: scroll;
+            padding-bottom: 185px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            padding: 20px;
+            margin: 0;
+            background-color: var(--comment-bg);
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        #comments {
+            max-width: 1200px;
+            margin: 20px auto;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: var(--comment-bg);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        .comment {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--comment-bg);
+        }
+
+        .comment-text {
+            /* 保持原有样式，颜色使用继承 */
+            color: inherit;
+        }
+
+        #inputArea {
+            background-color: var(--comment-bg);
+            border-color: var(--border-color);
+        }
+
+        #inputArea textarea {
+            width: 96%; /* 继承父容器宽度 */
+            min-height: 80px; /* 适当增加最小高度 */
+            max-height: 200px; /* 限制最大高度避免过高 */
+            padding: 14px 16px; /* 优化内边距 */
+            font-size: 16px; /* 适当增大字号 */
+            line-height: 1.5; /* 优化行高 */
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            resize: vertical; /* 允许垂直调整大小 */
+            transition: all 0.3s ease, height 0.2s ease;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        /* 焦点状态增强 */
+        #inputArea textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 12px var(--input-focus-shadow);
+            outline: none; /* 移除默认轮廓 */
+        }
+
+        /* 占位符优化 */
+        #inputArea textarea::placeholder {
+            color: var(--placeholder-color);
+            font-weight: 300;
+            transition: all 0.2s ease;
+        }
+
+        /* 输入时占位符渐变消失 */
+        #inputArea textarea:focus::placeholder {
+            opacity: 0.6;
+            transform: translateY(-2px);
+        }
+
+        /* 自动高度调整 */
+        #inputArea textarea.autosize {
+            height: auto;
+        }
+        #inputArea button {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            color: #fff;
+            background-color: #4a90e2;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #inputArea button:hover {
+            background-color: #357abd;
+        }
+        p {
+            color: #666;
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+        @media (max-width: 768px) {
+            #inputArea {
+                width: 90%;
+                bottom: 10px;
+            }
+            body {
+                padding-bottom: 120px;
+            }
+        }
+    </style>
+    
+    </head>
+    <body class="dark-theme">
+        <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+    <h1>欢迎来到留言区</h1>
+    <div id="comments">
+        <!-- 留言将会显示在这里 -->
+    </div>
+    <div id="inputArea">
+        <textarea id="commentInput" placeholder="留下你的留言..."></textarea>
+        <button onclick="addComment()">发送留言</button>
+    </div>
+
+    <script>
+        // 在页面加载时检查主题设置
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.classList.toggle('dark-theme', savedTheme === 'dark');
+        });
+
+        // 主题切换函数
+        function toggleTheme() {
+            const isDark = document.body.classList.toggle('dark-theme');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+        // 页面加载时，读取并显示已有的留言
+        window.onload = function() {
+            fetchComments();
+        };
+
+        // 添加留言的函数
+        function addComment() {
+            var commentInput = document.getElementById('commentInput');
+            var commentText = commentInput.value.trim();
+
+            if(commentText) {
+                fetch('add-comment.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'comment=' + encodeURIComponent(commentText)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        commentInput.value = ''; // 清空输入框
+                        fetchComments(); // 更新留言显示
+                    } else {
+                        alert('留言发送失败，请重试。');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('留言发送失败，请重试。');
+                });
+            } else {
+                alert('留言内容不能为空！');
+            }
+        }
+
+        // 显示留言的函数
+        function fetchComments() {
+            fetch('get-comments.php')
+                .then(response => response.json())
+                .then(data => {
+                    var commentsDiv = document.getElementById('comments');
+                    commentsDiv.innerHTML = ''; // 清空现有留言
+
+                    if (data.comments.length === 0) {
+                        commentsDiv.innerHTML = '<p>暂无留言。</p>';
+                    } else {
+                        data.comments.forEach(function(comment) {
+                            var commentElement = document.createElement('div');
+                            commentElement.className = 'comment';
+
+                            // 创建留言内容和时间
+                            var commentContent = document.createElement('p');
+                            commentContent.className = 'comment-text';
+                            commentContent.textContent = comment.comment;
+
+                            var commentTime = document.createElement('small');
+                            commentTime.className = 'comment-time';
+                            commentTime.textContent = formatTimestamp(comment.timestamp); // 格式化时间戳
+
+                            // 将内容和时间加到留言元素中
+                            commentElement.appendChild(commentContent);
+                            commentElement.appendChild(commentTime);
+                            commentsDiv.appendChild(commentElement);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // 时间戳格式化函数
+        function formatTimestamp(timestamp) {
+            var date = new Date(timestamp);
+            var year = date.getFullYear();
+            var month = String(date.getMonth() + 1).padStart(2, '0');
+            var day = String(date.getDate()).padStart(2, '0');
+            var hours = String(date.getHours()).padStart(2, '0');
+            var minutes = String(date.getMinutes()).padStart(2, '0');
+            var seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('comment-text')) {
+            const isCollapsed = e.target.style.webkitLineClamp; // 检测当前状态
+            if (isCollapsed) {
+                e.target.style.webkitLineClamp = ''; // 取消行限制
+                e.target.style.maxHeight = 'none'; // 设置为不限制高度
+                e.target.style.cursor = 'default'; // 展开后移除交互提示
+            } else {
+                e.target.style.webkitLineClamp = '3'; // 恢复行限制
+                e.target.style.maxHeight = '4.8em';
+                e.target.style.cursor = 'pointer';
+            }
+        }
+    });
+
+    </script>
+</body>
+</html>

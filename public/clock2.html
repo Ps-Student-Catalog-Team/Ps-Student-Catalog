@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>桌面</title>
+		<link rel="stylesheet" type="text/css" href="css/normalize.css" />
+<link rel="stylesheet" href="css/style.css">
+
+    <script src="https://v1.hitokoto.cn/?encode=js&select=%23hitokoto" defer></script>
+		<link rel="stylesheet" type="text/css" href="css/demo.css" />
+		<!--必要样式-->
+		<link rel="stylesheet" type="text/css" href="css/component.css" />
+		<!--[if IE]>
+		<script src="js/html5.js"></script>
+		<![endif]-->
+    <style>
+      @font-face {
+    font-family: 'YourCustomFont';
+    src: url('fonts/one.ttf') format('truetype'); /* 备用格式 */
+    font-weight: normal; /* 字体权重 */
+    font-style: normal; /* 字体样式 */
+}
+#quoteDisplay {
+            cursor: pointer;
+            transition: opacity 0.5s ease-in-out, height 0.5s ease-in-out;
+            overflow: hidden; /* 防止内容在动画期间溢出 */
+            max-height: 100px; /* 根据需要设置最大高度 */
+        }
+
+        /* 隐藏状态，用于动画切换 */
+        #quoteDisplay.hidden {
+            opacity: 0;
+            height: 0; /* 可以根据需要设置为其他值 */
+        }
+    </style>
+	</head>
+  
+	<body>
+
+
+		<div class="container demo-1">
+			<div class="content">
+        
+				<div id="large-header" class="large-header">
+					
+
+<div class="time" id="time" data-hours="" data-minutes="" style="position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%);">
+
+  <div class="digit">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+  </div>
+  <div class="digit">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+  </div>
+  <div class="digit">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+  </div>
+  <div class="digit">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+  </div>
+  <div class="digit">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+  </div>
+  <div class="digit">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+  </div>
+
+
+</div>
+<div style="text-align:center;margin:10px 0; font:normal 30px/110px 'YourCustomFont', 'MicroSoft YaHei';color:#ffffff;display: flex; justify-content: center; align-items: center;">
+<p id="quoteDisplay" onclick="getRandomQuote()" style="cursor: pointer; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.724);">点击这里获取新的引语</p> <!-- 点击文字获取新引语 -->
+</div>
+				<canvas  id="demo-canvas"></canvas>	
+			</div>
+			</div>
+			
+			</div><!-- /container -->
+			
+			<script src="js/TweenLite.min.js"></script>
+			<script src="js/EasePack.min.js"></script>
+			<script src="js/rAF.js"></script>
+			<script src="js/demo-1.js"></script>
+      <script src="js/quotess.js"> </script>
+<script src='js/Rx.min.js'></script>
+<script src='js/rxcss.min.js'></script>
+<script src="js/index.js"></script>
+
+		</body>
+	</html>
