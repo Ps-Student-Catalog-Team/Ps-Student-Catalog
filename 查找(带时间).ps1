@@ -1,6 +1,6 @@
 # 定义文件路径（请根据实际情况修改）
 $inputFile = "同名文件列表_排除后.txt"
-$outputFile = "最早同名文件_从列表.txt"
+$outputFile = "最晚同名文件_从列表.txt"
 
 # 检查输入文件是否存在
 if (-not (Test-Path $inputFile)) {
