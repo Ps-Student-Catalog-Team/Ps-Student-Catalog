@@ -1,61 +1,140 @@
-# 定义文件路径（请根据实际情况修改）
-$inputFile = "同名文件列表_排除后.txt"
-$outputFile = "最晚同名文件_从列表.txt"
+<#
+.SYNOPSIS
+    从同名文件列表文件中提取每组文件的最早和最晚修改时间，输出为文本文件（CSV 格式）。
+.DESCRIPTION
+    读取“同名文件列表_排除后.txt”，解析每组同名文件的路径和修改时间，
+    找出每组最早和最晚修改时间的文件，分别输出为 .txt 文件，内容格式： "FileName","Path","LastWriteTime"
+.NOTES
+    版本：4.1
+    输出：最早日期.txt、最晚日期.txt
+#>
 
-# 检查输入文件是否存在
-if (-not (Test-Path $inputFile)) {
-    Write-Host "文件 $inputFile 不存在，请检查路径。" -ForegroundColor Red
-    exit
+param(
+    [string]$InputFile = "同名文件列表_排除后.txt",
+    [string]$EarliestOutput = "最早日期.txt",
+    [string]$LatestOutput = "最晚日期.txt"
+)
+
+# 获取脚本所在目录
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$inputPath = Join-Path $scriptDir $InputFile
+$earliestPath = Join-Path $scriptDir $EarliestOutput
+$latestPath = Join-Path $scriptDir $LatestOutput
+
+# 检查输入文件
+if (-not (Test-Path $inputPath)) {
+    Write-Error "输入文件 '$inputPath' 不存在。"
+    exit 1
 }
 
-# 读取文件内容
-$lines = Get-Content $inputFile
+# 使用系统默认编码（ANSI/GBK）读取文件
+try {
+    $lines = Get-Content $inputPath -Encoding Default
+} catch {
+    Write-Error "无法读取文件 '$inputPath'：$_"
+    exit 1
+}
 
-# 初始化变量
-$currentFileName = $null
-$fileGroups = @{}  # 用于存储每组文件的列表
+# 用于存储结果
+$earliestList = @()
+$latestList = @()
 
-# 解析文件
+# 临时变量
+$currentFile = $null
+$fileInfos = @()   # 存储当前组的 {Path, Date} 对象
+
+# 逐行处理
 foreach ($line in $lines) {
-    if ($line -match '^    ') {
-        # 缩进行：文件路径和修改时间
-        # 提取路径和时间，格式：'    路径 (修改时间: yyyy-MM-dd HH:mm:ss)'
-        if ($line -match '^    (.+?) \(修改时间: ([\d\-: ]+)\)$') {
-            $path = $matches[1]
-            $timeStr = $matches[2]
-            # 转换为DateTime对象以便比较
-            $time = [datetime]::ParseExact($timeStr, 'yyyy-MM-dd HH:mm:ss', $null)
-            # 添加到当前文件组
-            if ($currentFileName) {
-                if (-not $fileGroups.ContainsKey($currentFileName)) {
-                    $fileGroups[$currentFileName] = @()
+    if ([string]::IsNullOrWhiteSpace($line)) { continue }
+
+    # 文件名行（不以空白开头）
+    if ($line -notmatch '^\s') {
+        # 处理上一组
+        if ($currentFile -ne $null -and $fileInfos.Count -gt 0) {
+            $objects = $fileInfos | ForEach-Object {
+                try {
+                    $dateObj = [datetime]::ParseExact($_.Date, "yyyy-MM-dd HH:mm:ss", $null)
+                    [PSCustomObject]@{ Path = $_.Path; Date = $dateObj }
+                } catch {
+                    Write-Warning "无法解析日期: $($_.Date) ，跳过该条记录。"
+                    $null
                 }
-                $fileGroups[$currentFileName] += [PSCustomObject]@{
-                    Path = $path
-                    LastWriteTime = $time
+            } | Where-Object { $_ -ne $null }
+
+            if ($objects.Count -gt 0) {
+                $earliestObj = $objects | Sort-Object Date | Select-Object -First 1
+                $latestObj   = $objects | Sort-Object Date | Select-Object -Last 1
+                $earliestList += [PSCustomObject]@{
+                    FileName = $currentFile
+                    Path = $earliestObj.Path
+                    LastWriteTime = $earliestObj.Date.ToString('yyyy-MM-dd HH:mm:ss')
                 }
+                $latestList += [PSCustomObject]@{
+                    FileName = $currentFile
+                    Path = $latestObj.Path
+                    LastWriteTime = $latestObj.Date.ToString('yyyy-MM-dd HH:mm:ss')
+                }
+            } else {
+                Write-Warning "文件组 '$currentFile' 没有有效的修改时间记录。"
             }
         }
-    } elseif ($line -match '^\S') {
-        # 非缩进行：新的文件名（假设不以空格开头）
-        $currentFileName = $line.Trim()
+
+        # 开始新组
+        $currentFile = $line.Trim()
+        $fileInfos = @()
+    } else {
+        # 缩进行：提取路径和日期
+        if ($line -match '^\s+(.+?)\s+\(修改时间:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\)') {
+            $filePath = $matches[1].Trim()
+            $dateStr = $matches[2]
+            $fileInfos += [PSCustomObject]@{ Path = $filePath; Date = $dateStr }
+        } else {
+            Write-Warning "无法从行中提取路径和时间: $line"
+        }
     }
 }
 
-# 找出每组的最早文件
-$earliestFiles = @()
-foreach ($fileName in $fileGroups.Keys) {
-    $files = $fileGroups[$fileName]
-    # 按修改时间升序排序，取第一个
-    $earliest = $files | Sort-Object LastWriteTime | Select-Object -First 1
-    $earliestFiles += [PSCustomObject]@{
-        FileName = $fileName
-        Path = $earliest.Path
-        LastWriteTime = $earliest.LastWriteTime
+# 处理最后一组
+if ($currentFile -ne $null -and $fileInfos.Count -gt 0) {
+    $objects = $fileInfos | ForEach-Object {
+        try {
+            $dateObj = [datetime]::ParseExact($_.Date, "yyyy-MM-dd HH:mm:ss", $null)
+            [PSCustomObject]@{ Path = $_.Path; Date = $dateObj }
+        } catch {
+            Write-Warning "无法解析日期: $($_.Date) ，跳过该条记录。"
+            $null
+        }
+    } | Where-Object { $_ -ne $null }
+
+    if ($objects.Count -gt 0) {
+        $earliestObj = $objects | Sort-Object Date | Select-Object -First 1
+        $latestObj   = $objects | Sort-Object Date | Select-Object -Last 1
+        $earliestList += [PSCustomObject]@{
+            FileName = $currentFile
+            Path = $earliestObj.Path
+            LastWriteTime = $earliestObj.Date.ToString('yyyy-MM-dd HH:mm:ss')
+        }
+        $latestList += [PSCustomObject]@{
+            FileName = $currentFile
+            Path = $latestObj.Path
+            LastWriteTime = $latestObj.Date.ToString('yyyy-MM-dd HH:mm:ss')
+        }
+    } else {
+        Write-Warning "文件组 '$currentFile' 没有有效的修改时间记录。"
     }
 }
 
-# 输出到屏幕并保存到文件
-$earliestFiles | Format-Table -AutoSize
-$earliestFiles | Select-Object FileName, Path, @{Name='LastWriteTime';Expression={$_.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss')}} | Export-Csv -Path $outputFile -NoTypeInformation -Encoding UTF8
-Write-Host "结果已保存到 $outputFile" -ForegroundColor Green
+# 导出为文本文件（CSV 格式）
+if ($earliestList.Count -gt 0) {
+    $earliestList | Export-Csv -Path $earliestPath -NoTypeInformation -Encoding UTF8
+    Write-Host "最早时间已导出: $earliestPath"
+} else {
+    Write-Warning "没有有效的记录可写入最早时间文件。"
+}
+
+if ($latestList.Count -gt 0) {
+    $latestList | Export-Csv -Path $latestPath -NoTypeInformation -Encoding UTF8
+    Write-Host "最晚时间已导出: $latestPath"
+} else {
+    Write-Warning "没有有效的记录可写入最晚时间文件。"
+}

@@ -7,8 +7,8 @@
 #>
 
 # 交互式输入
-$defaultCsv = "最晚同名文件_从列表.txt"
-$defaultOutput = "filelist.txt"
+$defaultCsv = "最早日期.txt"
+$defaultOutput = "最早文件（正斜杠）.txt"
 $defaultRoot = "D:\website"
 
 Write-Host "请提供以下信息（直接回车使用默认值）：" -ForegroundColor Cyan
