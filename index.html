@@ -221,36 +221,36 @@
                 <div class="tutorial-card">
                     <h3>关于如何正确删除powershadow的研究</h3>
                     <p>介绍了如何使用正确的方法删除powershadow来避免每次电脑重启后恢复原本的文件，详细解释了各种删除方式的原理，并给出了各种删除方法的优劣对比。</p>
-                    <a href="tutorial/show.php?tutorial/powershadow.md" class="btn btn-outline-primary">查看教程</a>
+                    <a href="tutorial/show.html?file=powershadow.md" class="btn btn-outline-primary">查看教程</a>
                 </div>
                 <div class="tutorial-card">
                     <h3>怎么在学校访问互联网</h3>
                     <p>介绍了如何使用正确的方法在学校访问互联网</p>
-                    <a href="tutorial/show.php?file=web.md" class="btn btn-outline-primary">查看教程</a> <!-- 使用 outline按钮样式 -->
+                    <a href="tutorial/show.html?file=web.md" class="btn btn-outline-primary">查看教程</a> <!-- 使用 outline按钮样式 -->
                 </div>
                 
                 <div class="tutorial-card">
                      <h3>更好的在学校中上网</h3>
                     <p>如何在学校内通过电脑移动热点上网</p>
-                    <a href="tutorial/show.php?file=wed3.md" class="btn btn-outline-primary">查看教程</a> <!-- 使用 outline按钮样式 -->
+                    <a href="tutorial/show.html?file=wed3.md" class="btn btn-outline-primary">查看教程</a> <!-- 使用 outline按钮样式 -->
                 </div>
                 
                 <div class="tutorial-card">
                     <h3>教师目录密码</h3>
                     <p>教师目录密码登记</p>
-                    <a class="btn btn-outline-primary" onclick="checkPassword('tutorial/show.php?file=password.md')">查看教程</a>
+                    <a class="btn btn-outline-primary" onclick="checkPassword('tutorial/show.html?file=password.md')">查看教程</a>
                 </div>
                 
                 <div class="tutorial-card">
                     <h3>教学楼中的WiFi密码登记</h3>
                     <p>登记了教学楼中的WiFi密码</p>
-                    <a onclick="checkPassword('tutorial/show.php?file=web2.md')" class="btn btn-outline-primary">查看教程</a> <!-- 使用 outline按钮样式 -->
+                    <a onclick="checkPassword('tutorial/show.html?file=web2.md')" class="btn btn-outline-primary">查看教程</a> <!-- 使用 outline按钮样式 -->
                 </div>
 
                 <div class="tutorial-card">
                      <h3>连接我们的Minecraft服务器</h3>
                     <p>包含了如何连接我们的Minecraft服务器</p>
-                    <a href="tutorial/show.php?file=minecraft_server.md" class="btn btn-outline-primary">查看教程</a> <!-- 使用 outline按钮样式 -->
+                    <a href="tutorial/show.html?file=minecraft_server.md" class="btn btn-outline-primary">查看教程</a> <!-- 使用 outline按钮样式 -->
                 </div>
 
             </div>
@@ -291,22 +291,12 @@
             <button class="back-button" onclick="goBack()">返回首页</button>
             <h2>关于</h2>
             <br>
-            <div class="tutorial-grid" >
+            <div class="about-container">
                 <div class="about-card">
                     <div class="collapsible-content">
-                        <!DOCTYPE html>
-                        <html lang="en">
-                        <head>
-                            <meta charset="UTF-8">
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            <title>Document</title>
-                        </head>
-                        <body>
-                            
-                        </body>
-                        </html><p><strong>学生目录计划 第二版</strong></p><br>
+                        <p><strong>学生目录计划 第二版</strong></p><br>
                         <p>在过去的两个学期中，学生目录团队已经完成了<code>网站的搭建</code>、<code>服务器的部署</code>、<code>网站的优化</code>等工作。新成员Leo</del>加入了我们的团队，并于即将到来的下一学期负责<code>服务器维护</code>。</p>
-                        <div class="collapsed-content">
+                        <div class="collapsed-content" style="max-height: 1000px;">
                             <h3 id="总结" style="margin-top: 15px;"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>目前学生目录的功能众多，总结如下</p>
                             <h4 id="校内服务" style="margin-top: 7px;"><a href="#校内服务" class="headerlink" title="校内服务"></a>校内服务</h4><p><em>校外服务指的是在学校内网中的服务资源，无需连接互联网也可使用</em></p>
                             <ul>
@@ -336,7 +326,7 @@
                                 <p><em>2025.07.26</em></p>
                             </div>
                         </div>
-                        <button class="read-more-btn" onclick="toggleReadMore(this)">阅读更多 ↓</button>
+                        <button class="read-more-btn" onclick="toggleReadMore(this)">收起 ↑</button>
                     </div>
                 </div>
                 <div class="about-card">
