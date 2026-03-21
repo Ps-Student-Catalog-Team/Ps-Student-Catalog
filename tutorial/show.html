@@ -90,8 +90,8 @@
         .markdown-container h4, 
         .markdown-container h5, 
         .markdown-container h6 {
-            margin-top: 2rem; /* 调整标题的上外边距 */
-            margin-bottom: 1.5rem; /* 调整标题的下外边距 */
+            margin-top: 1.5rem; /* 调整标题的上外边距 */
+            margin-bottom: 1rem; /* 调整标题的下外边距 */
             font-weight: bold; /* 自定义字体粗细 */
             font-size: 1.8em; /* 增大字体大小 */
         }
@@ -119,10 +119,14 @@
         
         .markdown-container h2 {
             font-size: 1.5em;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 1s forwards;
         }
         
         .markdown-container h3 {
             font-size: 1.3em;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 1.2s forwards;
         }
         
         .markdown-container p, 
@@ -130,6 +134,8 @@
             line-height: 1.8; /* 增大行间距 */
             font-size: 1.1em; /* 增大字体大小 */
             margin-bottom: 1.2rem; /* 增大段落间距 */
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 1.4s forwards;
         }
         
         .markdown-container blockquote {
@@ -138,6 +144,28 @@
             margin: 1.5rem 0;
             color: #555; /* 颜色 */
             font-size: 1.1em;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 1.6s forwards;
+        }
+        
+        .markdown-container table {
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 1.8s forwards;
+        }
+        
+        .markdown-container img {
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 2s forwards;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
         
         /* 链接样式 */
@@ -352,7 +380,12 @@
             name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
             const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
             const results = regex.exec(location.search);
-            return results === null ? 'powershadow.md' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+            let fileName = results === null ? 'powershadow.md' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+            
+            // 防止目录遍历漏洞
+            fileName = fileName.replace(/[\.\/]/g, '');
+            
+            return fileName + '.md';
         }
 
         // 提取Markdown标题
@@ -374,6 +407,7 @@
             try {
                 const markdownFile = getUrlParameter('file');
                 // 确保路径正确，因为show.html在tutorial目录下
+                // 限制文件路径在tutorial目录内
                 const response = await fetch(markdownFile);
                 
                 if (!response.ok) {
