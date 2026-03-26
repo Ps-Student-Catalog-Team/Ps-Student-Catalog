@@ -124,7 +124,7 @@ app.get('/api/vpn-users', async (req, res) => {
 
         res.json({
             ip: req.query.ip,
-            sessionCount: sessionCount - 1
+            sessionCount: sessionCount
         });
     });
 });
