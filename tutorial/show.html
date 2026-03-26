@@ -635,46 +635,64 @@
             headings.forEach(heading => observer.observe(heading));
         }
 
+        // 鼠标特效设置
+        const MOUSE_EFFECT_KEY = 'mouseEffectEnabled';
+
+        function getMouseEffectEnabled() {
+            const value = localStorage.getItem(MOUSE_EFFECT_KEY);
+            return value === null ? true : value === 'true';
+        }
+
         // 鼠标跟随动画
         document.addEventListener('DOMContentLoaded', () => {
             // 圆形跟随动画
             const follower = document.createElement('div');
             follower.className = 'mouse-follower';
+            follower.style.display = getMouseEffectEnabled() ? 'block' : 'none';
             document.body.appendChild(follower);
-            
+
             let mouseX = 0, mouseY = 0;
             let followerX = 0, followerY = 0;
 
             function animateFollower() {
+                // 根据设置显示/隐藏
+                follower.style.display = getMouseEffectEnabled() ? 'block' : 'none';
+
+                if (!getMouseEffectEnabled()) {
+                    requestAnimationFrame(animateFollower);
+                    return;
+                }
                 // 计算跟随元素的新位置（更快的跟随效果）
                 followerX += (mouseX - followerX) * 0.3;
                 followerY += (mouseY - followerY) * 0.3;
-                
+
                 // 动态获取当前尺寸并计算偏移量，确保以中心定位
                 const currentWidth = follower.offsetWidth;
                 const currentHeight = follower.offsetHeight;
                 const offsetX = currentWidth / 2;
                 const offsetY = currentHeight / 2;
-                
+
                 // 应用位置
                 follower.style.transform = `translate(${followerX - offsetX}px, ${followerY - offsetY}px)`;
-                
+
                 requestAnimationFrame(animateFollower);
             }
 
             // 粒子跟随动画
             const particlesContainer = document.createElement('div');
             particlesContainer.className = 'mouse-particles';
+            particlesContainer.style.display = getMouseEffectEnabled() ? 'block' : 'none';
             document.body.appendChild(particlesContainer);
-            
+
             let isHovering = false;
-            
+
             // 粒子数组
             const particles = [];
             const maxParticles = 50;
-            
+
             // 创建粒子
             function createParticle(x, y) {
+                if (!getMouseEffectEnabled()) return;
                 if (particles.length >= maxParticles) {
                     // 移除最旧的粒子
                     const oldestParticle = particles.shift();
@@ -682,25 +700,25 @@
                         particlesContainer.removeChild(oldestParticle.element);
                     }
                 }
-                
+
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 particle.style.left = x + 'px';
                 particle.style.top = y + 'px';
-                
+
                 // 随机属性
                 const size = Math.random() * 4 + 2;
                 particle.style.width = size + 'px';
                 particle.style.height = size + 'px';
-                
+
                 const opacity = Math.random() * 0.5 + 0.3;
                 particle.style.opacity = opacity;
-                
+
                 const speedX = (Math.random() - 0.5) * 2;
                 const speedY = (Math.random() - 0.5) * 2;
-                
+
                 particlesContainer.appendChild(particle);
-                
+
                 particles.push({
                     element: particle,
                     x: x,
@@ -713,31 +731,38 @@
                     decay: Math.random() * 0.02 + 0.01
                 });
             }
-            
+
             // 动画循环
             function animateParticles() {
+                // 根据设置显示/隐藏
+                particlesContainer.style.display = getMouseEffectEnabled() ? 'block' : 'none';
+
+                if (!getMouseEffectEnabled()) {
+                    requestAnimationFrame(animateParticles);
+                    return;
+                }
                 for (let i = particles.length - 1; i >= 0; i--) {
                     const particle = particles[i];
-                    
+
                     // 更新位置
                     particle.x += particle.speedX;
                     particle.y += particle.speedY;
-                    
+
                     // 更新透明度
                     particle.life -= particle.decay;
                     particle.element.style.opacity = particle.life;
-                    
+
                     // 应用样式
                     particle.element.style.left = particle.x + 'px';
                     particle.element.style.top = particle.y + 'px';
-                    
+
                     // 移除死亡粒子
                     if (particle.life <= 0) {
                         particlesContainer.removeChild(particle.element);
                         particles.splice(i, 1);
                     }
                 }
-                
+
                 requestAnimationFrame(animateParticles);
             }
 
@@ -745,7 +770,7 @@
             document.addEventListener('mousemove', (e) => {
                 mouseX = e.clientX;
                 mouseY = e.clientY;
-                
+
                 // 每移动一定距离创建粒子
                 if (Math.random() > 0.7) {
                     createParticle(mouseX, mouseY);
@@ -754,7 +779,9 @@
 
             // 鼠标按下事件
             document.addEventListener('mousedown', () => {
-                follower.classList.add('active');
+                if (getMouseEffectEnabled()) {
+                    follower.classList.add('active');
+                }
             });
 
             // 鼠标释放事件
@@ -764,9 +791,10 @@
 
             // 为可点击元素添加悬停效果
             const clickableElements = document.querySelectorAll('a, button, .floating-btn');
-            
+
             clickableElements.forEach(element => {
                 element.addEventListener('mouseenter', () => {
+                    if (!getMouseEffectEnabled()) return;
                     isHovering = true;
                     follower.classList.add('hover');
                     // 给现有粒子添加悬停效果
@@ -774,7 +802,7 @@
                         particle.element.classList.add('hover');
                     });
                 });
-                
+
                 element.addEventListener('mouseleave', () => {
                     isHovering = false;
                     follower.classList.remove('hover');
