@@ -105,26 +105,49 @@ app.get('/api/vpn-users', async (req, res) => {
     }
 
     // 构建vpncmd命令
-    const command = `vpncmd ${req.query.ip} /server /password:adm1n5 /hub:vpn /cmd statusget`;
+    const command = `"C:\\Program Files\\SoftEther VPN Server Developer Edition\\vpncmd.exe" ${req.query.ip} /server /password:adm1n5 /hub:vpn /cmd statusget`;
 
     // 执行命令
     exec(command, (error, stdout, stderr) => {
         if (error) {
             console.error(`[ERROR] 执行命令错误: ${error.message}`);
-            return res.status(500).json({ error: 'Failed to execute command' });
-        }
-        if (stderr) {
-            console.error(`[ERROR] 命令输出错误: ${stderr}`);
-            return res.status(500).json({ error: 'Command execution failed' });
+            console.error(`[ERROR] 执行命令 stderr: ${stderr}`);
+            return res.status(500).json({ error: 'Failed to execute command', details: error.message });
         }
 
-        // 解析输出以获取有效会话数
-        const sessionMatch = stdout.match(/会话数\s*\|\s*([0-9]+)/);
-        const sessionCount = sessionMatch ? parseInt(sessionMatch[1], 10) : 0;
+        if (stderr) {
+            // 某些情况下 vpncmd 会把普通信息输出到 stderr，例如警告或进度提示
+            console.warn(`[WARN] 命令 stderr: ${stderr}`);
+        }
+
+        const parseSessionCount = (output) => {
+            const lines = output.split(/\r?\n/);
+            for (const line of lines) {
+                // 优先抽取主会话数行，排除客户端和网桥细分行
+                if (/^\s*会话数[\s\u3000]*\|/.test(line) && !/会话数\s*\(客户端\)|会话数\s*\(网桥\)/.test(line)) {
+                    const m = line.match(/会话数[\s\u3000]*\|[\s\u3000]*([0-9]+)/);
+                    if (m) return parseInt(m[1].replace(/,/g, ''), 10);
+                }
+                // 兼容英文输出形式
+                if (/\b(SessionCount|CurrentSessions|Sessions)\b/i.test(line)) {
+                    const m = line.match(/\|[\s\u3000]*([0-9]+)/);
+                    if (m) return parseInt(m[1].replace(/,/g, ''), 10);
+                }
+            }
+            return null;
+        };
+
+        const sessionCount = parseSessionCount(stdout);
+
+        if (sessionCount === null) {
+            console.error('[ERROR] 无法从 vpncmd 输出解析会话数', { stdout, stderr });
+            return res.status(500).json({ error: 'Failed to parse VPN user count', details: stdout.trim() || stderr.trim() });
+        }
 
         res.json({
             ip: req.query.ip,
-            sessionCount: sessionCount
+            sessionCount: sessionCount,
+            rawOutput: stdout.trim()
         });
     });
 });
