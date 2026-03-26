@@ -18,6 +18,6 @@ app.post('/api/verify-password', async (req, res) => {
 });
 
 // 启动服务器
-app.listen(3000, () => {
-    console.log("Server is running on port 3000");
+app.listen(3132, () => {
+    console.log("Server is running on port 3132");
 });

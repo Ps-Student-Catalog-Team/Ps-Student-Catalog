@@ -150,6 +150,6 @@ app.get('/api/pull-updates', (req, res) => {
 });
 
 // 绑定到所有网络接口
-app.listen(3000, '0.0.0.0', () => {
-    console.log('Server running on http://0.0.0.0:3000');
+app.listen(3132, '0.0.0.0', () => {
+    console.log('Server running on http://0.0.0.0:3132');
 });

@@ -1,2 +1,2 @@
-node D:\project\website\Ps-Student-Catalog\server\server.js
+node .\server.js
 pause
