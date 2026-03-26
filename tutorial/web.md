@@ -1,16 +1,18 @@
 # 怎么在学校访问互联网
 
-<br>
+<br />
 
-**重要信息：如需获取VPN密码请自行联系管理员或通过邮箱联系classicmcnet@outlook.com**
+**重要信息：如需获取VPN密码请自行联系管理员或通过邮箱联系<classicmcnet@outlook.com>**
 
 ## 使用代理连接网络
+
 *注意：此方法大部分情况下仅能使得浏览器访问互联网，更稳定的方式详见“使用VPN连接网络”*
+
 ### 使用Windows电脑
 
 首先，打开设置
 
-![本地图片](../img/settings.png)
+!\[本地图片]\(../img/settings.png null)
 
 点击网络和internet，选择代理
 
@@ -26,7 +28,7 @@
 
 **注意：外网访问速度较慢**.
 
-![本地图片](../img/屏幕截图%202024-11-04%20204711.png)
+!\[本地图片]\(../img/屏幕截图%202024-11-04%20204711.png null)
 
 ### 使用手机
 
@@ -34,7 +36,7 @@
 
 连接校园网中的WiFi，有关教学楼中的WiFi密码，请参阅教程中的《教学楼中的WiFi密码登记》一节。
 
-![本地图片](../public/img/Screenshot_2024-12-23-13-11-00-107_com.android.settings.jpg)
+!\[本地图片]\(../public/img/Screenshot\_2024-12-23-13-11-00-107\_com.android.settings.jpg null)
 
 然后，点击Wi-Fi，进入wifi设置页面
 
@@ -46,11 +48,9 @@
 在地址中填入“10.88.202.73”，端口填入10002后
 即可连接外网
 
-![本地图片](../public/img/Screenshot_2024-12-23-13-11-53-694_com.android.settings.jpg)
+!\[本地图片]\(../public/img/Screenshot\_2024-12-23-13-11-53-694\_com.android.settings.jpg null)
 
-
-
-<br>
+<br />
 
 ## 使用VPN连接网络<a name="何连接VPN"></a>
 
@@ -65,7 +65,6 @@
 
 点击新建VPN
 
-
 名称填写你想要的名称
 
 地址填写 **10.88.202.73**
@@ -78,10 +77,9 @@
 
 **注意：没有提到的选项请勿填写**
 
-
 然后，**点击保存**
-<br>
-<br>
+
+
 ### 使用电脑
 
 打开设置
@@ -92,7 +90,7 @@
 
 点击添加VPN连接
 
-![本地图片](../img/vpn%20windows.png)
+!\[本地图片]\(../img/vpn%20windows.png null)
 
 名称填写你想要的名称
 
