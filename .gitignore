@@ -10,3 +10,4 @@ yarn-error.log*
 lastOnlineTimes.json*
 dist/
 .github/
+server/lastOnlineTimes.json
