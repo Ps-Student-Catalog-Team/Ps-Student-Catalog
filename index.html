@@ -147,6 +147,38 @@
             showAnnouncementModal();
         });
 
+        // 检测 VPN 会话数并更新链接颜色
+        async function checkVPNSessionCount() {
+            const linkElement = document.getElementById('vpnStatusLink');
+            const countElement = document.getElementById('vpnSessionCount');
+            
+            try {
+                const response = await fetch('http://10.88.202.73:3000/api/vpn-users?ip=10.88.202.73');
+                const data = await response.json();
+                const sessionCount = data.sessionCount || 0;
+                
+                // 更新会话数显示
+                if (countElement) {
+                    countElement.textContent = `(${sessionCount}人)`;
+                }
+                
+                // 根据会话数设置颜色（使用 !important 覆盖 CSS 样式）
+                if (sessionCount < 3) {
+                    linkElement.style.setProperty('color', 'rgb(0, 189, 73)', 'important'); // 绿色
+                } else if (sessionCount >= 3 && sessionCount <= 6) {
+                    linkElement.style.setProperty('color', 'rgb(255, 193, 7)', 'important'); // 黄色
+                } else {
+                    linkElement.style.setProperty('color', 'rgb(220, 53, 69)', 'important'); // 红色
+                }
+            } catch (error) {
+                console.error('检测 VPN 会话数失败:', error);
+                linkElement.style.setProperty('color', 'rgb(128, 128, 128)', 'important'); // 灰色 - 检测失败
+                if (countElement) {
+                    countElement.textContent = '(检测失败)';
+                }
+            }
+        }
+
         // 确保在 DOM 加载完成后执行
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('passwordModal').addEventListener('click', function(e) {
@@ -165,6 +197,11 @@
             });
 
             updateMouseEffectUI();
+            
+            // 检测 VPN 会话数
+            checkVPNSessionCount();
+            // 每 30 秒刷新一次
+            setInterval(checkVPNSessionCount, 30000);
         });
     </script>
 
@@ -239,7 +276,8 @@
                 </div-->
 
                 <div style="text-align: center; margin-top: 10px;">
-                    <a class="footer-link" style="color:rgb(0, 189, 73);" href="password/newest.html">查看当前VPN状态</a>
+                    <a id="vpnStatusLink" style="color:rgb(128, 128, 128);" class="footer-link" href="password/newest.html">查看当前VPN状态</a>      
+                    <span id="vpnSessionCount" style="font-size: 0.8em; margin-left: 8px; color: #666;"></span>
                     <!--p><a class="footer-link" style="color:rgb(0, 189, 73);" href="sessionlst.php">查看VPN会话</a></p-->
 
                 </div>

@@ -671,6 +671,255 @@
                 });
             }
         });
+
+        // 鼠标特效设置
+        const MOUSE_EFFECT_KEY = 'mouseEffectEnabled';
+
+        function getMouseEffectEnabled() {
+            const value = localStorage.getItem(MOUSE_EFFECT_KEY);
+            return value === null ? true : value === 'true';
+        }
+
+        function setMouseEffectEnabled(enabled) {
+            localStorage.setItem(MOUSE_EFFECT_KEY, enabled.toString());
+            updateMouseEffectUI();
+        }
+
+        function toggleMouseEffect() {
+            const current = getMouseEffectEnabled();
+            setMouseEffectEnabled(!current);
+        }
+
+        function updateMouseEffectUI() {
+            const enabled = getMouseEffectEnabled();
+            const follower = document.querySelector('.mouse-follower');
+            const particles = document.querySelector('.mouse-particles');
+            if (follower) {
+                follower.style.display = enabled ? 'block' : 'none';
+            }
+            if (particles) {
+                particles.style.display = enabled ? 'block' : 'none';
+            }
+            const toggleBtn = document.getElementById('mouseEffectToggle');
+            if (toggleBtn) {
+                toggleBtn.textContent = enabled ? '鼠标特效: 开启' : '鼠标特效: 关闭';
+                toggleBtn.style.opacity = enabled ? '1' : '0.5';
+            }
+        }
+
+        // 鼠标跟随动画
+        document.addEventListener('DOMContentLoaded', () => {
+            updateMouseEffectUI();
+
+            const follower = document.querySelector('.mouse-follower');
+            let mouseX = 0, mouseY = 0;
+            let followerX = 0, followerY = 0;
+
+            function animateFollower() {
+                follower.style.display = getMouseEffectEnabled() ? 'block' : 'none';
+
+                if (!getMouseEffectEnabled()) {
+                    requestAnimationFrame(animateFollower);
+                    return;
+                }
+
+                followerX += (mouseX - followerX) * 0.3;
+                followerY += (mouseY - followerY) * 0.3;
+
+                const currentWidth = follower.offsetWidth;
+                const currentHeight = follower.offsetHeight;
+                const offsetX = currentWidth / 2;
+                const offsetY = currentHeight / 2;
+
+                follower.style.transform = `translate(${followerX - offsetX}px, ${followerY - offsetY}px)`;
+
+                requestAnimationFrame(animateFollower);
+            }
+
+            const particlesContainer = document.querySelector('.mouse-particles');
+            let isHovering = false;
+            const particles = [];
+            const maxParticles = 50;
+
+            function createParticle(x, y) {
+                if (!getMouseEffectEnabled()) return;
+                if (particles.length >= maxParticles) {
+                    const oldestParticle = particles.shift();
+                    if (oldestParticle) {
+                        particlesContainer.removeChild(oldestParticle.element);
+                    }
+                }
+
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+
+                const size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+
+                const opacity = Math.random() * 0.5 + 0.3;
+                particle.style.opacity = opacity;
+
+                const speedX = (Math.random() - 0.5) * 2;
+                const speedY = (Math.random() - 0.5) * 2;
+
+                particlesContainer.appendChild(particle);
+
+                particles.push({
+                    element: particle,
+                    x: x,
+                    y: y,
+                    speedX: speedX,
+                    speedY: speedY,
+                    size: size,
+                    opacity: opacity,
+                    life: 1.0,
+                    decay: Math.random() * 0.02 + 0.01
+                });
+            }
+
+            function animateParticles() {
+                particlesContainer.style.display = getMouseEffectEnabled() ? 'block' : 'none';
+
+                if (!getMouseEffectEnabled()) {
+                    requestAnimationFrame(animateParticles);
+                    return;
+                }
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const particle = particles[i];
+                    particle.x += particle.speedX;
+                    particle.y += particle.speedY;
+                    particle.life -= particle.decay;
+                    particle.element.style.opacity = particle.life;
+                    particle.element.style.left = particle.x + 'px';
+                    particle.element.style.top = particle.y + 'px';
+
+                    if (particle.life <= 0) {
+                        particlesContainer.removeChild(particle.element);
+                        particles.splice(i, 1);
+                    }
+                }
+
+                requestAnimationFrame(animateParticles);
+            }
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                if (Math.random() > 0.7) {
+                    createParticle(mouseX, mouseY);
+                }
+            });
+
+            document.addEventListener('mousedown', () => {
+                if (getMouseEffectEnabled()) {
+                    follower.classList.add('active');
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                follower.classList.remove('active');
+            });
+
+            const clickableElements = document.querySelectorAll('a, button, .member-card, .back-btn, .modal-close');
+
+            clickableElements.forEach(element => {
+                element.addEventListener('mouseenter', () => {
+                    if (!getMouseEffectEnabled()) return;
+                    isHovering = true;
+                    follower.classList.add('hover');
+                    particles.forEach(particle => {
+                        particle.element.classList.add('hover');
+                    });
+                });
+
+                element.addEventListener('mouseleave', () => {
+                    isHovering = false;
+                    follower.classList.remove('hover');
+                    particles.forEach(particle => {
+                        particle.element.classList.remove('hover');
+                    });
+                });
+            });
+
+            animateFollower();
+            animateParticles();
+        });
     </script>
+
+    <!-- 鼠标跟随元素 -->
+    <div class="mouse-follower"></div>
+    <!-- 鼠标跟随粒子容器 -->
+    <div class="mouse-particles"></div>
+
+    <!-- 鼠标特效设置按钮 -->
+    <button id="mouseEffectToggle" class="mouse-effect-toggle" onclick="toggleMouseEffect()" style="position: fixed; bottom: 10px; right: 10px; font-size: 0.8em; padding: 4px 10px; border: 1px solid var(--accent-color); background: transparent; color: var(--accent-color); border-radius: 4px; cursor: pointer; transition: all 0.3s ease; opacity: 1; z-index: 10000;">鼠标特效: 开启</button>
+
+    <style>
+        /* 鼠标跟随元素 */
+        .mouse-follower {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ff9d;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.1s ease-out, width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+            opacity: 0.7;
+            transform-origin: center center;
+        }
+
+        .mouse-follower.active {
+            width: 40px;
+            height: 40px;
+            opacity: 0.5;
+            background: rgba(0, 255, 157, 0.2);
+        }
+
+        .mouse-follower.hover {
+            width: 35px;
+            height: 35px;
+            opacity: 0.8;
+            background: rgba(0, 255, 157, 0.3);
+            border-color: #00cc80;
+            transform: scale(1.2);
+        }
+
+        /* 鼠标跟随粒子动画 */
+        .mouse-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00ff9d;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .particle.hover {
+            background: #00cc80;
+            box-shadow: 0 0 8px #00ff9d;
+            transform: scale(1.5);
+        }
+    </style>
 </body>
 </html>

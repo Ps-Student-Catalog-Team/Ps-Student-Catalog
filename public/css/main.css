@@ -462,7 +462,7 @@ body {
 /* 底部链接动画 */
 .footer-link {
     position: relative;
-    color: rgb(0, 189, 73) !important;
+    color: rgb(0, 189, 73);
     text-decoration: none;
     padding: 5px 0;
     transition: all 0.3s ease;
