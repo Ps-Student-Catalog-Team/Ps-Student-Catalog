@@ -19,12 +19,133 @@
             align-items: center;
         }
 
+        .page-layout {
+            display: flex;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 30px;
+            gap: 30px;
+            width: 100%;
+        }
+
+        .toc-sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            background: rgba(42, 42, 42, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(0, 255, 157, 0.2);
+        }
+
+        .toc-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 157, 0.3);
+            border-radius: 3px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 157, 0.5);
+        }
+
+        .toc-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 255, 157, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toc-title::before {
+            content: '📑';
+        }
+
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .toc-list li {
+            margin: 0;
+            padding: 0;
+        }
+
+        .toc-list a {
+            display: block;
+            padding: 8px 12px;
+            color: #ccc !important;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+            line-height: 1.4;
+            border-left: 3px solid transparent;
+        }
+
+        .toc-list a:hover {
+            background: rgba(0, 255, 157, 0.1);
+            color: var(--accent-color) !important;
+            padding-left: 15px;
+        }
+
+        .toc-list a.active {
+            background: rgba(0, 255, 157, 0.15);
+            color: var(--accent-color) !important;
+            border-left-color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .toc-list .toc-h1 {
+            font-weight: 600;
+            font-size: 1em;
+        }
+
+        .toc-list .toc-h2 {
+            padding-left: 20px;
+            font-size: 0.9em;
+        }
+
+        .toc-list .toc-h3 {
+            padding-left: 35px;
+            font-size: 0.85em;
+            color: #aaa !important;
+        }
+
+        .toc-list .toc-h3:hover {
+            color: var(--accent-color) !important;
+        }
+
         .markdown-container {
-            max-width: 1500px;
-            margin: 0px auto;
+            flex: 1;
+            max-width: none;
+            margin: 0;
             padding: 30px;
             overflow-x: hidden;
-            word-wrap: break-word; 
+            word-wrap: break-word;
+        }
+
+        .markdown-container h1,
+        .markdown-container h2,
+        .markdown-container h3 {
+            scroll-margin-top: 100px;
         }
         
         .markdown-container img {
@@ -323,13 +444,20 @@
     </style>
 </head>
 <body>
-  <div class="markdown-container">
-    <div class="fixed-buttons">
-      <a href="../index.html" class="btn">返回首页</a>
-      <a href="javascript:history.back()" class="btn">返回</a>
-    </div>
+  <div class="fixed-buttons">
+    <a href="../index.html" class="btn">返回首页</a>
+    <a href="javascript:history.back()" class="btn">返回</a>
+  </div>
 
-    <div id="content"></div>
+  <div class="page-layout">
+    <aside class="toc-sidebar" id="tocSidebar">
+      <div class="toc-title">目录</div>
+      <ul class="toc-list" id="tocList"></ul>
+    </aside>
+
+    <div class="markdown-container">
+      <div id="content"></div>
+    </div>
   </div>
 
     <script>
@@ -426,6 +554,9 @@
 
                 // 设置图片点击功能
                 setupImageClick();
+
+                // 生成目录
+                generateTOC();
             } catch (error) {
                 contentDiv.innerHTML = `<div class="error">错误: ${error.message}</div>`;
             }
@@ -433,6 +564,76 @@
 
         // 页面加载完成后执行
         window.addEventListener('DOMContentLoaded', loadMarkdown);
+
+        // 生成目录
+        function generateTOC() {
+            const contentDiv = document.getElementById('content');
+            const tocList = document.getElementById('tocList');
+            const headings = contentDiv.querySelectorAll('h1, h2, h3');
+
+            if (headings.length === 0) {
+                document.getElementById('tocSidebar').style.display = 'none';
+                return;
+            }
+
+            tocList.innerHTML = '';
+
+            headings.forEach((heading, index) => {
+                // 为标题添加锚点ID
+                const id = `heading-${index}`;
+                heading.id = id;
+
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = heading.textContent;
+                a.className = `toc-${heading.tagName.toLowerCase()}`;
+
+                // 点击平滑滚动
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    heading.scrollIntoView({ behavior: 'smooth' });
+                    history.pushState(null, null, `#${id}`);
+                });
+
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            // 监听滚动，高亮当前目录项
+            setupTOCHighlight();
+        }
+
+        // 目录高亮
+        function setupTOCHighlight() {
+            const contentDiv = document.getElementById('content');
+            const headings = contentDiv.querySelectorAll('h1, h2, h3');
+            const tocLinks = document.querySelectorAll('.toc-list a');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-100px 0px -60% 0px',
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        tocLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${id}`) {
+                                link.classList.add('active');
+                                // 将当前项滚动到目录可视区域
+                                link.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            headings.forEach(heading => observer.observe(heading));
+        }
 
         // 鼠标跟随动画
         document.addEventListener('DOMContentLoaded', () => {
