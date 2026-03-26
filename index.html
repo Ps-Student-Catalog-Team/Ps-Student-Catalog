@@ -153,7 +153,7 @@
             const countElement = document.getElementById('vpnSessionCount');
             
             try {
-                const response = await fetch('http://10.88.202.73:3000/api/vpn-users?ip=10.88.202.73');
+                const response = await fetch('http://10.88.202.73:3132/api/vpn-users?ip=10.88.202.73');
                 const data = await response.json();
                 const sessionCount = data.sessionCount || 0;
                 
@@ -201,7 +201,7 @@
             // 检测 VPN 会话数
             checkVPNSessionCount();
             // 每 30 秒刷新一次
-            setInterval(checkVPNSessionCount, 30000);
+            setInterval(checkVPNSessionCount, 31320);
         });
     </script>
 
