@@ -12,7 +12,7 @@
 
 首先，打开设置
 
-!\[本地图片]\(../img/settings.png null)
+![本地图片](../img/settings.png)
 
 点击网络和internet，选择代理
 
