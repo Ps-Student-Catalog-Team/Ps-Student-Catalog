@@ -36,7 +36,7 @@
 
 连接校园网中的WiFi，有关教学楼中的WiFi密码，请参阅教程中的《教学楼中的WiFi密码登记》一节。
 
-!\[本地图片]\(../public/img/Screenshot\_2024-12-23-13-11-00-107\_com.android.settings.jpg null)
+![本地图片](../public/img/Screenshot\_2024-12-23-13-11-00-107\_com.android.settings.jpg )
 
 然后，点击Wi-Fi，进入wifi设置页面
 
@@ -48,7 +48,7 @@
 在地址中填入“10.88.202.73”，端口填入10002后
 即可连接外网
 
-!\[本地图片]\(../public/img/Screenshot\_2024-12-23-13-11-53-694\_com.android.settings.jpg null)
+![本地图片](../public/img/Screenshot\_2024-12-23-13-11-53-694\_com.android.settings.jpg)
 
 <br />
 
@@ -90,7 +90,7 @@
 
 点击添加VPN连接
 
-!\[本地图片]\(../img/vpn%20windows.png null)
+![本地图片](../img/vpn%20windows.png)
 
 名称填写你想要的名称
 
