@@ -163,9 +163,9 @@
                 }
                 
                 // 根据会话数设置颜色（使用 !important 覆盖 CSS 样式）
-                if (sessionCount < 3) {
+                if (sessionCount < 4) {
                     linkElement.style.setProperty('color', 'rgb(0, 189, 73)', 'important'); // 绿色
-                } else if (sessionCount >= 3 && sessionCount <= 6) {
+                } else if (sessionCount >= 4 && sessionCount <= 7) {
                     linkElement.style.setProperty('color', 'rgb(255, 193, 7)', 'important'); // 黄色
                 } else {
                     linkElement.style.setProperty('color', 'rgb(220, 53, 69)', 'important'); // 红色
@@ -206,7 +206,7 @@
     </script>
 
     <link rel="stylesheet" href="public/css/main.css">
-    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="../public/css/font-awesome.min.css">
 </head>
 
 <body>

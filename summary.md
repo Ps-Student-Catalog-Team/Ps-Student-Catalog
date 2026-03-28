@@ -136,17 +136,17 @@ website/
 
 ### `index.html` (根目录)
 - favicon: `img/favicon.ico`
-- CSS: `public/css/main.css`, `css/font-awesome.min.css`
+- CSS: `public/css/main.css`, `../public/css/font-awesome.min.css`
 - 页面链接: `pages/readme.html`, `password/newest.html`, `tutorial/show.html`, `public/clock2.html`, `public/Countdown/index.html`, `pages/clock.html`, `pages/comment.html`, `pages/user-center.html`
 
 ### `pages/clock.html`
-- CSS: `../public/css/normalize.css`, `../public/css/style.css`, `../public/css/demo.css`, `../public/css/component.css`
+- CSS: `../public/css/normalize.css`, `../public/public/css/style.css`, `../public/css/demo.css`, `../public/css/component.css`
 - JS: `../public/js/html5.js`, `../js/TweenLite.min.js`, `../js/EasePack.min.js`, `../js/rAF.js`, `../js/demo-1.js`, `../js/quotes.js`, `../js/Rx.min.js`, `../js/rxcss.min.js`, `../js/index.js`
 - 字体: `../public/fonts/one.ttf`
 
 ### `pages/about_us.html`
 - 图标: `../public/img/favicon.ico`
-- CSS: `../public/css/main.css`, `../css/font-awesome.min.css`
+- CSS: `../public/css/main.css`, `../../public/css/font-awesome.min.css`
 - 图片: `../public/img/logo/*.jpg`, `../public/img/logo/*.png`, `../public/img/logo/*.jpeg`
 
 ### `pages/user-center.html`
