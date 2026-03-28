@@ -2,9 +2,11 @@ name: Run Node.js Server
 
 on:
   push:
-    branches: [ main ]   # 可根据需要修改触发条件
+    branches: [ main ]   
   pull_request:
     branches: [ main ]
+    
+  workflow_dispatch:
 
 jobs:
   test:
