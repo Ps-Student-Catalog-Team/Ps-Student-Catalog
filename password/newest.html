@@ -39,12 +39,68 @@
     </main>
     <script src="copy-script.js"></script>
     <script>
+    const API_BASE_URLS = {
+        main: 'http://10.88.202.73:3132',
+        local: 'http://localhost:3132'
+    };
+
+    async function pingServer(host, timeout = 1000) {
+        return new Promise((resolve) => {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+                resolve(false);
+            }, timeout);
+
+            fetch(`http://${host}:3132/api/ping`, {
+                signal: controller.signal,
+                method: 'GET'
+            })
+            .then(response => {
+                clearTimeout(timeoutId);
+                resolve(response.ok);
+            })
+            .catch(() => {
+                clearTimeout(timeoutId);
+                resolve(false);
+            });
+        });
+    }
+
+    async function getApiBaseUrl() {
+        const isMainServerReachable = await pingServer('10.88.202.73', 1000);
+        return isMainServerReachable ? API_BASE_URLS.main : API_BASE_URLS.local;
+    }
+
+    async function fetchFromApi(endpoint, options = {}) {
+        const baseUrl = await getApiBaseUrl();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), options.timeout || 1000);
+        
+        try {
+            const response = await fetch(`${baseUrl}${endpoint}`, {
+                ...options,
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error(`API请求失败: ${response.status}`);
+            }
+            
+            return response;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            throw error;
+        }
+    }
+
     // VPN状态检测函数
     async function checkVPNStatus(ip, elementId, sessionInfoId) {
         const statusElement = document.getElementById(elementId);
         const sessionInfoElement = document.getElementById(sessionInfoId);
         try {
-            const response = await fetch(`http://10.88.202.73:3132/api/vpn-status?ip=${ip}`);
+            const response = await fetchFromApi(`/api/vpn-status?ip=${ip}`, { timeout: 1000 });
             const data = await response.json();
             // 新增IP地址显示（使用模板字符串优化可读性）
             statusElement.innerHTML = data.online ? 
@@ -57,7 +113,7 @@
 
             if (data.online) {
                 statusElement.classList.add('online');
-                const sessionResponse = await fetch(`http://10.88.202.73:3132/api/vpn-users?ip=${ip}`);
+                const sessionResponse = await fetchFromApi(`/api/vpn-users?ip=${ip}`, { timeout: 1000 });
                 const sessionData = await sessionResponse.json();
                 sessionInfoElement.innerHTML = `会话数: ${sessionData.sessionCount}`;
                 sessionInfoElement.classList.add('online-session');
@@ -212,46 +268,46 @@
         document.addEventListener('DOMContentLoaded', initParticles);
     
     // 从API获取公告内容
-    document.addEventListener('DOMContentLoaded', function() {
-        fetch('http://10.88.202.73:3132/api/announcement')
-            .then(response => response.json())
-            .then(data => {
-                if (data.newest) {
-                    const container = document.getElementById('announcementContainer');
-                    // 清空现有内容
-                    container.innerHTML = '';
-                    
-                    // 添加标题
-                    const title = document.createElement('h3');
-                    title.textContent = data.newest.title;
-                    container.appendChild(title);
-                    
-                    // 添加分隔线
-                    const hr = document.createElement('hr');
-                    hr.style.cssText = 'border: none; border-top: 1px solid #ddd; margin: 10px 0;';
-                    container.appendChild(hr);
-                    
-                    // 添加内容
-                    data.newest.content.forEach(item => {
-                        const p = document.createElement('p');
-                        p.innerHTML = item;
-                        container.appendChild(p);
-                    });
-                    
-                    // 添加最后修改时间（底部居中）
-                    if (data.serverModifiedTime) {
-                        const timeP = document.createElement('p');
-                        timeP.style.cssText = 'font-size: 0.7em; color: #999; text-align: center; margin-top: 15px; margin-bottom: 0;';
-                        timeP.innerHTML = `<i>最后更新: ${data.serverModifiedTime}</i>`;
-                        container.appendChild(timeP);
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('获取公告失败:', error);
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const response = await fetchFromApi('/api/announcement', { timeout: 1000 });
+            const data = await response.json();
+            
+            if (data.newest) {
                 const container = document.getElementById('announcementContainer');
-                container.innerHTML = '<h3>重要公告</h3><p>加载公告失败</p>';
-            });
+                // 清空现有内容
+                container.innerHTML = '';
+                
+                // 添加标题
+                const title = document.createElement('h3');
+                title.textContent = data.newest.title;
+                container.appendChild(title);
+                
+                // 添加分隔线
+                const hr = document.createElement('hr');
+                hr.style.cssText = 'border: none; border-top: 1px solid #ddd; margin: 10px 0;';
+                container.appendChild(hr);
+                
+                // 添加内容
+                data.newest.content.forEach(item => {
+                    const p = document.createElement('p');
+                    p.innerHTML = item;
+                    container.appendChild(p);
+                });
+                
+                // 添加最后修改时间（底部居中）
+                if (data.serverModifiedTime) {
+                    const timeP = document.createElement('p');
+                    timeP.style.cssText = 'font-size: 0.7em; color: #999; text-align: center; margin-top: 15px; margin-bottom: 0;';
+                    timeP.innerHTML = `<i>最后更新: ${data.serverModifiedTime}</i>`;
+                    container.appendChild(timeP);
+                }
+            }
+        } catch (error) {
+            console.error('获取公告失败:', error);
+            const container = document.getElementById('announcementContainer');
+            container.innerHTML = '<h3>重要公告</h3><p>加载公告失败</p>';
+        }
     });
     </script>
 </body>

@@ -40,6 +40,61 @@
         const ANNOUNCEMENT_HASH_KEY = 'announcementContentHash';
         const ANNOUNCEMENT_EXPIRE_HOURS = 3;
         const MOUSE_EFFECT_KEY = 'mouseEffectEnabled';
+        const API_BASE_URLS = {
+            main: 'http://10.88.202.73:3132',
+            local: 'http://localhost:3132'
+        };
+
+        async function pingServer(host, timeout = 1000) {
+            return new Promise((resolve) => {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                    resolve(false);
+                }, timeout);
+
+                fetch(`http://${host}:3132/api/ping`, {
+                    signal: controller.signal,
+                    method: 'GET'
+                })
+                .then(response => {
+                    clearTimeout(timeoutId);
+                    resolve(response.ok);
+                })
+                .catch(() => {
+                    clearTimeout(timeoutId);
+                    resolve(false);
+                });
+            });
+        }
+
+        async function getApiBaseUrl() {
+            const isMainServerReachable = await pingServer('10.88.202.73', 1000);
+            return isMainServerReachable ? API_BASE_URLS.main : API_BASE_URLS.local;
+        }
+
+        async function fetchFromApi(endpoint, options = {}) {
+            const baseUrl = await getApiBaseUrl();
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), options.timeout || 1000);
+            
+            try {
+                const response = await fetch(`${baseUrl}${endpoint}`, {
+                    ...options,
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`API请求失败: ${response.status}`);
+                }
+                
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                throw error;
+            }
+        }
 
         function getMouseEffectEnabled() {
             const value = localStorage.getItem(MOUSE_EFFECT_KEY);
@@ -105,85 +160,89 @@
             return hoursPassed >= ANNOUNCEMENT_EXPIRE_HOURS;
         }
 
-        function showAnnouncementModal(forceShow = false) {
+        async function showAnnouncementModal(forceShow = false) {
             const modal = document.getElementById('announcementModal');
             const content = modal.querySelector('.announcement-content');
             
-            // 从API获取公告内容
-            fetch('http://10.88.202.73:3132/api/announcement')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.home) {
-                        // 计算当前公告内容的哈希值
-                        const contentString = JSON.stringify(data.home);
-                        const currentHash = calculateHash(contentString);
-                        
-                        // 检查是否需要显示公告
-                        if (!forceShow && !shouldShowAnnouncement(currentHash)) {
-                            isFirstAnnouncement = false;
-                            document.getElementById('home-page').style.display = 'flex';
-                            document.getElementById('announcementLink').style.display = 'inline-block';
-                            document.getElementById('updateLogLink').style.display = 'inline-block';
-                            document.getElementById('moreContentLink').style.display = 'inline-block';
-                            
-                            const progress = document.createElement('div');
-                            progress.className = 'progress-bar';
-                            document.body.prepend(progress);
+            // 先显示页面内容，避免API阻塞页面加载
+            if (isFirstAnnouncement) {
+                isFirstAnnouncement = false;
+                document.getElementById('home-page').style.display = 'flex';
+                document.getElementById('announcementLink').style.display = 'inline-block';
+                document.getElementById('updateLogLink').style.display = 'inline-block';
+                document.getElementById('moreContentLink').style.display = 'inline-block';
+                
+                const progress = document.createElement('div');
+                progress.className = 'progress-bar';
+                document.body.prepend(progress);
 
-                            setTimeout(() => {
-                                document.querySelectorAll('.intro-section li').forEach(li => {
-                                    li.style.visibility = 'visible';
-                                });
-                            }, 1000);
-                            return;
-                        }
-                        
-                        // 清空现有内容
-                        content.innerHTML = '';
-                        
-                        // 添加标题
-                        const title = document.createElement('h2');
-                        title.textContent = data.home.title;
-                        content.appendChild(title);
-                        
-                        // 添加分隔线
-                        const hr = document.createElement('hr');
-                        hr.style.cssText = 'border: none; border-top: 1px solid #444; margin: 15px 0;';
-                        content.appendChild(hr);
-                        
-                        // 添加内容
-                        data.home.content.forEach(item => {
-                            const p = document.createElement('p');
-                            p.innerHTML = item;
-                            content.appendChild(p);
-                        });
-                        
-                        // 添加确认按钮
-                        const button = document.createElement('button');
-                        button.className = 'btn-accept';
-                        button.onclick = function() {
-                            // 保存当前公告内容的哈希值
-                            localStorage.setItem(ANNOUNCEMENT_HASH_KEY, currentHash);
-                            hideAnnouncementModal();
-                        };
-                        button.textContent = '确认';
-                        content.appendChild(button);
-                        
-                        // 添加最后修改时间（底部居中）
-                        if (data.serverModifiedTime) {
-                            const timeP = document.createElement('p');
-                            timeP.style.cssText = 'font-size: 0.7em; color: #666; text-align: center; margin-top: 15px; margin-bottom: 0;';
-                            timeP.innerHTML = `<i>最后更新: ${data.serverModifiedTime}</i>`;
-                            content.appendChild(timeP);
-                        }
-                        
-                        content.classList.remove('hide');
-                        modal.style.display = 'flex';
+                setTimeout(() => {
+                    document.querySelectorAll('.intro-section li').forEach(li => {
+                        li.style.visibility = 'visible';
+                    });
+                }, 1000);
+            }
+            
+            // 从API获取公告内容（使用备用地址机制）
+            try {
+                const response = await fetchFromApi('/api/announcement', { timeout: 1000 });
+                const data = await response.json();
+                
+                if (data.home) {
+                    // 计算当前公告内容的哈希值
+                    const contentString = JSON.stringify(data.home);
+                    const currentHash = calculateHash(contentString);
+                    
+                    // 检查是否需要显示公告
+                    if (!forceShow && !shouldShowAnnouncement(currentHash)) {
+                        return;
                     }
-                })
-                .catch(error => {
-                    console.error('获取公告失败:', error);
-                });
+                    
+                    // 清空现有内容
+                    content.innerHTML = '';
+                    
+                    // 添加标题
+                    const title = document.createElement('h2');
+                    title.textContent = data.home.title;
+                    content.appendChild(title);
+                    
+                    // 添加分隔线
+                    const hr = document.createElement('hr');
+                    hr.style.cssText = 'border: none; border-top: 1px solid #444; margin: 15px 0;';
+                    content.appendChild(hr);
+                    
+                    // 添加内容
+                    data.home.content.forEach(item => {
+                        const p = document.createElement('p');
+                        p.innerHTML = item;
+                        content.appendChild(p);
+                    });
+                    
+                    // 添加确认按钮
+                    const button = document.createElement('button');
+                    button.className = 'btn-accept';
+                    button.onclick = function() {
+                        // 保存当前公告内容的哈希值
+                        localStorage.setItem(ANNOUNCEMENT_HASH_KEY, currentHash);
+                        hideAnnouncementModal();
+                    };
+                    button.textContent = '确认';
+                    content.appendChild(button);
+                    
+                    // 添加最后修改时间（底部居中）
+                    if (data.serverModifiedTime) {
+                        const timeP = document.createElement('p');
+                        timeP.style.cssText = 'font-size: 0.7em; color: #666; text-align: center; margin-top: 15px; margin-bottom: 0;';
+                        timeP.innerHTML = `<i>最后更新: ${data.serverModifiedTime}</i>`;
+                        content.appendChild(timeP);
+                    }
+                    
+                    content.classList.remove('hide');
+                    modal.style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('获取公告失败:', error);
+            }
         }
 
         function hideAnnouncementModal() {
@@ -231,7 +290,7 @@
             const countElement = document.getElementById('vpnSessionCount');
             
             try {
-                const response = await fetch('http://10.88.202.73:3132/api/vpn-users?ip=10.88.202.73');
+                const response = await fetchFromApi('/api/vpn-users?ip=10.88.202.73', { timeout: 1000 });
                 const data = await response.json();
                 const sessionCount = data.sessionCount || 0;
                 
