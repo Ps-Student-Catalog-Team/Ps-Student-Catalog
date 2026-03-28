@@ -1,45 +1,49 @@
-name: Run Node.js Server
+name: Run Server with ngrok
 
 on:
-  push:
-    branches: [ main ]   
-  pull_request:
-    branches: [ main ]
-    
-  workflow_dispatch:
+  workflow_dispatch:   # 手动触发
 
 jobs:
-  test:
+  preview:
     runs-on: ubuntu-latest
-
     steps:
-      # 1. 检出代码
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. 设置 Node.js 环境
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'   # 改成你需要的版本
+          node-version: '20'
 
-      # 3. 安装依赖（如果 server/ 下有 package.json）
       - name: Install dependencies
         run: |
           cd server
-          npm install   # 若没有 package.json 可省略此步
-        # 如果依赖安装在根目录，则直接运行 npm install
+          npm install
 
-      # 4. 启动服务器（作为后台进程）
-      - name: Start server
+      - name: Start server (background)
         run: |
           cd server
           node server.js &
-          # 等待几秒确保服务启动
           sleep 5
+        # 假设 server.js 监听 3132 端口
 
-      #5. （可选）运行集成测试
-      - name: Run integration tests
+      - name: Install ngrok
         run: |
-          # 例如使用 curl 测试服务是否正常响应
-          curl http://localhost:3000/health
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+          sudo apt update && sudo apt install ngrok
+
+      - name: Expose port via ngrok
+        run: |
+          ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+          ngrok http 3132 --log=stdout > ngrok.log &
+          sleep 3
+          cat ngrok.log | grep -o 'https://[a-z0-9]*\.ngrok\.io' | head -1 > ngrok_url.txt
+          echo "NGROK_URL=$(cat ngrok_url.txt)" >> $GITHUB_ENV
+
+      - name: Show ngrok URL
+        run: echo "Public URL -> ${{ env.NGROK_URL }}"
+
+      # 保持工作流运行一段时间，以便手动测试
+      - name: Keep runner alive
+        run: sleep 3600   # 可调整时长，最长 6 小时
