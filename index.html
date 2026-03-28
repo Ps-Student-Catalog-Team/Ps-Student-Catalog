@@ -37,6 +37,7 @@
 
         let isFirstAnnouncement = true;
         const ANNOUNCEMENT_KEY = 'announcementDismissedTime';
+        const ANNOUNCEMENT_HASH_KEY = 'announcementContentHash';
         const ANNOUNCEMENT_EXPIRE_HOURS = 3;
         const MOUSE_EFFECT_KEY = 'mouseEffectEnabled';
 
@@ -72,9 +73,31 @@
             }
         }
 
-        function shouldShowAnnouncement() {
+        // 计算内容哈希值（简单字符串哈希）
+        function calculateHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return hash.toString();
+        }
+
+        function shouldShowAnnouncement(currentHash) {
             const dismissedTime = localStorage.getItem(ANNOUNCEMENT_KEY);
+            const savedHash = localStorage.getItem(ANNOUNCEMENT_HASH_KEY);
+            
             console.log('dismissedTime:', dismissedTime);
+            console.log('savedHash:', savedHash);
+            console.log('currentHash:', currentHash);
+            
+            // 如果内容发生变化，强制显示公告
+            if (savedHash !== currentHash) {
+                console.log('公告内容已改变，需要显示');
+                return true;
+            }
+            
             if (!dismissedTime) return true;
             
             const hoursPassed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60);
@@ -83,25 +106,6 @@
         }
 
         function showAnnouncementModal(forceShow = false) {
-            if (!forceShow && !shouldShowAnnouncement()) {
-                isFirstAnnouncement = false;
-                document.getElementById('home-page').style.display = 'flex';
-                document.getElementById('announcementLink').style.display = 'inline-block';
-                document.getElementById('updateLogLink').style.display = 'inline-block';
-                document.getElementById('moreContentLink').style.display = 'inline-block';
-                
-                const progress = document.createElement('div');
-                progress.className = 'progress-bar';
-                document.body.prepend(progress);
-
-                setTimeout(() => {
-                    document.querySelectorAll('.intro-section li').forEach(li => {
-                        li.style.visibility = 'visible';
-                    });
-                }, 1000);
-                return;
-            }
-            
             const modal = document.getElementById('announcementModal');
             const content = modal.querySelector('.announcement-content');
             
@@ -110,6 +114,30 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.home) {
+                        // 计算当前公告内容的哈希值
+                        const contentString = JSON.stringify(data.home);
+                        const currentHash = calculateHash(contentString);
+                        
+                        // 检查是否需要显示公告
+                        if (!forceShow && !shouldShowAnnouncement(currentHash)) {
+                            isFirstAnnouncement = false;
+                            document.getElementById('home-page').style.display = 'flex';
+                            document.getElementById('announcementLink').style.display = 'inline-block';
+                            document.getElementById('updateLogLink').style.display = 'inline-block';
+                            document.getElementById('moreContentLink').style.display = 'inline-block';
+                            
+                            const progress = document.createElement('div');
+                            progress.className = 'progress-bar';
+                            document.body.prepend(progress);
+
+                            setTimeout(() => {
+                                document.querySelectorAll('.intro-section li').forEach(li => {
+                                    li.style.visibility = 'visible';
+                                });
+                            }, 1000);
+                            return;
+                        }
+                        
                         // 清空现有内容
                         content.innerHTML = '';
                         
@@ -117,6 +145,11 @@
                         const title = document.createElement('h2');
                         title.textContent = data.home.title;
                         content.appendChild(title);
+                        
+                        // 添加分隔线
+                        const hr = document.createElement('hr');
+                        hr.style.cssText = 'border: none; border-top: 1px solid #444; margin: 15px 0;';
+                        content.appendChild(hr);
                         
                         // 添加内容
                         data.home.content.forEach(item => {
@@ -128,17 +161,29 @@
                         // 添加确认按钮
                         const button = document.createElement('button');
                         button.className = 'btn-accept';
-                        button.onclick = hideAnnouncementModal;
+                        button.onclick = function() {
+                            // 保存当前公告内容的哈希值
+                            localStorage.setItem(ANNOUNCEMENT_HASH_KEY, currentHash);
+                            hideAnnouncementModal();
+                        };
                         button.textContent = '确认';
                         content.appendChild(button);
+                        
+                        // 添加最后修改时间（底部居中）
+                        if (data.serverModifiedTime) {
+                            const timeP = document.createElement('p');
+                            timeP.style.cssText = 'font-size: 0.7em; color: #666; text-align: center; margin-top: 15px; margin-bottom: 0;';
+                            timeP.innerHTML = `<i>最后更新: ${data.serverModifiedTime}</i>`;
+                            content.appendChild(timeP);
+                        }
+                        
+                        content.classList.remove('hide');
+                        modal.style.display = 'flex';
                     }
                 })
                 .catch(error => {
                     console.error('获取公告失败:', error);
                 });
-            
-            content.classList.remove('hide');
-            modal.style.display = 'flex';
         }
 
         function hideAnnouncementModal() {
@@ -911,8 +956,8 @@
                 return;
             }
             // 计算跟随元素的新位置（更快的跟随效果）
-            followerX += (mouseX - followerX) * 0.3;
-            followerY += (mouseY - followerY) * 0.3;
+            followerX += (mouseX - followerX) * 0.6;
+            followerY += (mouseY - followerY) * 0.6;
 
             // 动态获取当前尺寸并计算偏移量，确保以中心定位
             const currentWidth = follower.offsetWidth;

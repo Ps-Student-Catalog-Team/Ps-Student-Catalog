@@ -226,12 +226,25 @@
                     title.textContent = data.newest.title;
                     container.appendChild(title);
                     
+                    // 添加分隔线
+                    const hr = document.createElement('hr');
+                    hr.style.cssText = 'border: none; border-top: 1px solid #ddd; margin: 10px 0;';
+                    container.appendChild(hr);
+                    
                     // 添加内容
                     data.newest.content.forEach(item => {
                         const p = document.createElement('p');
                         p.innerHTML = item;
                         container.appendChild(p);
                     });
+                    
+                    // 添加最后修改时间（底部居中）
+                    if (data.serverModifiedTime) {
+                        const timeP = document.createElement('p');
+                        timeP.style.cssText = 'font-size: 0.7em; color: #999; text-align: center; margin-top: 15px; margin-bottom: 0;';
+                        timeP.innerHTML = `<i>最后更新: ${data.serverModifiedTime}</i>`;
+                        container.appendChild(timeP);
+                    }
                 }
             })
             .catch(error => {
