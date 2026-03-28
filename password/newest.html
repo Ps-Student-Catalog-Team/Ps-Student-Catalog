@@ -44,7 +44,7 @@
         const statusElement = document.getElementById(elementId);
         const sessionInfoElement = document.getElementById(sessionInfoId);
         try {
-            const response = await fetch(`http://127.0.0.1:3132/api/vpn-status?ip=${ip}`);
+            const response = await fetch(`http://10.88.202.73:3132/api/vpn-status?ip=${ip}`);
             const data = await response.json();
             // 新增IP地址显示（使用模板字符串优化可读性）
             statusElement.innerHTML = data.online ? 
@@ -57,7 +57,7 @@
 
             if (data.online) {
                 statusElement.classList.add('online');
-                const sessionResponse = await fetch(`http://127.0.0.1:3132/api/vpn-users?ip=${ip}`);
+                const sessionResponse = await fetch(`http://10.88.202.73:3132/api/vpn-users?ip=${ip}`);
                 const sessionData = await sessionResponse.json();
                 sessionInfoElement.innerHTML = `会话数: ${sessionData.sessionCount}`;
                 sessionInfoElement.classList.add('online-session');
@@ -213,7 +213,7 @@
     
     // 从API获取公告内容
     document.addEventListener('DOMContentLoaded', function() {
-        fetch('http://127.0.0.1:3132/api/announcement')
+        fetch('http://10.88.202.73:3132/api/announcement')
             .then(response => response.json())
             .then(data => {
                 if (data.newest) {

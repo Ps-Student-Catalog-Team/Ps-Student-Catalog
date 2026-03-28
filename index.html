@@ -110,7 +110,7 @@
             const content = modal.querySelector('.announcement-content');
             
             // 从API获取公告内容
-            fetch('http://127.0.0.1:3132/api/announcement')
+            fetch('http://10.88.202.73:3132/api/announcement')
                 .then(response => response.json())
                 .then(data => {
                     if (data.home) {
@@ -231,7 +231,7 @@
             const countElement = document.getElementById('vpnSessionCount');
             
             try {
-                const response = await fetch('http://127.0.0.1:3132/api/vpn-users?ip=10.88.202.73');
+                const response = await fetch('http://10.88.202.73:3132/api/vpn-users?ip=10.88.202.73');
                 const data = await response.json();
                 const sessionCount = data.sessionCount || 0;
                 
