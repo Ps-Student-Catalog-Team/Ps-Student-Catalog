@@ -16,14 +16,9 @@
         <p>以前一直不变确实不太好呢</p>
         <p>以后更新的VPN密码将会记录在此</p>
         <p>如果你发现无法连接VPN，记得回来看看哦。<em style="color: gray;">访问此网站无需VPN</em></p>
-        <div class="announcement">
+        <div class="announcement" id="announcementContainer">
             <h3>重要公告</h3>
-            <p>阅读3月的日志报告<a class="link" href="https://psstunet.github.io/article/2505_2506.html">月度报告</a>！</p>
-            <p>VPN状态页面功能已更新φ(゜▽゜*)♪</p>
-            <p>网站主页上的状态指示灯已经修复(≧∀≦)ゞ</p>
-            <!--hr>
-            <p>更新了VPN状态页面φ(゜▽゜*)♪</p>
-            <p>以后VPN的最新密码将会同步在VPN状态页面</p-->
+            <p>加载中...</p>
         </div>
         <div class="password-info">
             <p>最新密码发布时间：<span class="timestamp">2025-10-22 12:00:00</span></p>
@@ -49,7 +44,7 @@
         const statusElement = document.getElementById(elementId);
         const sessionInfoElement = document.getElementById(sessionInfoId);
         try {
-            const response = await fetch(`http://10.88.202.73:3132/api/vpn-status?ip=${ip}`);
+            const response = await fetch(`http://127.0.0.1:3132/api/vpn-status?ip=${ip}`);
             const data = await response.json();
             // 新增IP地址显示（使用模板字符串优化可读性）
             statusElement.innerHTML = data.online ? 
@@ -62,7 +57,7 @@
 
             if (data.online) {
                 statusElement.classList.add('online');
-                const sessionResponse = await fetch(`http://10.88.202.73:3132/api/vpn-users?ip=${ip}`);
+                const sessionResponse = await fetch(`http://127.0.0.1:3132/api/vpn-users?ip=${ip}`);
                 const sessionData = await sessionResponse.json();
                 sessionInfoElement.innerHTML = `会话数: ${sessionData.sessionCount}`;
                 sessionInfoElement.classList.add('online-session');
@@ -215,6 +210,36 @@
 
         // 初始化动态背景
         document.addEventListener('DOMContentLoaded', initParticles);
+    
+    // 从API获取公告内容
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('http://127.0.0.1:3132/api/announcement')
+            .then(response => response.json())
+            .then(data => {
+                if (data.newest) {
+                    const container = document.getElementById('announcementContainer');
+                    // 清空现有内容
+                    container.innerHTML = '';
+                    
+                    // 添加标题
+                    const title = document.createElement('h3');
+                    title.textContent = data.newest.title;
+                    container.appendChild(title);
+                    
+                    // 添加内容
+                    data.newest.content.forEach(item => {
+                        const p = document.createElement('p');
+                        p.innerHTML = item;
+                        container.appendChild(p);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('获取公告失败:', error);
+                const container = document.getElementById('announcementContainer');
+                container.innerHTML = '<h3>重要公告</h3><p>加载公告失败</p>';
+            });
+    });
     </script>
 </body>
 </html>

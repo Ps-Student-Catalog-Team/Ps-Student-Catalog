@@ -172,6 +172,17 @@ app.get('/api/pull-updates', (req, res) => {
     });
 });
 
+// 添加获取公告内容的端点
+app.get('/api/announcement', (req, res) => {
+    try {
+        const announcementData = fs.readFileSync(path.join(__dirname, 'announcement.json'), 'utf8');
+        res.json(JSON.parse(announcementData));
+    } catch (err) {
+        console.error(`[ERROR] 读取公告文件错误: ${err.message}`);
+        res.status(500).json({ error: 'Failed to read announcement data' });
+    }
+});
+
 // 绑定到所有网络接口
 app.listen(3132, '0.0.0.0', () => {
     console.log('Server running on http://0.0.0.0:3132');
