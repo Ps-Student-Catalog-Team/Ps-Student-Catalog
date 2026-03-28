@@ -1,0 +1,43 @@
+name: Run Node.js Server
+
+on:
+  push:
+    branches: [ main ]   # 可根据需要修改触发条件
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. 设置 Node.js 环境
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'   # 改成你需要的版本
+
+      # 3. 安装依赖（如果 server/ 下有 package.json）
+      - name: Install dependencies
+        run: |
+          cd server
+          npm install   # 若没有 package.json 可省略此步
+        # 如果依赖安装在根目录，则直接运行 npm install
+
+      # 4. 启动服务器（作为后台进程）
+      - name: Start server
+        run: |
+          cd server
+          node server.js &
+          # 等待几秒确保服务启动
+          sleep 5
+
+      #5. （可选）运行集成测试
+      - name: Run integration tests
+        run: |
+          # 例如使用 curl 测试服务是否正常响应
+          curl http://localhost:3000/health
