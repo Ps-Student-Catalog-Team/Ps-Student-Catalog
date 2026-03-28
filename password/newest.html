@@ -16,14 +16,9 @@
         <p>以前一直不变确实不太好呢</p>
         <p>以后更新的VPN密码将会记录在此</p>
         <p>如果你发现无法连接VPN，记得回来看看哦。<em style="color: gray;">访问此网站无需VPN</em></p>
-        <div class="announcement">
+        <div class="announcement" id="announcementContainer">
             <h3>重要公告</h3>
-            <--p>阅读3月的日志报告<a class="link" href="https://psstunet.github.io/article/2505_2506.html">月度报告</a>！</p-->
-            <--p>网站主页上的状态指示灯暂时失效</p>
-            <p>Leo正式成为该网站管理员(≧∇≦)ﾉ</p>
-            <hr>
-            <p>更新了VPN状态页面φ(゜▽゜*)♪</p>
-            <p>以后VPN的最新密码将会同步在VPN状态页面</p>
+            <p>加载中...</p>
         </div>
         <div class="password-info">
             <p>最新密码发布时间：<span class="timestamp">2025-10-22 12:00:00</span></p>
@@ -31,7 +26,7 @@
             <button class="btn-toggle" id="copyButton">一键复制密码</button>
         </div>
         <div class="vpn-status" id="vpnStatus">
-            <h3>VPN服务器状态<!--em style="font-size: medium;">此功能仍在开发中，敬请期待！（*＾-＾*）</em--></h3>
+            <h3>VPN服务器状态</h3>
             <div class="status-item" id="status_10.88.202.73">检测中...</div>
             <div class="session-info" id="sessionInfo_10.88.202.73">会话数: 检测中...</div>
             <div class="status-item" id="status_10.88.213.212">检测中...</div>
@@ -215,6 +210,49 @@
 
         // 初始化动态背景
         document.addEventListener('DOMContentLoaded', initParticles);
+    
+    // 从API获取公告内容
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('http://10.88.202.73:3132/api/announcement')
+            .then(response => response.json())
+            .then(data => {
+                if (data.newest) {
+                    const container = document.getElementById('announcementContainer');
+                    // 清空现有内容
+                    container.innerHTML = '';
+                    
+                    // 添加标题
+                    const title = document.createElement('h3');
+                    title.textContent = data.newest.title;
+                    container.appendChild(title);
+                    
+                    // 添加分隔线
+                    const hr = document.createElement('hr');
+                    hr.style.cssText = 'border: none; border-top: 1px solid #ddd; margin: 10px 0;';
+                    container.appendChild(hr);
+                    
+                    // 添加内容
+                    data.newest.content.forEach(item => {
+                        const p = document.createElement('p');
+                        p.innerHTML = item;
+                        container.appendChild(p);
+                    });
+                    
+                    // 添加最后修改时间（底部居中）
+                    if (data.serverModifiedTime) {
+                        const timeP = document.createElement('p');
+                        timeP.style.cssText = 'font-size: 0.7em; color: #999; text-align: center; margin-top: 15px; margin-bottom: 0;';
+                        timeP.innerHTML = `<i>最后更新: ${data.serverModifiedTime}</i>`;
+                        container.appendChild(timeP);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('获取公告失败:', error);
+                const container = document.getElementById('announcementContainer');
+                container.innerHTML = '<h3>重要公告</h3><p>加载公告失败</p>';
+            });
+    });
     </script>
 </body>
 </html>

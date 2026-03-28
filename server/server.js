@@ -172,6 +172,38 @@ app.get('/api/pull-updates', (req, res) => {
     });
 });
 
+// 添加获取公告内容的端点
+app.get('/api/announcement', (req, res) => {
+    try {
+        const filePath = path.join(__dirname, 'announcement.json');
+        const announcementData = fs.readFileSync(filePath, 'utf8');
+        const data = JSON.parse(announcementData);
+        
+        // 获取文件修改时间
+        const stats = fs.statSync(filePath);
+        const modifiedTime = stats.mtime;
+        
+        // 格式化为本地时间字符串
+        const formattedTime = modifiedTime.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+        
+        // 将自动生成的修改时间添加到响应中
+        data.serverModifiedTime = formattedTime;
+        
+        res.json(data);
+    } catch (err) {
+        console.error(`[ERROR] 读取公告文件错误: ${err.message}`);
+        res.status(500).json({ error: 'Failed to read announcement data' });
+    }
+});
+
 // 绑定到所有网络接口
 app.listen(3132, '0.0.0.0', () => {
     console.log('Server running on http://0.0.0.0:3132');

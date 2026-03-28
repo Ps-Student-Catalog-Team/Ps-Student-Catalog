@@ -663,8 +663,8 @@
                     return;
                 }
                 // 计算跟随元素的新位置（更快的跟随效果）
-                followerX += (mouseX - followerX) * 0.3;
-                followerY += (mouseY - followerY) * 0.3;
+                followerX += (mouseX - followerX) * 0.6;
+                followerY += (mouseY - followerY) * 0.6;
 
                 // 动态获取当前尺寸并计算偏移量，确保以中心定位
                 const currentWidth = follower.offsetWidth;
