@@ -857,6 +857,17 @@
 
     <!-- 鼠标特效设置按钮 -->
     <button id="mouseEffectToggle" class="mouse-effect-toggle" onclick="toggleMouseEffect()" style="position: fixed; bottom: 10px; right: 10px; font-size: 0.8em; padding: 4px 10px; border: 1px solid var(--accent-color); background: transparent; color: var(--accent-color); border-radius: 4px; cursor: pointer; transition: all 0.3s ease; opacity: 1; z-index: 10000;">鼠标特效: 开启</button>
+    
+    <style>
+        @media (max-width: 640px) {
+            .mouse-effect-toggle {
+                bottom: 50px !important;
+                right: 10px !important;
+                font-size: 0.7em !important;
+                padding: 6px 8px !important;
+            }
+        }
+    </style>
 
     <style>
         /* 鼠标跟随元素 */
