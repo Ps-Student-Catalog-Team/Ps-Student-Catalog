@@ -172,6 +172,19 @@ app.get('/api/pull-updates', (req, res) => {
     });
 });
 
+// 添加获取最新VPN密码的端点
+app.get('/api/vpn-password', (req, res) => {
+    try {
+        const filePath = path.join(__dirname, 'vpn-password.json');
+        const passwordData = fs.readFileSync(filePath, 'utf8');
+        const data = JSON.parse(passwordData);
+        res.json(data);
+    } catch (err) {
+        console.error(`[ERROR] 读取VPN密码文件错误: ${err.message}`);
+        res.status(500).json({ error: 'Failed to read VPN password data' });
+    }
+});
+
 // 添加获取公告内容的端点
 app.get('/api/announcement', (req, res) => {
     try {

@@ -21,8 +21,8 @@
             <p>加载中...</p>
         </div>
         <div class="password-info">
-            <p>最新密码发布时间：<span class="timestamp">2025-10-22 12:00:00</span></p>
-            <p>最新密码：<span class="password" id="password">\@(^O^)@/</span></p>
+            <p>最新密码发布时间：<span class="timestamp" id="passwordTime">加载中...</span></p>
+            <p>最新密码：<span class="password" id="password">加载中...</span></p>
             <button class="btn-toggle" id="copyButton">一键复制密码</button>
         </div>
         <div class="vpn-status" id="vpnStatus">
@@ -267,6 +267,34 @@
         // 初始化动态背景
         document.addEventListener('DOMContentLoaded', initParticles);
     
+    // 从API获取VPN密码
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const response = await fetchFromApi('/api/vpn-password', { timeout: 1000 });
+            const data = await response.json();
+            
+            if (data.password) {
+                document.getElementById('password').textContent = data.password;
+            }
+            if (data.updatedAt) {
+                const date = new Date(data.updatedAt);
+                document.getElementById('passwordTime').textContent = date.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+            }
+        } catch (error) {
+            console.error('获取VPN密码失败:', error);
+            document.getElementById('password').textContent = '@(^O^)@/';
+            document.getElementById('passwordTime').textContent = '2025-10-22 12:00:00';
+        }
+    });
+
     // 从API获取公告内容
     document.addEventListener('DOMContentLoaded', async function() {
         try {
