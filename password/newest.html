@@ -37,27 +37,12 @@
             <canvas id="particles"></canvas>
         </div>
     </main>
-    <script src=".\server\copy-script.js"></script>
+    <script src="copy-script.js"></script>
     <script>
     const API_BASE_URLS = {
         main: 'http://10.88.202.73:3132',
-        local: 'http://10.88.202.73:3132'
+        local: 'http://localhost:3132'
     };
-
-    function ping(ip, callback) {
-        let xhr = new XMLHttpRequest();
-        let start = new Date().getTime();
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                let end = new Date().getTime();
-                let time = end - start;
-                callback(time);
-            }
-        };
-        xhr.open("GET", "http://" + ip, true);
-    }
-
-
 
     async function pingServer(host, timeout = 1000) {
         return new Promise((resolve) => {
@@ -67,7 +52,7 @@
                 resolve(false);
             }, timeout);
 
-            fetch(`http://10.88.202.73:3132/api/ping`, {
+            fetch(`http://${host}:3132/api/ping`, {
                 signal: controller.signal,
                 method: 'GET'
             })
