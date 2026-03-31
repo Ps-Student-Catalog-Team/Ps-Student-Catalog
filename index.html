@@ -42,7 +42,7 @@
         const MOUSE_EFFECT_KEY = 'mouseEffectEnabled';
         const API_BASE_URLS = {
             main: 'http://10.88.202.73:3132',
-            local: 'http://10.88.202.73:3132'
+            local: 'http://localhost:3132'
         };
 
         async function pingServer(host, timeout = 1000) {
@@ -53,13 +53,15 @@
                     resolve(false);
                 }, timeout);
 
-                fetch(`http://${host}:3132/api/ping`, {
+                // 使用通用的根路径检测，不依赖API端点
+                fetch(`http://${host}:3132/`, {
                     signal: controller.signal,
-                    method: 'GET'
+                    method: 'HEAD', // 使用HEAD请求减少数据传输
+                    mode: 'no-cors' // 允许跨域请求
                 })
-                .then(response => {
+                .then(() => {
                     clearTimeout(timeoutId);
-                    resolve(response.ok);
+                    resolve(true);
                 })
                 .catch(() => {
                     clearTimeout(timeoutId);
@@ -413,7 +415,7 @@
                 </div-->
 
                 <div style="text-align: center; margin-top: 10px;">
-                    <a id="vpnStatusLink" style="color:rgb(128, 128, 128);" class="footer-link" href="public\newest.html">查看当前VPN状态</a>      
+                    <a id="vpnStatusLink" style="color:rgb(128, 128, 128);" class="footer-link" href="password/newest.html">查看当前VPN状态</a>      
                     <span id="vpnSessionCount" style="font-size: 0.8em; margin-left: 8px; color: #666;"></span>
                     <!--p><a class="footer-link" style="color:rgb(0, 189, 73);" href="sessionlst.php">查看VPN会话</a></p-->
 
@@ -994,7 +996,7 @@
         resultDiv.innerHTML = '<p>正在拉取同步最新更改，请稍候...</p>';
         
         // 发送请求到服务器
-        fetch('http://${host}:3132/api/pull-updates')
+        fetch('/api/pull-updates')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
