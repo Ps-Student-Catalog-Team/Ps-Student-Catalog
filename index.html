@@ -53,13 +53,15 @@
                     resolve(false);
                 }, timeout);
 
-                fetch(`http://${host}:3132/api/ping`, {
+                // 使用通用的根路径检测，不依赖API端点
+                fetch(`http://${host}:3132/`, {
                     signal: controller.signal,
-                    method: 'GET'
+                    method: 'HEAD', // 使用HEAD请求减少数据传输
+                    mode: 'no-cors' // 允许跨域请求
                 })
-                .then(response => {
+                .then(() => {
                     clearTimeout(timeoutId);
-                    resolve(response.ok);
+                    resolve(true);
                 })
                 .catch(() => {
                     clearTimeout(timeoutId);
