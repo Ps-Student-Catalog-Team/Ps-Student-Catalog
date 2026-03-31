@@ -7,6 +7,12 @@ const path = require('path');
 
 const app = express();
 
+const express = require('express');
+const ping = require('ping');
+
+const PORT = 3132;
+
+
 // 启用CORS中间件
 app.use(cors());
 
@@ -216,6 +222,75 @@ app.get('/api/announcement', (req, res) => {
         res.status(500).json({ error: 'Failed to read announcement data' });
     }
 });
+
+//ping检测api
+
+// 允许跨域
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
+
+// 处理 /api/ping 路由
+app.get('/api/ping', async (req, res) => {
+    // 从查询参数中获取 host，例如 /api/ping?host=8.8.8.8
+    const host = req.query.host;
+
+    if (!host) {
+        return res.status(400).json({
+            error: 'Missing required parameter: host'
+        });
+    }
+
+    // 简单的安全校验：防止命令注入，这里只允许域名或 IP 的常见字符
+    const hostRegex = /^[a-zA-Z0-9.-]+$/;
+    if (!hostRegex.test(host)) {
+        return res.status(400).json({
+            error: 'Invalid host format'
+        });
+    }
+
+    try {
+        // 使用 ping 库发送 2 个 ICMP 包，超时 2 秒
+        const result = await ping.promise.probe(host, {
+            timeout: 2,
+            extra: ['-c', '4']   // 发送 4 个包
+        });
+
+        if (result.alive) {
+            res.json({
+                success: true,
+                host: host,
+                reachable: true,
+                time: result.time,        // 平均延迟（毫秒）
+                output: result.output
+            });
+        } else {
+            res.json({
+                success: false,
+                host: host,
+                reachable: false,
+                error: 'Host unreachable',
+                output: result.output
+            });
+        }
+    } catch (err) {
+        console.error('Ping error:', err);
+        res.status(500).json({
+            success: false,
+            host: host,
+            reachable: false,
+            error: err.message
+        });
+    }
+});
+
+
 
 // 绑定到所有网络接口
 app.listen(3132, '0.0.0.0', () => {
