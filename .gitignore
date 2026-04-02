@@ -9,3 +9,4 @@ yarn-error.log*
 .env
 dist/
 .github/
+lastOnlineTimes.json*
