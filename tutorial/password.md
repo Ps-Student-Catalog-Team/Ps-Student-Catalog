@@ -8,7 +8,9 @@
 | zhengmm   | zhengmm123    | 数学    |郑梦梦       |
 | luhj   | YyDD0S    | 化学    |卢航君    |
 | hef   | 896236    | 生物    |何芬        |
-| zhangxiaoyan   | 123456    | 历史    |   张晓燕  |
+| zhangxiaoyan   | 123456    | 历史    |   张笑燕  |
+| laojm|135246|生物|劳键明|
+| liuby|as04as04|英语|张源源|
 
 
 ## 如何搜集教师目录的密码
