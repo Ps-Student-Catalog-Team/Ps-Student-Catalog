@@ -8,11 +8,11 @@ Windows时间同步服务器（Windows Time Service）是Windows操作系统内�
 ## 如何配置Windows Time Server？
 
 ### 1. 打开“控制面板”
- 
-### 2. 点击“日期和时间”
- 
-### 3. 点击“Internet时间”
- 
+  ![控制面板](../img/时间同步1.png)
+### 2. 在日期和时间选项卡，选择Internet时间选项卡，如下图所示
+ ![控制面板](../img/时间同步2.png)
+### 3.在internet时间选项卡点击更改设置按钮，如下图所示
+ ![控制面板](../img/时间同步3.png)
 ### 4. 点击“更改设置”
  
 ### 5. 选择“使用以下NTP服务器”
@@ -20,8 +20,10 @@ Windows时间同步服务器（Windows Time Service）是Windows操作系统内�
 ### 6. 输入NTP服务器地址
 
 <div class="code-block-wrapper">
-    <pre><code class="language-javascript">// 你的代码内容
-    console.log("Hello World!");
-    </code></pre>
+<pre>
+<code class="language-javascript">10.88.202.73</code>
+</pre>
 </div>
-### 7. 点击“确定”
+ ![控制面板](../img/时间同步4.jpg)
+### 7.点击“确定”
+这样就好啦~(ゝ∀･)

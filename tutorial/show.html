@@ -9,6 +9,81 @@
     <!-- 引入主站样式 -->
     <link rel="stylesheet" href="../public/css/main.css">
     <style>
+        /* 代码块容器样式 */
+.code-block-wrapper {
+    position: relative;      /* 为按钮提供定位参考 */
+    margin: 1.2em 0;
+    padding: 1em 2.8em 1em 1em; /* 右侧内边距为按钮预留空间 */
+    background: linear-gradient(135deg, rgba(20, 26, 44, 0.95), rgba(40, 47, 76, 0.95));
+    color: #e8f0ff;
+    border: 1px solid rgba(120, 150, 210, 0.3);
+    box-shadow: 0 10px 25px rgba(8, 14, 35, 0.4);
+    border-radius: 12px;
+    overflow: auto;
+}
+
+.code-block-wrapper code {
+    color: #f1f8ff;
+}
+
+/* 复制按钮通用样式 */
+.copy-code-button {
+    position: absolute;
+    top: 0.65em;
+    right: 0.65em;
+    padding: 0.45em 1em;
+    background: linear-gradient(120deg, #00a9ff, #00e6ac);
+    color: #082b57;
+    border: 1px solid #0b78bd;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.82em;
+    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    z-index: 10;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    user-select: none;
+    box-shadow: 0 4px 14px rgba(2, 108, 166, 0.24);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.copy-code-button::before {
+    content: '📋';
+    display: inline-block;
+    transform: translateY(1px);
+}
+
+/* 悬停状态 */
+.copy-code-button:hover {
+    background: linear-gradient(120deg, #00c8ff, #5dffb9);
+    border-color: #0f95e4;
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 6px 18px rgba(0, 130, 214, 0.32);
+}
+
+/* 点击状态 */
+.copy-code-button:active {
+    background: linear-gradient(120deg, #009be0, #00d18f);
+    transform: translateY(0) scale(0.99);
+    box-shadow: 0 2px 8px rgba(0, 80, 135, 0.35);
+}
+
+/* 复制成功状态 */
+.copy-code-button.copied {
+    background: linear-gradient(120deg, #6ae47c, #09c874);
+    border-color: #3ebf55;
+    color: #0b4020;
+}
+
+/* 失败状态 */
+.copy-code-button.copy-failed {
+    background: linear-gradient(120deg, #ff7f7f, #ff4f4f);
+    border-color: #d64040;
+    color: #611a1a;
+}
         /* 特定于教程页面的样式 */
         body {
             min-height: 100vh;
@@ -557,6 +632,9 @@
 
                 // 生成目录
                 generateTOC();
+
+                // 添加复制按钮到代码块
+                setupCodeCopyButtons();
             } catch (error) {
                 contentDiv.innerHTML = `<div class="error">错误: ${error.message}</div>`;
             }
@@ -633,6 +711,108 @@
             }, observerOptions);
 
             headings.forEach(heading => observer.observe(heading));
+        }
+
+        // 代码块复制按钮
+        async function copyTextToClipboard(text) {
+            if (!text) return false;
+
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                }
+            } catch (err) {
+                console.warn('navigator.clipboard 失败，尝试 fallback', err);
+            }
+
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '-9999px';
+            textarea.style.left = '-9999px';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            textarea.setSelectionRange(0, textarea.value.length);
+
+            let successful = false;
+            try {
+                successful = document.execCommand('copy');
+            } catch (e) {
+                successful = false;
+            }
+
+            textarea.remove();
+            return successful;
+        }
+
+        function setupCodeCopyButtons() {
+            const contentDiv = document.getElementById('content');
+            if (!contentDiv) return;
+
+            const preElements = contentDiv.querySelectorAll('pre');
+            preElements.forEach(pre => {
+                let wrapper = pre.closest('.code-block-wrapper');
+                if (!wrapper) {
+                    wrapper = document.createElement('div');
+                    wrapper.className = 'code-block-wrapper';
+                    pre.parentNode.insertBefore(wrapper, pre);
+                    wrapper.appendChild(pre);
+                }
+
+                if (wrapper.querySelector('.copy-code-button')) return;
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'copy-code-button';
+                button.textContent = '复制';
+
+                wrapper.appendChild(button);
+
+                button.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const codeElement = wrapper.querySelector('code');
+                    if (!codeElement) return;
+
+                    let codeText = codeElement.textContent || codeElement.innerText;
+                    if (!codeText) {
+                        console.warn('未查询到代码文本');
+                        button.textContent = '复制失败';
+                        setTimeout(() => { button.textContent = '复制'; }, 2000);
+                        return;
+                    }
+
+                    codeText = codeText
+                        .split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0)
+                        .join('\n')
+                        .trim();
+
+                    codeText = codeText.replace(/[;，,]+$/g, '').trim();
+
+                    console.debug('复制文本:', JSON.stringify(codeText));
+
+                    const originalText = button.textContent;
+                    const copied = await copyTextToClipboard(codeText);
+
+                    if (copied) {
+                        button.textContent = '已复制!';
+                        button.classList.add('copied');
+                    } else {
+                        button.textContent = '复制失败';
+                        button.classList.add('copy-failed');
+                    }
+
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('copied', 'copy-failed');
+                    }, 2000);
+                });
+            });
         }
 
         // 鼠标特效设置
@@ -887,5 +1067,11 @@
             transform: scale(1.5);
         }
     </style>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            setupCodeCopyButtons();
+        });
+    </script>
 </body>
 </html>
