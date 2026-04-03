@@ -18,12 +18,14 @@ Windows时间同步服务器（Windows Time Service）是Windows操作系统内�
 ### 5. 选择“使用以下NTP服务器”
  
 ### 6. 输入NTP服务器地址
-
+![控制面板](../img/时间同步4.jpg)
 <div class="code-block-wrapper">
 <pre>
 <code class="language-javascript">10.88.202.73</code>
 </pre>
 </div>
- ![控制面板](../img/时间同步4.jpg)
+
+
+
 ### 7.点击“确定”
 这样就好啦~(ゝ∀･)
