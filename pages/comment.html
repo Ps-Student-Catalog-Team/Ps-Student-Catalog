@@ -394,15 +394,15 @@ body.dark-theme #logoutBtn:hover {
                 .then(response => response.json())
                 .then(data => {
                     if(data.success) {
-                        commentInput.value = ''; // 清空输入框
-                        fetchComments(); // 更新留言显示
+                        commentInput.value = '';
+                        fetchComments();
                     } else {
-                        alert('留言发送失败，请重试。');
+                        alert('留言失败：' + (data.error || '未知错误'));
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('留言发送失败，请重试。');
+                    console.error('Fetch错误:', error);
+                    alert('网络或服务器错误，请查看控制台');
                 });
             } else {
                 alert('留言内容不能为空！');
@@ -411,7 +411,7 @@ body.dark-theme #logoutBtn:hover {
 
         // 显示留言的函数
         function fetchComments() {
-            fetch('get-comments.php')
+            fetch('../php/get-comments.php')
                 .then(response => response.json())
                 .then(data => {
                     var commentsDiv = document.getElementById('comments');
