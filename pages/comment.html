@@ -384,7 +384,7 @@ body.dark-theme #logoutBtn:hover {
             var username = localStorage.getItem('username');
 
             if(commentText) {
-                fetch('add-comment.php', {
+                fetch('../php/add-comment.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
