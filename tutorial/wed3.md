@@ -3,8 +3,8 @@
 
 ## 注意⚠️：以下方法只适用于Windows 8及以上的系统，Windows 7目前还没办法支持。且一切的行为所带来的后果需自负！若还未配置VPN，请查看这里[VPN连接](wed..md#如何连接VPN)。
 
-Windows 7一般长这样：![Windows 7](../img/windows7.jpg "Wijndows 7")
-Windows 10一般长这样：![Windows 10](../img/Windows10.AVIF "Windows 10")
+Windows 7一般长这样：![Windows 7](../public/img/windows7.jpg "Wijndows 7")
+Windows 10一般长这样：![Windows 10](../public/img/Windows10.AVIF "Windows 10")
 
 ### 让我们开始吧（使用Windows 10做演示）
 
@@ -27,13 +27,13 @@ Windows 10一般长这样：![Windows 10](../img/Windows10.AVIF "Windows 10")
 在键盘上按下"win+r"键，在弹出的窗口输入`ncpa..cpl `。
 
 在打开的网络连接列表中，找出VPN对应的网络连接（通常网卡名称是TAP-Windows***），下图中内容只是示意，抓图时没有连接上VPN，如果是连接上VPN后，上面不会显示小红叉的。
-![控制面板](../img/IMG_0805.PNG "控制面板")
+![控制面板](../public/img/IMG_0805.PNG "控制面板")
 
 打开“属性”窗口，切换到“共享”Tab页：
-![共享](../img/共享图像.png "共享")
+![共享](../public/img/共享图像.png "共享")
 
 选择上“允许其他网络用户通过此计算机的Internet连接来连接(N)”，此时会热点在使用其它网络在共享的话（如下图，此时在使用本地有线连接在共享）会弹出提示，选择“确定”即可。
-![共享](../img/共享图像2.png "共享")
+![共享](../public/img/共享图像2.png "共享")
 下边这个列表框选择的是共享给哪个网络，我这里选择的是热点对应的网络连接。
 
 上面的配置后，此时连接在热点的移动设备或其它电脑，就是在通过VPN上网啦。
