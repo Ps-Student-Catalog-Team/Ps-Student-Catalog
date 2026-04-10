@@ -147,7 +147,7 @@ website/
 ### `pages/about_us.html`
 - 图标: `../public/img/favicon.ico`
 - CSS: `../public/css/main.css`, `../../public/css/font-awesome.min.css`
-- 图片: `../public/img/logo/*.jpg`, `../public/img/logo/*.png`, `../public/img/logo/*.jpeg`
+- 图片: `../img/logo/*.jpg`, `../img/logo/*.png`, `../img/logo/*.jpeg`
 
 ### `pages/user-center.html`
 - 链接: `../index.html`, `comment.html`
