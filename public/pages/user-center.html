@@ -159,7 +159,7 @@
                 <span id="username"></span>
             </div>
             <div class="nav-buttons">
-                <a href="../index.html" class="btn btn-primary">返回首页</a>
+                <a href="/index.html" class="btn btn-primary">返回首页</a>
                 <a href="comment.html" class="btn btn-primary">留言簿</a>
                 <button class="btn btn-danger" onclick="logout()">退出登录</button>
             </div>
@@ -203,7 +203,7 @@
         // 加载用户留言
         async function loadUserComments(username) {
             try {
-                const response = await fetch('../public/php/get-user-comments.php', {
+                const response = await fetch('../php/get-user-comments.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -259,7 +259,7 @@
             try {
                 resultDiv.textContent = '正在创建AList账户...';
                 
-                const response = await fetch('../public/php/create-alist-account.php', {
+                const response = await fetch('../php/create-alist-account.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

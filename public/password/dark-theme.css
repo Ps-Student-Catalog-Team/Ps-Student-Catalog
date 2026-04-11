@@ -1,0 +1,42 @@
+/* dark-theme.css */
+body {
+    font-family: Arial, sans-serif;
+    color: #eee;
+    background: #121212;
+    padding: 20px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.btn-toggle {
+    display: block;
+    margin: 0 auto 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: 1px solid #fff;
+    background-color: #333;
+    transition: background-color 0.3s;
+}
+
+.btn-toggle:hover {
+    background-color: #555;
+}
+
+.password-container {
+    background: #232323;
+    padding: 25px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(255,255,255,0.1);
+}
+
+#passwords {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: 'Courier New', Courier, monospace;
+    color: #fff;
+}

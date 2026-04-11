@@ -2,11 +2,11 @@
 	font-weight: normal;
 	font-style: normal;
 	font-family: 'codropsicons';
-	src:url('../public/fonts/codropsicons/codropsicons.eot');
-	src:url('../public/fonts/codropsicons/codropsicons.eot?#iefix') format('embedded-opentype'),
-		url('../public/fonts/codropsicons/codropsicons.woff') format('woff'),
-		url('../public/fonts/codropsicons/codropsicons.ttf') format('truetype'),
-		url('../public/fonts/codropsicons/codropsicons.svg#codropsicons') format('svg');
+	src:url('../fonts/codropsicons/codropsicons.eot');
+	src:url('../fonts/codropsicons/codropsicons.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/codropsicons/codropsicons.woff') format('woff'),
+		url('../fonts/codropsicons/codropsicons.ttf') format('truetype'),
+		url('../fonts/codropsicons/codropsicons.svg#codropsicons') format('svg');
 }
 
 *, *:after, *:before { -webkit-box-sizing: border-box; box-sizing: border-box; }

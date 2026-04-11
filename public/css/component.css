@@ -2,13 +2,13 @@
 .large-header {
 	position: relative;
 	width: 100%;
-	background: url('../public/img/stsr.png') no-repeat center center; /* 修改这里为你的图片地址 */
+	background: url('../img/stsr.png') no-repeat center center; /* 修改这里为你的图片地址 */
 	background-size: cover;
 	overflow: hidden;
 	z-index: 1;
 }
 .demo-1 .large-header {
-	background-image: url('../public/img/stsr.png'); /* 可以选择去掉这一行或修改为其他图片 */
+	background-image: url('../img/stsr.png'); /* 可以选择去掉这一行或修改为其他图片 */
 }
 video#bgvid { 
 	position: fixed; right: 0; bottom: 0; 
@@ -16,7 +16,7 @@ video#bgvid {
 	width: auto; 
 	height: auto; 
 	z-index: -100; 
-	background: url('../public/img/stsr.png') no-repeat; /* 修改这里为另一张图片地址 */
+	background: url('../img/stsr.png') no-repeat; /* 修改这里为另一张图片地址 */
 	background-size: cover; 
   }
 
@@ -53,7 +53,7 @@ video#bgvid {
 	height: 20vw;
 	min-width: 3.5em;
 	min-height: 3.5em;
-	background: url(../public/img/deco.svg) no-repeat center center;
+	background: url(../img/deco.svg) no-repeat center center;
 	background-size: cover;
 	position: absolute;
 	top: 50%;

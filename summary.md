@@ -150,10 +150,10 @@ website/
 - 图片: `../public/img/logo/*.jpg`, `../public/img/logo/*.png`, `../public/img/logo/*.jpeg`
 
 ### `pages/user-center.html`
-- 链接: `../index.html`, `comment.html`
+- 链接: `/index.html`, `comment.html`
 
 ### `pages/readme.html`
-- 链接: `../index.html`, `comment.html`
+- 链接: `/index.html`, `comment.html`
 
 ### `public/student_catalog.html`
 - 图标: `../public/img/favicon.ico`
