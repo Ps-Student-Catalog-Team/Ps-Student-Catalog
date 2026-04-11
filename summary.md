@@ -158,7 +158,7 @@ website/
 ### `public/student_catalog.html`
 - 图标: `../public/img/favicon.ico`
 - CSS: `./css/main.css`
-- 链接: `../pages/readme.html`
+- 链接: `../public/pages/readme.html`
 
 ## 验证结果
 经过全面检查，所有文件引用均已正确更新。使用grep搜索确认了所有`href`, `src`, `include`, `require`等引用路径的准确性。网站现在可以正常运行，所有资源路径都指向正确位置。

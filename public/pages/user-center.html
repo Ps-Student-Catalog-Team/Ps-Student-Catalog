@@ -203,7 +203,7 @@
         // 加载用户留言
         async function loadUserComments(username) {
             try {
-                const response = await fetch('../php/get-user-comments.php', {
+                const response = await fetch('../public/php/get-user-comments.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -259,7 +259,7 @@
             try {
                 resultDiv.textContent = '正在创建AList账户...';
                 
-                const response = await fetch('../php/create-alist-account.php', {
+                const response = await fetch('../public/php/create-alist-account.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
