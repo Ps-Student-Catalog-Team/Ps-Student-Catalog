@@ -44,7 +44,7 @@ website/
 ├── public/         # 公共资源
 ├── fonts/          # 字体文件
 ├── tutorial/       # 教程相关文件
-├── password/       # 密码相关页面
+├── public/password/ # 密码相关页面
 ├── server/         # 服务器相关文件
 ├── status/         # 状态相关文件
 ├── ErrorFiles/     # 错误页面
@@ -137,7 +137,7 @@ website/
 ### `index.html` (根目录)
 - favicon: `img/favicon.ico`
 - CSS: `public/css/main.css`, `../public/css/font-awesome.min.css`
-- 页面链接: `pages/readme.html`, `password/newest.html`, `tutorial/show.html`, `public/clock2.html`, `public/Countdown/index.html`, `pages/clock.html`, `pages/comment.html`, `pages/user-center.html`
+- 页面链接: `pages/readme.html`, `public/password/newest.html`, `tutorial/show.html`, `public/clock2.html`, `public/Countdown/index.html`, `pages/clock.html`, `pages/comment.html`, `pages/user-center.html`
 
 ### `pages/clock.html`
 - CSS: `../public/css/normalize.css`, `../public/public/css/style.css`, `../public/css/demo.css`, `../public/css/component.css`
