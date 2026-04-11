@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>教程内容</title>
     <!-- 引入marked.js库 -->
-    <script src="../public/js/marked.min.js"></script>
+    <script src="../js/marked.min.js"></script>
     <!-- 引入主站样式 -->
-    <link rel="stylesheet" href="../public/css/main.css">
+    <link rel="stylesheet" href="../css/main.css">
     <style>
         /* 代码块容器样式 */
 .code-block-wrapper {
@@ -585,10 +585,15 @@
             const results = regex.exec(location.search);
             let fileName = results === null ? 'powershadow.md' : decodeURIComponent(results[1].replace(/\+/g, ' '));
             
-            // 防止目录遍历漏洞
-            fileName = fileName.replace(/[\.\/]/g, '');
+            // 防止目录遍历漏洞，仅保留文件名，不保留路径或特殊字符
+            fileName = fileName.replace(/\\/g, '/');
+            fileName = fileName.split('/').pop().split('?')[0].split('#')[0];
+            fileName = fileName.replace(/[^A-Za-z0-9_.-]/g, '');
+            if (!fileName.toLowerCase().endsWith('.md')) {
+                fileName += '.md';
+            }
             
-            return fileName + '.md';
+            return fileName;
         }
 
         // 提取Markdown标题

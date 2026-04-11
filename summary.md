@@ -42,8 +42,8 @@ website/
 ├── css/            # 样式文件
 ├── js/             # JavaScript 文件
 ├── public/         # 公共资源
-├── fonts/          # 字体文件
-├── tutorial/       # 教程相关文件
+├── public/assets/fonts/ # 字体文件
+├── public/tutorial/     # 教程相关文件
 ├── public/password/ # 密码相关页面
 ├── server/         # 服务器相关文件
 ├── status/         # 状态相关文件
@@ -137,12 +137,12 @@ website/
 ### `index.html` (根目录)
 - favicon: `img/favicon.ico`
 - CSS: `public/css/main.css`, `../public/css/font-awesome.min.css`
-- 页面链接: `pages/readme.html`, `public/password/newest.html`, `tutorial/show.html`, `public/clock2.html`, `public/Countdown/index.html`, `pages/clock.html`, `pages/comment.html`, `pages/user-center.html`
+- 页面链接: `pages/readme.html`, `public/password/newest.html`, `public/tutorial/show.html`, `public/clock2.html`, `public/Countdown/index.html`, `pages/clock.html`, `pages/comment.html`, `pages/user-center.html`
 
 ### `pages/clock.html`
 - CSS: `../public/css/normalize.css`, `../public/public/css/style.css`, `../public/css/demo.css`, `../public/css/component.css`
 - JS: `../public/js/html5.js`, `../js/TweenLite.min.js`, `../js/EasePack.min.js`, `../js/rAF.js`, `../js/demo-1.js`, `../js/quotes.js`, `../js/Rx.min.js`, `../js/rxcss.min.js`, `../js/index.js`
-- 字体: `../public/fonts/one.ttf`
+- 字体: `../assets/fonts/one.ttf`
 
 ### `pages/about_us.html`
 - 图标: `../public/img/favicon.ico`
