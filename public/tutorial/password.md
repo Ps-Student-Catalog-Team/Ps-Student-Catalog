@@ -8,7 +8,7 @@
 | zhengmm   | zhengmm123    | 数学    |郑梦梦       |
 | luhj   | YyDD0S    | 化学    |卢航君    |
 | hef   | 896236    | 生物    |何芬        |
-| zhangxiaoyan   | 123456    | 历史    |   张笑燕  |
+| zhangxiaoyan   |  135246   | 历史    |   张笑燕  |
 | laojm|135246|生物|劳键明|
 | liuby|as04as04|英语|刘碧瑜|
 | fanlf|Fanlf1|物理|樊利芳|
@@ -17,6 +17,8 @@
 ||xia440183|劳动||
 |huangjj|135246|物理|黄俊俊|
 |xijw|wei011030|英语|席嘉威|
+linxp|135246|语文|林先平|
+tanyy|19961214|谭杨英|物理|
 
 
 ## 如何搜集教、师目录的密码
