@@ -562,67 +562,86 @@
         </div>
 
         <!-- 工具选择页面 -->
-        <div id="tools-page">
-            <button class="back-button" onclick="goBack()">返回首页</button>
-            <h2>工具选择</h2>
-            <div class="tutorial-grid">
-                <div class="tutorial-card">
-                    <h3>VPN日志分析</h3>
-                    <p>一个小小的日志分析网站</p>
-                    <a href="http://10.88.202.73:10091" class="btn btn-outline-primary">进入</a>
-                </div>
-                <div class="tutorial-card">
-                    <h3>时钟</h3>
-                    <p>展示当前的时间</p>
-                    <p>如果你想添加引言，请在留言簿中留言</p>
-                    <a href="public/pages/clock.html" class="btn btn-outline-primary">进入</a>
-                </div>
-                <div class="tutorial-card">
-                    <h3>特殊的时钟(oﾟvﾟ)ノ</h3>
-                    <p>展示当前的时间，不过引言变得有些奇怪 : ）</p>
-                    <p>如果你想添加引言，请在留言簿中留言</p>
-                    <a href="public/pages/clock2.html" class="btn btn-outline-primary">进入</a>
-                </div>
-                <div class="tutorial-card">
-                    <h3>留言簿</h3>
-                    <p>一个简单的留言簿，所有人都可以匿名地在这里记录任何事情</p>
-                    <a href="public/pages/comment.html" class="btn btn-outline-primary">进入</a>
-                </div>
-                
-                <div class="tutorial-card">
-                    <h3>更多内容</h3>
-                    <p>我们将一些有趣的内容放在了这里，访问这些内容需要拥有公网访问权限，有关如何访问公网请参考教程</p>
-                    <a href="https://psstunet.github.io/" class="btn btn-outline-primary">进入</a>
-                </div>
+        <!-- 工具选择页面 -->
+<div id="tools-page">
+    <button id="toolsBackButton" class="back-button" onclick="goBack()">返回首页</button>
+    <h2>工具选择</h2>
 
-                <!--div class="tutorial-card">
-                    <h3>种子下载</h3>
-                    <p>使用Qbittorrent下载种子文件</p>
-                    <a href="http://10.88.202.73:8080" class="btn btn-outline-primary">进入</a>
-                </div-->
-
-                <div class="tutorial-card">
-                    <h3>countdown</h3>
-                    <p>高考倒计时awa（以当届高三生为准）</p>
-                    <a href="public/pages/clock2.html" class="btn btn-outline-primary">进入</a>
-                </div>
-                <div class="tutorial-card">
-                    <h3>用户中心</h3>
-                    <p>查看您发送的留言</p>
-                    <a href="public/pages/user-center.html" class="btn btn-outline-primary">进入</a>
-                </div>
-                <div class="tutorial-card">
-                    <h3>我的世界管理</h3>
-                    <p>我的世界管理服务器</p>
-                    <a href="http://10.88.202.73:23333/#/login" class="btn btn-outline-primary">进入</a>
-                </div>
-                <div class="tutorial-card">
-                    <h3>keylogger管理</h3>
-                    <p>管理服务器keylogger</p>
-                     <a href="http://10.88.202.73:3232/login.html" class="btn btn-outline-primary">进入</a>
-                </div>
+    <!-- 一级工具视图-->
+    <div id="primary-tools-view">
+        <div class="tutorial-grid">
+            <div class="tutorial-card">
+                <h3>时钟</h3>
+                <p>展示当前的时间</p>
+                <p>如果你想添加引言，请在留言簿中留言</p>
+                <a href="public/pages/clock.html" class="btn btn-outline-primary">进入</a>
+            </div>
+            <div class="tutorial-card">
+                <h3>特殊的时钟(oﾟvﾟ)ノ</h3>
+                <p>展示当前的时间，不过引言变得有些奇怪 : ）</p>
+                <p>如果你想添加引言，请在留言簿中留言</p>
+                <a href="public/pages/clock2.html" class="btn btn-outline-primary">进入</a>
+            </div>
+            <div class="tutorial-card">
+                <h3>留言簿</h3>
+                <p>一个简单的留言簿，所有人都可以匿名地在这里记录任何事情</p>
+                <a href="public/pages/comment.html" class="btn btn-outline-primary">进入</a>
+            </div>
+            <div class="tutorial-card">
+                <h3>学生目录日志</h3>
+                <p>查看每月月度报告</p>
+                <a href="https://psstunet.github.io/" class="btn btn-outline-primary">进入</a>
+            </div>
+            <div class="tutorial-card">
+                <h3>countdown</h3>
+                <p>高考倒计时awa（以当届高三生为准）</p>
+                <a href="public/pages/clock2.html" class="btn btn-outline-primary">进入</a>
+            </div>
+            <div class="tutorial-card">
+                <h3>用户中心</h3>
+                <p>查看您发送的留言</p>
+                <a href="public/pages/user-center.html" class="btn btn-outline-primary">进入</a>
+            </div>
+            <!--点击后显示二级工具视图 -->
+            <div class="tutorial-card">
+                <h3>工具集</h3>
+                <p>一些小小的工具。。？</p>
+                <br>
+                <br>
+                <a href="javascript:void(0);" onclick="showSecondaryTools();" class="btn btn-outline-primary">进入</a>
             </div>
         </div>
+    </div>
+
+    <!-- 二级工具视图（初始隐藏） -->
+    <div id="secondary-tools-view" style="display: none;">
+        <h3 style="margin-bottom: 20px; color: var(--accent-color);">更多工具</h3>
+        <div class="tutorial-grid">
+            <!-- 在这里添加你想要的二级卡片，例如： -->
+            
+            <!--div class="tutorial-card">
+                <h3>种子下载</h3>
+                <p>使用Qbittorrent下载种子文件</p>
+                <a href="http://10.88.202.73:8080" class="btn btn-outline-primary">进入</a>
+            </div-->
+            <div class="tutorial-card">
+                <h3>VPN日志分析</h3>
+                <p>一个小小的日志分析网站</p>
+                <a href="http://10.88.202.73:10091" class="btn btn-outline-primary">进入</a>
+            </div>
+            <div class="tutorial-card">
+                <h3>我的世界管理</h3>
+                <p>我的世界管理服务器</p>
+                <a href="http://10.88.202.73:23333/#/login" class="btn btn-outline-primary">进入</a>
+            </div>
+            <div class="tutorial-card">
+                <h3>keylogger管理</h3>
+                <p>管理服务器keylogger</p>
+                <a href="http://10.88.202.73:3232/login.html" class="btn btn-outline-primary">进入</a>
+            </div>
+        </div>
+    </div>
+</div>
 
     </div>
     
@@ -665,17 +684,102 @@
     }
 
     function navigateToTools() {
-        document.getElementById('home-page').classList.add('slide-out');
-        document.getElementById('tools-page').classList.add('slide-in');
+    document.getElementById('home-page').classList.add('slide-out');
+    document.getElementById('tools-page').classList.add('slide-in');
+
+    // 确保工具页显示一级视图，且按钮状态正确
+    var primary = document.getElementById('primary-tools-view');
+    var secondary = document.getElementById('secondary-tools-view');
+    if (primary && secondary) {
+        primary.style.display = 'block';
+        secondary.style.display = 'none';
+        primary.classList.remove('slide-out', 'slide-in');
+        secondary.classList.remove('slide-out', 'slide-in');
+    }
+    var backBtn = document.getElementById('toolsBackButton');
+    if (backBtn) {
+        backBtn.textContent = '返回首页';
+        backBtn.onclick = goBack;
+    }
+}
+
+    // 显示二级工具视图（从一级滑到二级）
+function showSecondaryTools() {
+    var primary = document.getElementById('primary-tools-view');
+    var secondary = document.getElementById('secondary-tools-view');
+    var backBtn = document.getElementById('toolsBackButton');
+
+    // 一级视图滑出
+    primary.classList.add('slide-out');
+    
+    setTimeout(() => {
+        primary.style.display = 'none';
+        primary.classList.remove('slide-out');
+        
+        // 显示二级视图并滑入
+        secondary.style.display = 'block';
+        secondary.classList.add('slide-in');
+        
+        setTimeout(() => {
+            secondary.classList.remove('slide-in');
+        }, 300);
+    }, 300);
+
+    // 修改顶部返回按钮
+    backBtn.textContent = '返回';
+    backBtn.onclick = showPrimaryTools;
+}
+
+// 返回一级工具视图（从二级滑回一级）
+function showPrimaryTools() {
+    var primary = document.getElementById('primary-tools-view');
+    var secondary = document.getElementById('secondary-tools-view');
+    var backBtn = document.getElementById('toolsBackButton');
+
+    // 二级视图滑出
+    secondary.classList.add('slide-out');
+    
+    setTimeout(() => {
+        secondary.style.display = 'none';
+        secondary.classList.remove('slide-out');
+        
+        // 显示一级视图并滑入
+        primary.style.display = 'block';
+        primary.classList.add('slide-in');
+        
+        setTimeout(() => {
+            primary.classList.remove('slide-in');
+        }, 300);
+    }, 300);
+
+    // 恢复顶部返回按钮
+    backBtn.textContent = '返回首页';
+    backBtn.onclick = goBack;
+}
+
+// 返回首页（确保重置工具页状态）
+function goBack() {
+    document.getElementById('home-page').classList.remove('slide-out');
+    document.getElementById('tutorial-page').classList.remove('slide-in');
+    document.getElementById('about-page').classList.remove('slide-in');
+    document.getElementById('tools-page').classList.remove('slide-in');
+
+    // 重置工具页内部为一级视图（无动画直接重置，因为已经离开工具页）
+    var primary = document.getElementById('primary-tools-view');
+    var secondary = document.getElementById('secondary-tools-view');
+    if (primary && secondary) {
+        primary.style.display = 'block';
+        secondary.style.display = 'none';
+        primary.classList.remove('slide-out', 'slide-in');
+        secondary.classList.remove('slide-out', 'slide-in');
     }
 
-    function goBack() {
-        document.getElementById('home-page').classList.remove('slide-out');
-        document.getElementById('tutorial-page').classList.remove('slide-in');
-        document.getElementById('about-page').classList.remove('slide-in');
-        document.getElementById('tools-page').classList.remove('slide-in');        
+    var backBtn = document.getElementById('toolsBackButton');
+    if (backBtn) {
+        backBtn.textContent = '返回首页';
+        backBtn.onclick = goBack;
     }
-
+}
     function toggleReadMore(btn) {
         const content = btn.parentElement.querySelector('.collapsed-content');
         const isExpanded = content.style.maxHeight;
@@ -824,6 +928,38 @@
             transform: translateX(0);
         }
     }
+
+    /* 工具页内部视图切换动画 */
+#primary-tools-view,
+#secondary-tools-view {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+#primary-tools-view.slide-out,
+#secondary-tools-view.slide-out {
+    opacity: 0;
+    transform: translateX(-30px);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#primary-tools-view.slide-in,
+#secondary-tools-view.slide-in {
+    animation: slideInView 0.3s forwards;
+}
+
+@keyframes slideInView {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
 
     @keyframes ripple {
         to {
