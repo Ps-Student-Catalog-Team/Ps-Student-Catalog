@@ -48,49 +48,96 @@ const saveLastOnlineTimes = () => {
 loadLastOnlineTimes();
 
 app.get('/api/vpn-status', async (req, res) => {
-    // 添加请求日志
     console.log(`[${new Date().toISOString()}] 检测IP: ${req.query.ip}`);
 
-    // 添加参数验证
+    // 参数验证
     if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(req.query.ip)) {
         return res.status(400).json({ error: 'Invalid IP format' });
     }
 
-    const start = Date.now();
-    const client = net.createConnection({
-        port: 443,
-        host: req.query.ip,
-        timeout: 5000 // 添加超时控制
-    });
+    const targetIP = req.query.ip;
+    const maxRetries = 3;               // 最多重试2次，总计3次尝试
+    const retryDelay = 500;             // 重试前等待500ms
+    const connectTimeout = 3000;        // 单次连接超时时间3秒
 
-    // 统一处理响应
-    const sendResponse = (online) => {
-        clearTimeout(timeoutHandle);
-        if (online) {
-            lastOnlineTimes[req.query.ip] = new Date().toLocaleString();
-            saveLastOnlineTimes(); // 保存最后在线时间到文件
-        }
-        res.json({
-            online,
-            ping: online ? Date.now() - start : null,
-            lastOnline: lastOnlineTimes[req.query.ip] || '从未在线'
+    // 封装单次检测尝试，返回 Promise
+    const attemptConnection = () => {
+        return new Promise((resolve, reject) => {
+            const start = Date.now();
+            const client = net.createConnection({
+                port: 443,
+                host: targetIP,
+                timeout: connectTimeout
+            });
+
+            let settled = false;
+
+            const handleResult = (online) => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timeoutHandle);
+                if (online) {
+                    client.end();
+                    resolve({
+                        online: true,
+                        ping: Date.now() - start
+                    });
+                } else {
+                    client.destroy();
+                    reject(new Error('Connection failed or timeout'));
+                }
+            };
+
+            const timeoutHandle = setTimeout(() => {
+                handleResult(false);
+            }, connectTimeout);
+
+            client.on('connect', () => {
+                handleResult(true);
+            });
+
+            client.on('error', (err) => {
+                console.error(`[ERROR] 连接错误 (${targetIP}): ${err.code} - ${err.message}`);
+                handleResult(false);
+            });
+
+            client.on('timeout', () => {
+                console.warn(`[WARN] 连接超时 (${targetIP})`);
+                handleResult(false);
+            });
         });
     };
 
-    // 超时处理
-    const timeoutHandle = setTimeout(() => {
-        client.destroy();
-        sendResponse(false);
-    }, 1000);
+    // 执行重试循环
+    let lastError;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            const result = await attemptConnection();
+            // 成功：记录最后在线时间并返回结果
+            lastOnlineTimes[targetIP] = new Date().toLocaleString();
+            saveLastOnlineTimes();
+            return res.json({
+                online: true,
+                ping: result.ping,
+                lastOnline: lastOnlineTimes[targetIP],
+                attempts: attempt + 1     // 可选：返回尝试次数便于调试
+            });
+        } catch (err) {
+            lastError = err;
+            if (attempt < maxRetries) {
+                console.log(`[INFO] 尝试 ${attempt + 1} 失败，${retryDelay}ms 后重试...`);
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+            }
+        }
+    }
 
-    client.on('connect', () => {
-        client.end();
-        sendResponse(true);
-    });
-
-    client.on('error', (err) => {
-        console.error(`[ERROR] 检测错误: ${err.message}`);
-        sendResponse(false);
+    // 所有尝试均失败
+    console.error(`[ERROR] 所有重试失败 (${targetIP}): ${lastError?.message}`);
+    return res.json({
+        online: false,
+        ping: null,
+        lastOnline: lastOnlineTimes[targetIP] || '从未在线',
+        attempts: maxRetries + 1
     });
 });
 
