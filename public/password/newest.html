@@ -27,8 +27,8 @@
         </div>
         <div class="vpn-status" id="vpnStatus">
             <h3>VPN服务器状态</h3>
-            <div class="status-item" id="status_10.88.202.73">检测中...</div>
-            <div class="session-info" id="sessionInfo_10.88.202.73">会话数: 检测中...</div>
+            <div class="status-item" id="status_10.88.202.59">检测中...</div>
+            <div class="session-info" id="sessionInfo_10.88.202.59">会话数: 检测中...</div>
             <div class="status-item" id="status_10.88.213.212">检测中...</div>
             <div class="session-info" id="sessionInfo_10.88.213.212">会话数: 检测中...</div>
         </div>
@@ -40,8 +40,8 @@
     <script src="./copy-script.js"></script>
     <script>
     const API_BASE_URLS = {
-        main: 'http://10.88.202.73:3132',
-        local: 'http://10.88.202.73:3132'
+        main: 'http://10.88.202.59:3132',
+        local: 'http://10.88.202.59:3132'
     };
 
     function ping(ip, callback) {
@@ -67,7 +67,7 @@
                 resolve(false);
             }, timeout);
 
-            fetch(`http://10.88.202.73:3132/api/ping`, {
+            fetch(`http://10.88.202.59:3132/api/ping`, {
                 signal: controller.signal,
                 method: 'GET'
             })
@@ -83,7 +83,7 @@
     }
 
     async function getApiBaseUrl() {
-        const isMainServerReachable = await pingServer('10.88.202.73', 1000);
+        const isMainServerReachable = await pingServer('10.88.202.59', 1000);
         return isMainServerReachable ? API_BASE_URLS.main : API_BASE_URLS.local;
     }
 
@@ -149,7 +149,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         checkVPNStatus('10.88.194.142', 'status_10.88.194.142', 'sessionInfo_10.88.194.142');
         checkVPNStatus('10.88.202.11', 'status_10.88.202.11', 'sessionInfo_10.88.202.11');
-        checkVPNStatus('10.88.202.73', 'status_10.88.202.73', 'sessionInfo_10.88.202.73');
+        checkVPNStatus('10.88.202.59', 'status_10.88.202.59', 'sessionInfo_10.88.202.59');
         checkVPNStatus('10.88.213.212', 'status_10.88.213.212', 'sessionInfo_10.88.213.212');
     });
 
