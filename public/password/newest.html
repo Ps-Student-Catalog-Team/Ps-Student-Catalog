@@ -27,6 +27,10 @@
         </div>
         <div class="vpn-status" id="vpnStatus">
             <h3>VPN服务器状态</h3>
+            <div class="status-item" id="status_10.88.194.142">检测中...</div>
+            <div class="session-info" id="sessionInfo_10.88.194.142">会话数: 检测中...</div>
+            <div class="status-item" id="status_10.88.202.11">检测中...</div>
+            <div class="session-info" id="sessionInfo_10.88.202.11">会话数: 检测中...</div>
             <div class="status-item" id="status_10.88.202.59">检测中...</div>
             <div class="session-info" id="sessionInfo_10.88.202.59">会话数: 检测中...</div>
             <div class="status-item" id="status_10.88.213.212">检测中...</div>
@@ -114,6 +118,12 @@
     async function checkVPNStatus(ip, elementId, sessionInfoId) {
         const statusElement = document.getElementById(elementId);
         const sessionInfoElement = document.getElementById(sessionInfoId);
+
+        if (!statusElement) {
+            console.warn(`VPN status element not found for ${ip}: ${elementId}`);
+            return;
+        }
+
         try {
             const response = await fetchFromApi(`/api/vpn-status?ip=${ip}`, { timeout: 1000 });
             const data = await response.json();
@@ -124,25 +134,33 @@
 
             // 根据服务器状态应用相应的样式
             statusElement.classList.remove('checking', 'offline', 'online');
-            sessionInfoElement.classList.remove('checking', 'offline-session', 'online-session');
+            if (sessionInfoElement) {
+                sessionInfoElement.classList.remove('checking', 'offline-session', 'online-session');
+            }
 
             if (data.online) {
                 statusElement.classList.add('online');
-                const sessionResponse = await fetchFromApi(`/api/vpn-users?ip=${ip}`, { timeout: 1000 });
-                const sessionData = await sessionResponse.json();
-                sessionInfoElement.innerHTML = `会话数: ${sessionData.sessionCount}`;
-                sessionInfoElement.classList.add('online-session');
-                sessionInfoElement.style.display = 'block'; // 显示会话数
+                if (sessionInfoElement) {
+                    const sessionResponse = await fetchFromApi(`/api/vpn-users?ip=${ip}`, { timeout: 1000 });
+                    const sessionData = await sessionResponse.json();
+                    sessionInfoElement.innerHTML = `会话数: ${sessionData.sessionCount}`;
+                    sessionInfoElement.classList.add('online-session');
+                    sessionInfoElement.style.display = 'block'; // 显示会话数
+                }
             } else {
                 statusElement.classList.add('offline');
-                sessionInfoElement.style.display = 'none'; // 不显示会话数
+                if (sessionInfoElement) {
+                    sessionInfoElement.style.display = 'none'; // 不显示会话数
+                }
             }
         } catch (error) {
             // 错误状态也显示IP
             statusElement.innerHTML = `⚠ ${ip} 检测失败`;
             statusElement.classList.remove('checking', 'online', 'offline');
             statusElement.classList.add('checking');
-            sessionInfoElement.style.display = 'none'; // 不显示会话数
+            if (sessionInfoElement) {
+                sessionInfoElement.style.display = 'none'; // 不显示会话数
+            }
         }
     }
     // 页面加载时执行检测
