@@ -143,39 +143,27 @@ app.get('/api/vpn-status', async (req, res) => {
 
 // 添加查询VPN当前在线人数的端点
 app.get('/api/vpn-users', async (req, res) => {
-    // 添加请求日志
     console.log(`[${new Date().toISOString()}] 查询VPN用户数: ${req.query.ip}`);
 
-    // 添加参数验证
     if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(req.query.ip)) {
-        return res.status(400).json({ error: 'Invalid IP format' });
+        return res.json({ success: false, error: 'Invalid IP format' });
     }
 
-    // 构建vpncmd命令
     const command = `"C:\\Program Files\\SoftEther VPN Server Developer Edition\\vpncmd.exe" ${req.query.ip} /server /password:adm1n5 /hub:vpn /cmd statusget`;
 
-    // 执行命令
     exec(command, (error, stdout, stderr) => {
         if (error) {
             console.error(`[ERROR] 执行命令错误: ${error.message}`);
-            console.error(`[ERROR] 执行命令 stderr: ${stderr}`);
-            return res.status(500).json({ error: 'Failed to execute command', details: error.message });
-        }
-
-        if (stderr) {
-            // 某些情况下 vpncmd 会把普通信息输出到 stderr，例如警告或进度提示
-            console.warn(`[WARN] 命令 stderr: ${stderr}`);
+            return res.json({ success: false, error: 'Failed to execute command', details: error.message });
         }
 
         const parseSessionCount = (output) => {
             const lines = output.split(/\r?\n/);
             for (const line of lines) {
-                // 优先抽取主会话数行，排除客户端和网桥细分行
                 if (/^\s*会话数[\s\u3000]*\|/.test(line) && !/会话数\s*\(客户端\)|会话数\s*\(网桥\)/.test(line)) {
                     const m = line.match(/会话数[\s\u3000]*\|[\s\u3000]*([0-9]+)/);
                     if (m) return parseInt(m[1].replace(/,/g, ''), 10);
                 }
-                // 兼容英文输出形式
                 if (/\b(SessionCount|CurrentSessions|Sessions)\b/i.test(line)) {
                     const m = line.match(/\|[\s\u3000]*([0-9]+)/);
                     if (m) return parseInt(m[1].replace(/,/g, ''), 10);
@@ -185,17 +173,12 @@ app.get('/api/vpn-users', async (req, res) => {
         };
 
         const sessionCount = parseSessionCount(stdout);
-
         if (sessionCount === null) {
             console.error('[ERROR] 无法从 vpncmd 输出解析会话数', { stdout, stderr });
-            return res.status(500).json({ error: 'Failed to parse VPN user count', details: stdout.trim() || stderr.trim() });
+            return res.json({ success: false, error: 'Failed to parse session count', rawOutput: stdout.trim() });
         }
 
-        res.json({
-            ip: req.query.ip,
-            sessionCount: sessionCount,
-            rawOutput: stdout.trim()
-        });
+        res.json({ success: true, ip: req.query.ip, sessionCount: sessionCount });
     });
 });
 
@@ -221,14 +204,17 @@ app.get('/api/pull-updates', (req, res) => {
 
 // 添加获取最新VPN密码的端点
 app.get('/api/vpn-password', (req, res) => {
+    const filePath = path.join(__dirname, 'vpn-password.json');
     try {
-        const filePath = path.join(__dirname, 'vpn-password.json');
+        if (!fs.existsSync(filePath)) {
+            return res.json({ success: false, error: '密码文件未配置', password: null });
+        }
         const passwordData = fs.readFileSync(filePath, 'utf8');
         const data = JSON.parse(passwordData);
-        res.json(data);
+        res.json({ success: true, ...data });
     } catch (err) {
         console.error(`[ERROR] 读取VPN密码文件错误: ${err.message}`);
-        res.status(500).json({ error: 'Failed to read VPN password data' });
+        res.json({ success: false, error: 'Failed to read VPN password data' });
     }
 });
 

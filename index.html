@@ -40,48 +40,17 @@
         const ANNOUNCEMENT_HASH_KEY = 'announcementContentHash';
         const ANNOUNCEMENT_EXPIRE_HOURS = 3;
         const MOUSE_EFFECT_KEY = 'mouseEffectEnabled';
-        const API_BASE_URLS = {
-            main: 'http://10.88.202.59:3132',
-            local: 'http://localhost:3132'
-        };
-
-        async function pingServer(host, timeout = 1000) {
-            return new Promise((resolve) => {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => {
-                    controller.abort();
-                    resolve(false);
-                }, timeout);
-
-                // 使用通用的根路径检测，不依赖API端点
-                fetch(`http://${host}:3132/`, {
-                    signal: controller.signal,
-                    method: 'HEAD', // 使用HEAD请求减少数据传输
-                    mode: 'no-cors' // 允许跨域请求
-                })
-                .then(() => {
-                    clearTimeout(timeoutId);
-                    resolve(true);
-                })
-                .catch(() => {
-                    clearTimeout(timeoutId);
-                    resolve(false);
-                });
-            });
-        }
-
-        async function getApiBaseUrl() {
-            const isMainServerReachable = await pingServer('10.88.202.59', 1000);
-            return isMainServerReachable ? API_BASE_URLS.main : API_BASE_URLS.local;
-        }
+        const API_BASE_URL = 'http://10.88.202.59:3132';
 
         async function fetchFromApi(endpoint, options = {}) {
-            const baseUrl = await getApiBaseUrl();
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), options.timeout || 1000);
+            const timeoutId = setTimeout(() => controller.abort(), options.timeout || 5000);
+            
+            // 拼接完整的 API 地址
+            const url = API_BASE_URL + endpoint;
             
             try {
-                const response = await fetch(`${baseUrl}${endpoint}`, {
+                const response = await fetch(url, {
                     ...options,
                     signal: controller.signal
                 });
@@ -292,32 +261,40 @@
             const countElement = document.getElementById('vpnSessionCount');
             
             try {
-                const response = await fetchFromApi('/api/vpn-users?ip=10.88.202.59', { timeout: 1000 });
+                const response = await fetchFromApi('/api/vpn-users?ip=10.88.202.59', { timeout: 5000 });
                 const data = await response.json();
-                const sessionCount = data.sessionCount || 0;
                 
-                // 更新会话数显示
-                if (countElement) {
-                    countElement.textContent = `(${sessionCount}人)`;
+                if (!data.success) {
+                    throw new Error(data.error || '获取会话数失败');
                 }
                 
-                // 根据会话数设置颜色（使用 !important 覆盖 CSS 样式）
+                const sessionCount = data.sessionCount;
+                if (sessionCount === null || sessionCount === undefined) {
+                    throw new Error('会话数数据无效');
+                }
+                
+                // 显示时减一（去掉自己的连接）
+                const displayCount = Math.max(0, sessionCount - 1);
+                if (countElement) {
+                    countElement.textContent = `(${displayCount}人)`;
+                }
+                
+                // 颜色判断仍使用原始会话数
                 if (sessionCount < 4) {
-                    linkElement.style.setProperty('color', 'rgb(0, 189, 73)', 'important'); // 绿色
+                    linkElement.style.setProperty('color', 'rgb(0, 189, 73)', 'important');
                 } else if (sessionCount >= 4 && sessionCount <= 7) {
-                    linkElement.style.setProperty('color', 'rgb(255, 193, 7)', 'important'); // 黄色
+                    linkElement.style.setProperty('color', 'rgb(255, 193, 7)', 'important');
                 } else {
-                    linkElement.style.setProperty('color', 'rgb(220, 53, 69)', 'important'); // 红色
+                    linkElement.style.setProperty('color', 'rgb(220, 53, 69)', 'important');
                 }
             } catch (error) {
                 console.error('检测 VPN 会话数失败:', error);
-                linkElement.style.setProperty('color', 'rgb(128, 128, 128)', 'important'); // 灰色 - 检测失败
+                linkElement.style.setProperty('color', 'rgb(128, 128, 128)', 'important');
                 if (countElement) {
                     countElement.textContent = '(检测失败)';
                 }
             }
         }
-
         // 确保在 DOM 加载完成后执行
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('passwordModal').addEventListener('click', function(e) {
