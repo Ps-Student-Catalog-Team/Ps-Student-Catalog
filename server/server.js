@@ -203,8 +203,8 @@ app.get('/api/pull-updates', (req, res) => {
 });
 
 // 添加获取最新VPN密码的端点
-app.get('/api/vpn-password', (req, res) => {
-    const filePath = path.join(__dirname, 'vpn-password.json');
+app.get('/api/Vpn-Password', (req, res) => {
+    const filePath = path.join(__dirname, 'Vpn-Password.json');
     try {
         if (!fs.existsSync(filePath)) {
             return res.json({ success: false, error: '密码文件未配置', password: null });

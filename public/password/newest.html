@@ -303,7 +303,7 @@
     // 从API获取VPN密码
     document.addEventListener('DOMContentLoaded', async function() {
         try {
-            const response = await fetchFromApi('/api/vpn-password', { timeout: 1000 });
+            const response = await fetchFromApi('/api/Vpn-Password', { timeout: 1000 });
             const data = await response.json();
             
             if (data.password) {
