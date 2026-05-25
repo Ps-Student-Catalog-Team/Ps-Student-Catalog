@@ -141,15 +141,13 @@ app.get('/api/vpn-status', async (req, res) => {
     });
 });
 
-// 添加查询VPN当前在线人数的端点
+// 添加查询本地VPN当前在线人数的端点
 app.get('/api/vpn-users', async (req, res) => {
-    console.log(`[${new Date().toISOString()}] 查询VPN用户数: ${req.query.ip}`);
+    console.log(`[${new Date().toISOString()}] 查询本地VPN用户数`);
 
-    if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(req.query.ip)) {
-        return res.json({ success: false, error: 'Invalid IP format' });
-    }
-
-    const command = `"C:\\Program Files\\SoftEther VPN Server Developer Edition\\vpncmd.exe" ${req.query.ip} /server /password:adm1n5 /hub:vpn /cmd statusget`;
+    // 直接请求本地，无需 IP 参数
+    const localhost = '127.0.0.1';
+    const command = `"C:\\Program Files\\SoftEther VPN Server Developer Edition\\vpncmd.exe" ${localhost} /server /password:adm1n5 /hub:vpn /cmd statusget`;
 
     exec(command, (error, stdout, stderr) => {
         if (error) {
@@ -178,9 +176,10 @@ app.get('/api/vpn-users', async (req, res) => {
             return res.json({ success: false, error: 'Failed to parse session count', rawOutput: stdout.trim() });
         }
 
-        res.json({ success: true, ip: req.query.ip, sessionCount: sessionCount });
+        res.json({ success: true, ip: localhost, sessionCount: sessionCount });
     });
 });
+
 
 // 添加拉取同步最新更改的端点
 app.get('/api/pull-updates', (req, res) => {
