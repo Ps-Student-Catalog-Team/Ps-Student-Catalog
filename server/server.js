@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 
 // 添加静态文件服务
-app.use(express.static(path.join(__dirname, '..')));
+//app.use(express.static(path.join(__dirname, '..')));
 
 // 解析JSON请求体
 app.use(express.json());
@@ -56,7 +56,7 @@ app.get('/api/vpn-status', async (req, res) => {
     }
 
     const targetIP = req.query.ip;
-    const maxRetries = 3;               // 最多重试2次，总计3次尝试
+    const maxRetries = 4;               // 最多重试3次，总计4次尝试
     const retryDelay = 500;             // 重试前等待500ms
     const connectTimeout = 3000;        // 单次连接超时时间3秒
 
