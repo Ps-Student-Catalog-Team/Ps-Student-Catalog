@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最新密码发布页</title>
+    <link href="../../public/css/light-theme.css" rel="stylesheet">
+    <meta name="color-scheme" content="light">
+</head>
+<body>
+    <header>
+        <h1>VPN 状态页</h1>
+    </header>
+    <main>
+        <p>校园VPN的密码以后会定时更新啦！</p>
+        <p>以前一直不变确实不太好呢</p>
+        <p>以后更新的VPN密码将会记录在此</p>
+        <p>如果你发现无法连接VPN，记得回来看看哦。<em style="color: gray;">访问此网站无需VPN</em></p>
+        <div class="announcement" id="announcementContainer">
+            <h3>重要公告</h3>
+            <p>加载中...</p>
+        </div>
+        <div class="password-info">
+            <p>最新密码发布时间：<span class="timestamp" id="passwordTime">加载中...</span></p>
+            <p>最新密码：<span class="password" id="password">加载中...</span></p>
+            <button class="btn-toggle" id="copyButton">一键复制密码</button>
+        </div>
+        <div class="vpn-status" id="vpnStatus">
+            <h3>VPN服务器状态</h3>
+            <div class="status-item" id="status_10.88.194.142">检测中...</div>
+            <div class="session-info" id="sessionInfo_10.88.194.142">会话数: 检测中...</div>
+            <div class="status-item" id="status_10.88.202.11">检测中...</div>
+            <div class="session-info" id="sessionInfo_10.88.202.11">会话数: 检测中...</div>
+            <div class="status-item" id="status_10.88.202.59">检测中...</div>
+            <div class="session-info" id="sessionInfo_10.88.202.59">会话数: 检测中...</div>
+            <div class="status-item" id="status_10.88.213.212">检测中...</div>
+            <div class="session-info" id="sessionInfo_10.88.213.212">会话数: 检测中...</div>
+        </div>
+        <!-- 动态背景粒子 -->
+        <div class="background-particles">
+            <canvas id="particles"></canvas>
+        </div>
+    </main>
+    <script src="../../server/copy-script.js"></script>
+    <script>
+        // ========== 固定 API 地址，避免探测延迟 ==========
+        const API_BASE_URL = 'http://10.88.202.59:3132';
+
+        async function fetchFromApi(endpoint, options = {}) {
+            const controller = new AbortController();
+            // 超时时间从 1 秒增加到 5 秒，匹配后端检测耗时
+            const timeoutId = setTimeout(() => controller.abort(), options.timeout || 5000);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    ...options,
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                throw error;
+            }
+        }
+
+        // VPN状态检测函数
+        async function checkVPNStatus(ip, elementId, sessionInfoId) {
+            const statusElement = document.getElementById(elementId);
+            const sessionInfoElement = document.getElementById(sessionInfoId);
+
+            if (!statusElement) {
+                console.warn(`VPN status element not found for ${ip}: ${elementId}`);
+                return;
+            }
+
+            try {
+                const response = await fetchFromApi(`/api/vpn-status?ip=${ip}`);
+                const data = await response.json();
+
+                statusElement.innerHTML = data.online ?
+                    `✅ ${ip} 在线 <span style="color: green;">(延迟: ${data.ping}ms)</span>` :
+                    `❌ ${ip} 离线 <span style="color: red;">(最后在线: ${data.lastOnline})</span>`;
+
+                statusElement.classList.remove('checking', 'offline', 'online');
+                if (sessionInfoElement) {
+                    sessionInfoElement.classList.remove('checking', 'offline-session', 'online-session');
+                }
+
+                if (data.online) {
+                    statusElement.classList.add('online');
+                    if (sessionInfoElement) {
+                        const sessionResponse = await fetchFromApi(`/api/vpn-users?ip=${ip}`);
+                        const sessionData = await sessionResponse.json();
+                        sessionInfoElement.innerHTML = `会话数: ${sessionData.sessionCount}`;
+                        sessionInfoElement.classList.add('online-session');
+                        sessionInfoElement.style.display = 'block';
+                    }
+                } else {
+                    statusElement.classList.add('offline');
+                    if (sessionInfoElement) {
+                        sessionInfoElement.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                statusElement.innerHTML = `⚠ ${ip} 检测失败`;
+                statusElement.classList.remove('checking', 'online', 'offline');
+                statusElement.classList.add('checking');
+                if (sessionInfoElement) {
+                    sessionInfoElement.style.display = 'none';
+                }
+            }
+        }
+
+        // 页面加载时执行检测
+        document.addEventListener('DOMContentLoaded', () => {
+            checkVPNStatus('10.88.194.142', 'status_10.88.194.142', 'sessionInfo_10.88.194.142');
+            checkVPNStatus('10.88.202.11', 'status_10.88.202.11', 'sessionInfo_10.88.202.11');
+            checkVPNStatus('10.88.202.59', 'status_10.88.202.59', 'sessionInfo_10.88.202.59');
+            checkVPNStatus('10.88.213.212', 'status_10.88.213.212', 'sessionInfo_10.88.213.212');
+        });
+
+        // 动态背景粒子效果（只保留一份）
+        function initParticles() {
+            const canvas = document.getElementById('particles');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const particleCount = 150;
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5'];
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 1;
+                    this.speedX = Math.random() * 2 - 1;
+                    this.speedY = Math.random() * 2 - 1;
+                    this.color = colors[Math.floor(Math.random() * colors.length)];
+                }
+
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.y > canvas.height) this.y = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                }
+
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(particle => {
+                    particle.update();
+                    particle.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+
+        // 从API获取VPN密码
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetchFromApi('/api/Vpn-Password');
+                const data = await response.json();
+
+                if (data.password) {
+                    document.getElementById('password').textContent = data.password;
+                }
+                if (data.updatedAt) {
+                    const date = new Date(data.updatedAt);
+                    document.getElementById('passwordTime').textContent = date.toLocaleString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                    });
+                }
+            } catch (error) {
+                console.error('获取VPN密码失败:', error);
+                document.getElementById('password').textContent = '@(^O^)@/';
+                document.getElementById('passwordTime').textContent = '2025-10-22 12:00:00';
+            }
+        });
+
+        // 从API获取公告内容
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetchFromApi('/api/announcement');
+                const data = await response.json();
+
+                if (data.newest) {
+                    const container = document.getElementById('announcementContainer');
+                    container.innerHTML = '';
+
+                    const title = document.createElement('h3');
+                    title.textContent = data.newest.title;
+                    container.appendChild(title);
+
+                    const hr = document.createElement('hr');
+                    hr.style.cssText = 'border: none; border-top: 1px solid #ddd; margin: 10px 0;';
+                    container.appendChild(hr);
+
+                    data.newest.content.forEach(item => {
+                        const p = document.createElement('p');
+                        p.innerHTML = item;
+                        container.appendChild(p);
+                    });
+
+                    if (data.serverModifiedTime) {
+                        const timeP = document.createElement('p');
+                        timeP.style.cssText = 'font-size: 0.7em; color: #999; text-align: center; margin-top: 15px; margin-bottom: 0;';
+                        timeP.innerHTML = `<i>最后更新: ${data.serverModifiedTime}</i>`;
+                        container.appendChild(timeP);
+                    }
+                }
+            } catch (error) {
+                console.error('获取公告失败:', error);
+                const container = document.getElementById('announcementContainer');
+                container.innerHTML = '<h3>重要公告</h3><p>加载公告失败</p>';
+            }
+        });
+
+        // 初始化动态背景
+        document.addEventListener('DOMContentLoaded', initParticles);
+    </script>
+</body>
+</html>

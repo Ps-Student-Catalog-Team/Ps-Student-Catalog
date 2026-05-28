@@ -137,7 +137,7 @@ website/
 ### `index.html` (根目录)
 - favicon: `img/favicon.ico`
 - CSS: `public/css/main.css`, `../public/css/font-awesome.min.css`
-- 页面链接: `pages/readme.html`, `public/password/newest.html`, `public/tutorial/show.html`, `public/clock2.html`, `public/Countdown/index.html`, `pages/clock.html`, `pages/comment.html`, `pages/user-center.html`
+- 页面链接: `pages/readme.html`, `public/pages/newest.html`, `public/tutorial/show.html`, `public/clock2.html`, `public/Countdown/index.html`, `pages/clock.html`, `pages/comment.html`, `pages/user-center.html`
 
 ### `pages/clock.html`
 - CSS: `../public/css/normalize.css`, `../public/public/css/style.css`, `../public/css/demo.css`, `../public/css/component.css`

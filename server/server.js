@@ -1,31 +1,28 @@
 const express = require('express');
 const net = require('net');
 const cors = require('cors');
-const { exec } = require('child_process'); // 引入child_process模块
+const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
 const app = express();
 
-// 启用CORS中间件
 app.use(cors());
-
-// 添加静态文件服务
-//app.use(express.static(path.join(__dirname, '..')));
-
-// 解析JSON请求体
 app.use(express.json());
-// 解析URL编码的请求体
 app.use(express.urlencoded({ extended: true }));
 
-// 添加健康检查端点
+// 健康检查
 app.get('/health', (req, res) => {
     res.status(200).send('Service Healthy');
 });
 
+// ping 接口，用于前端探测服务器可用性
+app.get('/api/ping', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
+
 let lastOnlineTimes = {};
 
-// 从文件中加载最后在线时间
 const loadLastOnlineTimes = () => {
     try {
         const data = fs.readFileSync(path.join(__dirname, 'lastOnlineTimes.json'), 'utf8');
@@ -36,7 +33,6 @@ const loadLastOnlineTimes = () => {
     }
 };
 
-// 将最后在线时间保存到文件中
 const saveLastOnlineTimes = () => {
     try {
         fs.writeFileSync(path.join(__dirname, 'lastOnlineTimes.json'), JSON.stringify(lastOnlineTimes, null, 2));
@@ -50,17 +46,15 @@ loadLastOnlineTimes();
 app.get('/api/vpn-status', async (req, res) => {
     console.log(`[${new Date().toISOString()}] 检测IP: ${req.query.ip}`);
 
-    // 参数验证
     if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(req.query.ip)) {
         return res.status(400).json({ error: 'Invalid IP format' });
     }
 
     const targetIP = req.query.ip;
-    const maxRetries = 4;               // 最多重试3次，总计4次尝试
-    const retryDelay = 500;             // 重试前等待500ms
-    const connectTimeout = 3000;        // 单次连接超时时间3秒
+    const maxRetries = 4;
+    const retryDelay = 500;
+    const connectTimeout = 3000;
 
-    // 封装单次检测尝试，返回 Promise
     const attemptConnection = () => {
         return new Promise((resolve, reject) => {
             const start = Date.now();
@@ -108,19 +102,17 @@ app.get('/api/vpn-status', async (req, res) => {
         });
     };
 
-    // 执行重试循环
     let lastError;
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
             const result = await attemptConnection();
-            // 成功：记录最后在线时间并返回结果
             lastOnlineTimes[targetIP] = new Date().toLocaleString();
             saveLastOnlineTimes();
             return res.json({
                 online: true,
                 ping: result.ping,
                 lastOnline: lastOnlineTimes[targetIP],
-                attempts: attempt + 1     // 可选：返回尝试次数便于调试
+                attempts: attempt + 1
             });
         } catch (err) {
             lastError = err;
@@ -131,7 +123,6 @@ app.get('/api/vpn-status', async (req, res) => {
         }
     }
 
-    // 所有尝试均失败
     console.error(`[ERROR] 所有重试失败 (${targetIP}): ${lastError?.message}`);
     return res.json({
         online: false,
@@ -141,11 +132,9 @@ app.get('/api/vpn-status', async (req, res) => {
     });
 });
 
-// 添加查询本地VPN当前在线人数的端点
 app.get('/api/vpn-users', async (req, res) => {
     console.log(`[${new Date().toISOString()}] 查询本地VPN用户数`);
 
-    // 直接请求本地，无需 IP 参数
     const localhost = '127.0.0.1';
     const command = `"C:\\Program Files\\SoftEther VPN Server Developer Edition\\vpncmd.exe" ${localhost} /server /password:adm1n5 /hub:vpn /cmd statusget`;
 
@@ -180,12 +169,9 @@ app.get('/api/vpn-users', async (req, res) => {
     });
 });
 
-
-// 添加拉取同步最新更改的端点
 app.get('/api/pull-updates', (req, res) => {
     console.log(`[${new Date().toISOString()}] 执行 git pull 命令`);
-    
-    // 执行 git pull 命令
+
     exec('git pull', { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
         if (error) {
             console.error(`[ERROR] 执行 git pull 错误: ${error.message}`);
@@ -193,15 +179,12 @@ app.get('/api/pull-updates', (req, res) => {
         }
         if (stderr) {
             console.error(`[ERROR] git pull 输出错误: ${stderr}`);
-            // 即使有stderr，也尝试返回stdout，因为git pull可能会在stderr中输出一些信息
         }
-        
         console.log(`[INFO] git pull 执行成功: ${stdout}`);
         res.json({ success: true, message: 'Updates pulled successfully', output: stdout });
     });
 });
 
-// 添加获取最新VPN密码的端点
 app.get('/api/Vpn-Password', (req, res) => {
     const filePath = path.join(__dirname, 'Vpn-Password.json');
     try {
@@ -217,18 +200,14 @@ app.get('/api/Vpn-Password', (req, res) => {
     }
 });
 
-// 添加获取公告内容的端点
 app.get('/api/announcement', (req, res) => {
     try {
         const filePath = path.join(__dirname, 'announcement.json');
         const announcementData = fs.readFileSync(filePath, 'utf8');
         const data = JSON.parse(announcementData);
-        
-        // 获取文件修改时间
+
         const stats = fs.statSync(filePath);
         const modifiedTime = stats.mtime;
-        
-        // 格式化为本地时间字符串
         const formattedTime = modifiedTime.toLocaleString('zh-CN', {
             year: 'numeric',
             month: '2-digit',
@@ -238,10 +217,8 @@ app.get('/api/announcement', (req, res) => {
             second: '2-digit',
             hour12: false
         });
-        
-        // 将自动生成的修改时间添加到响应中
+
         data.serverModifiedTime = formattedTime;
-        
         res.json(data);
     } catch (err) {
         console.error(`[ERROR] 读取公告文件错误: ${err.message}`);
@@ -249,7 +226,6 @@ app.get('/api/announcement', (req, res) => {
     }
 });
 
-// 绑定到所有网络接口
 app.listen(3132, '0.0.0.0', () => {
     console.log('Server running on http://0.0.0.0:3132');
 });
