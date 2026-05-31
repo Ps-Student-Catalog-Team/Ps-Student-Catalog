@@ -40,9 +40,13 @@ export function Newest() {
   const [passwordTime, setPasswordTime] = useState('加载中...');
   const [announcement, setAnnouncement] = useState<Announcement | null>(null);
   const [vpnStatuses, setVpnStatuses] = useState<Record<string, VPNStatus>>({});
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
-  const fetchFromApi = useCallback(async (endpoint: string, options: RequestInit = {}) => {
+  interface FetchOptions extends RequestInit {
+    timeout?: number;
+  }
+
+  const fetchFromApi = useCallback(async (endpoint: string, options: FetchOptions = {}) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), options.timeout || 5000);
 
@@ -160,7 +164,7 @@ export function Newest() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const particles: { x: number; y: number; size: number; speedX: number; speedY: number; color: string }[] = [];
+    const particles: Particle[] = [];
     const particleCount = 150;
     const colors = ['#00ff9d', '#00cc7d', '#00aa6a', '#4ECDC4', '#45B7D1'];
 
@@ -420,7 +424,7 @@ export function Newest() {
               >
                 VPN服务器状态
               </h3>
-              {VPN_IPS.map((ip, i) => {
+              {VPN_IPS.map((ip) => {
                 const status = vpnStatuses[ip];
                 return (
                   <div key={ip}>
