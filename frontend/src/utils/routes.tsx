@@ -4,6 +4,7 @@ import { default as TutorialDetail } from '../pages/TutorialDetail';
 import { About } from '../pages/About';
 import { Tools } from '../pages/Tools';
 import { Newest } from '../pages/Newest';
+import { default as Countdown } from '../pages/Countdown';
 
 export interface Route {
   path: string;
@@ -18,4 +19,5 @@ export const routes: Route[] = [
   { path: '/tools', component: Tools, label: '工具' },
   { path: '/about', component: About, label: '关于' },
   { path: '/newest', component: Newest, label: '最新' },
+  { path: '/countdown', component: Countdown, label: '高考倒计时' },
 ];
