@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { PageTransition } from '../components/layout/PageTransition';
 import { Typewriter } from '../components/animations/Typewriter';
@@ -30,9 +30,61 @@ async function fetchFromApi(endpoint: string, options: FetchOptions = {}) {
 
 type VPNSessionStatus = 'good' | 'warning' | 'full' | 'error';
 
+// 注入动画 keyframes
+const glitchKeyframes = `
+@keyframes titleShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes titleBreath {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  50%      { opacity: 0.7; filter: brightness(1.3); }
+}
+@keyframes titleShake {
+  0%, 100% { transform: translateX(0); }
+  10%       { transform: translateX(-3px) rotate(-0.5deg); }
+  20%       { transform: translateX(3px) rotate(0.5deg); }
+  30%       { transform: translateX(-2px) rotate(-0.3deg); }
+  40%       { transform: translateX(2px) rotate(0.3deg); }
+  50%       { transform: translateX(-1px); }
+  60%       { transform: translateX(1px); }
+}
+@keyframes titleGlitch {
+  0%   { transform: translate(0); opacity: 1; }
+  20%  { transform: translate(-2px, 1px); opacity: 0.8; }
+  40%  { transform: translate(2px, -1px); opacity: 0.6; }
+  60%  { transform: translate(-1px, 2px); opacity: 0.9; }
+  80%  { transform: translate(1px, -2px); opacity: 0.7; }
+  100% { transform: translate(0); opacity: 1; }
+}
+@keyframes glitchBefore {
+  0%, 100% { clip-path: inset(0 0 85% 0); transform: translate(-2px, -1px); }
+  10%      { clip-path: inset(15% 0 65% 0); transform: translate(2px, 1px); }
+  20%      { clip-path: inset(35% 0 40% 0); transform: translate(-1px, 2px); }
+  30%      { clip-path: inset(60% 0 10% 0); transform: translate(1px, -2px); }
+  40%      { clip-path: inset(80% 0 0 0); transform: translate(-2px, 1px); }
+  50%      { clip-path: inset(0 0 50% 0); transform: translate(2px, -1px); }
+  60%      { clip-path: inset(25% 0 25% 0); transform: translate(-1px, 2px); }
+  70%      { clip-path: inset(50% 0 0 0); transform: translate(1px, -1px); }
+  80%      { clip-path: inset(10% 0 60% 0); transform: translate(-2px, 1px); }
+  90%      { clip-path: inset(40% 0 20% 0); transform: translate(2px, -2px); }
+}
+@keyframes glitchAfter {
+  0%, 100% { clip-path: inset(85% 0 0 0); transform: translate(2px, 1px); }
+  10%      { clip-path: inset(0 0 15% 0); transform: translate(-2px, -1px); }
+  20%      { clip-path: inset(60% 0 35% 0); transform: translate(1px, -2px); }
+  30%      { clip-path: inset(10% 0 60% 0); transform: translate(-1px, 2px); }
+  40%      { clip-path: inset(0 0 80% 0); transform: translate(2px, -1px); }
+  50%      { clip-path: inset(50% 0 0 0); transform: translate(-2px, 1px); }
+  60%      { clip-path: inset(25% 0 25% 0); transform: translate(1px, -2px); }
+  70%      { clip-path: inset(0 0 50% 0); transform: translate(-1px, 1px); }
+  80%      { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
+  90%      { clip-path: inset(20% 0 40% 0); transform: translate(-2px, 2px); }
+}
+`;
+
 // 4 种标题动态样式
 const titleStyle: Record<VPNSessionStatus, React.CSSProperties> = {
-  // 流畅（绿）：流光 shimmer 扫过文字
   good: {
     fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
     fontSize: 'clamp(1.8rem, 8vw, 3rem)',
@@ -46,7 +98,6 @@ const titleStyle: Record<VPNSessionStatus, React.CSSProperties> = {
     animation: 'titleShimmer 2.5s linear infinite',
     textShadow: '0 0 20px rgba(0,255,157,0.6), 0 0 40px rgba(0,255,157,0.3)',
   },
-  // 一般（黄）：脉冲呼吸
   warning: {
     fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
     fontSize: 'clamp(1.8rem, 8vw, 3rem)',
@@ -56,7 +107,6 @@ const titleStyle: Record<VPNSessionStatus, React.CSSProperties> = {
     animation: 'titleBreath 1.8s ease-in-out infinite',
     textShadow: '0 0 20px rgba(255,193,7,0.6)',
   },
-  // 拥挤（红）：剧烈抖动 + 红色光晕
   full: {
     fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
     fontSize: 'clamp(1.8rem, 8vw, 3rem)',
@@ -66,7 +116,6 @@ const titleStyle: Record<VPNSessionStatus, React.CSSProperties> = {
     animation: 'titleShake 0.8s ease-in-out infinite',
     textShadow: '0 0 20px rgba(220,53,69,0.8), 0 0 40px rgba(220,53,69,0.4)',
   },
-  // 检测失败（灰）：数字故障 glitch
   error: {
     fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
     fontSize: 'clamp(1.8rem, 8vw, 3rem)',
@@ -99,34 +148,6 @@ const indicators = [
   { text: '关于', path: '/about' },
   { text: '共享目录', path: 'http://10.88.202.59:5244' },
 ];
-
-const glitchKeyframes = `
-@keyframes titleShimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-@keyframes titleBreath {
-  0%, 100% { opacity: 1; filter: brightness(1); }
-  50%      { opacity: 0.7; filter: brightness(1.3); }
-}
-@keyframes titleShake {
-  0%, 100% { transform: translateX(0); }
-  10%       { transform: translateX(-3px) rotate(-0.5deg); }
-  20%       { transform: translateX(3px) rotate(0.5deg); }
-  30%       { transform: translateX(-2px) rotate(-0.3deg); }
-  40%       { transform: translateX(2px) rotate(0.3deg); }
-  50%       { transform: translateX(-1px); }
-  60%       { transform: translateX(1px); }
-}
-@keyframes titleGlitch {
-  0%   { transform: translate(0); }
-  20%  { transform: translate(-2px, 1px); opacity: 0.8; }
-  40%  { transform: translate(2px, -1px); opacity: 0.6; }
-  60%  { transform: translate(-1px, 2px); opacity: 0.9; }
-  80%  { transform: translate(1px, -2px); opacity: 0.7; }
-  100% { transform: translate(0); opacity: 1; }
-}
-`;
 
 export function Home() {
   const navigate = useNavigate();
@@ -171,6 +192,30 @@ export function Home() {
       {/* 注入动画 keyframes */}
       <style>{glitchKeyframes}</style>
 
+      {/* Glitch 伪元素样式（仅 error 状态生效） */}
+      {sessionStatus === 'error' && (
+        <style>{`
+          .glitch-title::before,
+          .glitch-title::after {
+            content: "学生目录";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+          }
+          .glitch-title::before {
+            color: #ff0000;
+            animation: glitchBefore 3s infinite;
+            z-index: -1;
+          }
+          .glitch-title::after {
+            color: #00ffff;
+            animation: glitchAfter 3s infinite;
+            z-index: -1;
+          }
+        `}</style>
+      )}
+
       <div
         style={{
           minHeight: '100vh',
@@ -182,65 +227,20 @@ export function Home() {
           background: 'linear-gradient(135deg, rgba(10,10,10,0.8) 0%, rgba(26,26,46,0.8) 100%)',
         }}
       >
-        {/* 「学生目录」标题 — 4 种动态样式 */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          style={{ ...titleStyle[sessionStatus], display: 'inline-block' }}
-        >
-          <Typewriter text="学生目录" speed={100} delay={500} />
-        </motion.div>
-
-        {/* Glitch 伪元素（仅 error 状态生效） */}
-        {sessionStatus === 'error' && (
-          <>
-            <style>{`
-              .glitch-text::before,
-              .glitch-text::after {
-                content: "学生目录";
-                position: absolute;
-                top: 0; left: 0;
-                width: 100%; height: 100%;
-                overflow: hidden;
-              }
-              .glitch-text::before {
-                color: #ff0000;
-                z-index: -1;
-                animation: glitchBefore 3s infinite;
-              }
-              .glitch-text::after {
-                color: #00ffff;
-                z-index: -1;
-                animation: glitchAfter 3s infinite;
-              }
-              @keyframes glitchBefore {
-                0%, 100% { clip-path: inset(0 0 85% 0); transform: translate(-2px, -1px); }
-                10%      { clip-path: inset(15% 0 65% 0); transform: translate(2px, 1px); }
-                20%      { clip-path: inset(35% 0 40% 0); transform: translate(-1px, 2px); }
-                30%      { clip-path: inset(60% 0 10% 0); transform: translate(1px, -2px); }
-                40%      { clip-path: inset(80% 0 0 0); transform: translate(-2px, 1px); }
-                50%      { clip-path: inset(0 0 50% 0); transform: translate(2px, -1px); }
-                60%      { clip-path: inset(25% 0 25% 0); transform: translate(-1px, 2px); }
-                70%      { clip-path: inset(50% 0 0 0); transform: translate(1px, -1px); }
-                80%      { clip-path: inset(10% 0 60% 0); transform: translate(-2px, 1px); }
-                90%      { clip-path: inset(40% 0 20% 0); transform: translate(2px, -2px); }
-              }
-              @keyframes glitchAfter {
-                0%, 100% { clip-path: inset(85% 0 0 0); transform: translate(2px, 1px); }
-                10%      { clip-path: inset(0 0 15% 0); transform: translate(-2px, -1px); }
-                20%      { clip-path: inset(60% 0 35% 0); transform: translate(1px, -2px); }
-                30%      { clip-path: inset(10% 0 60% 0); transform: translate(-1px, 2px); }
-                40%      { clip-path: inset(0 0 80% 0); transform: translate(2px, -1px); }
-                50%      { clip-path: inset(50% 0 0 0); transform: translate(-2px, 1px); }
-                60%      { clip-path: inset(25% 0 25% 0); transform: translate(1px, -2px); }
-                70%      { clip-path: inset(0 0 50% 0); transform: translate(-1px, 1px); }
-                80%      { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
-                90%      { clip-path: inset(20% 0 40% 0); transform: translate(-2px, 2px); }
-              }
-            `}</style>
-          </>
-        )}
+        {/* 「学生目录」标题 — 4 种动态样式 + 状态切换动画 */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={sessionStatus}
+            initial={{ opacity: 0, scale: 0.8, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            style={{ ...titleStyle[sessionStatus], display: 'inline-block' }}
+            className={sessionStatus === 'error' ? 'glitch-title' : ''}
+          >
+            <Typewriter text="学生目录" speed={100} delay={500} />
+          </motion.div>
+        </AnimatePresence>
 
         <motion.p
           initial={{ opacity: 0 }}
