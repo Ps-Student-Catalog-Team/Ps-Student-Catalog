@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { PageTransition } from '../components/layout/PageTransition';
 import { Typewriter } from '../components/animations/Typewriter';
@@ -30,7 +30,7 @@ async function fetchFromApi(endpoint: string, options: FetchOptions = {}) {
 
 type VPNSessionStatus = 'good' | 'warning' | 'full' | 'error';
 
-// 注入动画 keyframes
+// 注入动画 keyframes（只注入一次）
 const glitchKeyframes = `
 @keyframes titleShimmer {
   0%   { background-position: -200% center; }
@@ -83,56 +83,71 @@ const glitchKeyframes = `
 }
 `;
 
-// 4 种标题动态样式
+const statusColor: Record<VPNSessionStatus, string> = {
+  good: '#00ff9d',
+  warning: '#ffc107',
+  full: '#dc3545',
+  error: '#888888',
+};
+
+const statusGlow: Record<VPNSessionStatus, string> = {
+  good: '0 0 20px rgba(0,255,157,0.6), 0 0 40px rgba(0,255,157,0.3)',
+  warning: '0 0 20px rgba(255,193,7,0.6)',
+  full: '0 0 20px rgba(220,53,69,0.8), 0 0 40px rgba(220,53,69,0.4)',
+  error: '0 0 10px rgba(136,136,136,0.3)',
+};
+
+// 4 种标题样式（带 CSS transition，样式切换时平滑过渡）
 const titleStyle: Record<VPNSessionStatus, React.CSSProperties> = {
   good: {
     fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
     fontSize: 'clamp(1.8rem, 8vw, 3rem)',
     marginBottom: '20px',
     textAlign: 'center',
-    background: `linear-gradient(90deg, #00ff9d 0%, #00ff9d 30%, #ffffff 50%, #00ff9d 70%, #00ff9d 100%)`,
+    background: `linear-gradient(90deg, ${statusColor.good} 0%, ${statusColor.good} 30%, #ffffff 50%, ${statusColor.good} 70%, ${statusColor.good} 100%)`,
     backgroundSize: '200% 100%',
     WebkitBackgroundClip: 'text',
     backgroundClip: 'text',
     color: 'transparent',
     animation: 'titleShimmer 2.5s linear infinite',
-    textShadow: '0 0 20px rgba(0,255,157,0.6), 0 0 40px rgba(0,255,157,0.3)',
+    textShadow: statusGlow.good,
+    transition: 'text-shadow 0.6s ease',
+    display: 'inline-block',
   },
   warning: {
     fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
     fontSize: 'clamp(1.8rem, 8vw, 3rem)',
     marginBottom: '20px',
     textAlign: 'center',
-    color: '#ffc107',
+    color: statusColor.warning,
     animation: 'titleBreath 1.8s ease-in-out infinite',
-    textShadow: '0 0 20px rgba(255,193,7,0.6)',
+    textShadow: statusGlow.warning,
+    transition: 'text-shadow 0.6s ease, color 0.6s ease, filter 0.6s ease',
+    display: 'inline-block',
   },
   full: {
     fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
     fontSize: 'clamp(1.8rem, 8vw, 3rem)',
     marginBottom: '20px',
     textAlign: 'center',
-    color: '#dc3545',
+    color: statusColor.full,
     animation: 'titleShake 0.8s ease-in-out infinite',
-    textShadow: '0 0 20px rgba(220,53,69,0.8), 0 0 40px rgba(220,53,69,0.4)',
+    textShadow: statusGlow.full,
+    transition: 'text-shadow 0.6s ease, color 0.6s ease, filter 0.6s ease',
+    display: 'inline-block',
   },
   error: {
     fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
     fontSize: 'clamp(1.8rem, 8vw, 3rem)',
     marginBottom: '20px',
     textAlign: 'center',
-    color: '#888888',
+    color: statusColor.error,
     animation: 'titleGlitch 3s infinite',
-    textShadow: '0 0 10px rgba(136,136,136,0.3)',
-    position: 'relative',
+    textShadow: statusGlow.error,
+    position: 'relative' as const,
+    transition: 'text-shadow 0.6s ease, color 0.6s ease',
+    display: 'inline-block',
   },
-};
-
-const statusColor: Record<VPNSessionStatus, string> = {
-  good: '#00ff9d',
-  warning: '#ffc107',
-  full: '#dc3545',
-  error: '#888888',
 };
 
 const statusText: Record<VPNSessionStatus, string> = {
@@ -189,7 +204,7 @@ export function Home() {
 
   return (
     <PageTransition>
-      {/* 注入动画 keyframes */}
+      {/* 注入动画 keyframes（全局一次） */}
       <style>{glitchKeyframes}</style>
 
       {/* Glitch 伪元素样式（仅 error 状态生效） */}
@@ -227,20 +242,16 @@ export function Home() {
           background: 'linear-gradient(135deg, rgba(10,10,10,0.8) 0%, rgba(26,26,46,0.8) 100%)',
         }}
       >
-        {/* 「学生目录」标题 — 4 种动态样式 + 状态切换动画 */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={sessionStatus}
-            initial={{ opacity: 0, scale: 0.8, y: -20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            style={{ ...titleStyle[sessionStatus], display: 'inline-block' }}
-            className={sessionStatus === 'error' ? 'glitch-title' : ''}
-          >
-            <Typewriter text="学生目录" speed={100} delay={500} />
-          </motion.div>
-        </AnimatePresence>
+        {/* 「学生目录」标题 — 4 种动态样式，切换时 CSS transition 平滑过渡 */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          style={titleStyle[sessionStatus]}
+          className={sessionStatus === 'error' ? 'glitch-title' : ''}
+        >
+          <Typewriter text="学生目录" speed={100} delay={500} />
+        </motion.div>
 
         <motion.p
           initial={{ opacity: 0 }}
@@ -282,6 +293,7 @@ export function Home() {
               background: statusColor[sessionStatus],
               display: 'inline-block',
               boxShadow: `0 0 6px ${statusColor[sessionStatus]}`,
+              transition: 'background 0.6s ease, box-shadow 0.6s ease',
             }}
           />
           <span>
@@ -300,7 +312,6 @@ export function Home() {
               transition={{ duration: 0.5, delay: 0.5 + i * 0.1 }}
             >
               <RippleButton
-                color={statusColor[sessionStatus]}
                 onClick={() => {
                   if (item.path.startsWith('http')) {
                     window.open(item.path, '_blank');

@@ -45,7 +45,7 @@ const PerformanceContext = createContext<PerformanceContextValue | null>(null);
 
 export function PerformanceProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<PerformanceSettings>(loadSettings);
-  const [isLoaded, setIsLoaded] = useState(true);
+  const [isLoaded, _setIsLoaded] = useState(true);
 
   // 持久化到 localStorage
   useEffect(() => {

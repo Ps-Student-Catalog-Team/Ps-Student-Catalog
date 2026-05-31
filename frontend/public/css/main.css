@@ -693,24 +693,6 @@ body::after {
 }
 
 /* 自定义滚动条 */
-::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: #1a1a1a;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--accent-color);
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #00e68a;
-}
-
 html {
     scroll-behavior: smooth;
 }
@@ -737,27 +719,35 @@ body::after {
     50% { transform: scale(1.2); }
 }
 
-/* 自定义滚动条 */
+/* 自定义滚动条 - 统一美观样式 */
 ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #1a1a1a;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--accent-color);
-    border-radius: 5px;
+    background: linear-gradient(180deg, #00ff9d, #00cc7a);
+    border-radius: 4px;
+    transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #00e68a;
+    background: linear-gradient(180deg, #00ff9d, #00ff9d);
+    box-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
 }
 
-html {
-    scroll-behavior: smooth;
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #00ff9d rgba(255, 255, 255, 0.05);
 }
 
 /* 增强内联元素样式 */
@@ -856,29 +846,6 @@ body::after {
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.2); }
-}
-
-/* 自定义滚动条 */
-::-webkit-scrollbar {
-    width: 4px;
-    height: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: #1a1a1a;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--accent-color);
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #00e68a;
-}
-
-html {
-    scroll-behavior: smooth;
 }
 
 /* 列表项优化样式 */
