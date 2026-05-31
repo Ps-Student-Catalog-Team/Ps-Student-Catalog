@@ -33,6 +33,7 @@ export default function TutorialDetail() {
   const [isContentVisible, setIsContentVisible] = useState(false);
   const [pageTitle, setPageTitle] = useState('');
   const [animateOnLoad, setAnimateOnLoad] = useState(true);
+  const [userHasNavigated, setUserHasNavigated] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const prevFileRef = useRef<string | null>(null);
 
@@ -308,7 +309,16 @@ export default function TutorialDetail() {
   useEffect(() => {
     if (content && !loading) {
       const timer = setTimeout(() => setIsContentVisible(true), 100);
-      return () => clearTimeout(timer);
+      // 在入场动画完成后移除 animate 类，防止滚动时重新触发动画
+      const animationEndTimer = setTimeout(() => {
+        if (contentRef.current) {
+          contentRef.current.classList.remove('animate');
+        }
+      }, 700);
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(animationEndTimer);
+      };
     }
   }, [content, loading]);
 
