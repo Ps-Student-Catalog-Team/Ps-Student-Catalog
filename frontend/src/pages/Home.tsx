@@ -49,14 +49,13 @@ export function Home() {
             padding: '0 16px',
           }}
         >
-          欢迎来到学生目录 2.0！
+          欢迎来到学生目录 3.0！
         </motion.p>
 
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center', padding: '0 16px' }}>
           {[
             { text: '教程', path: '/tutorials' },
             { text: '工具', path: '/tools' },
-            { text: 'VPN状态', path: '/newest' },
             { text: '关于', path: '/about' },
             { text: '共享目录', path: 'http://10.88.202.59:5244' },
           ].map((item, i) => (
