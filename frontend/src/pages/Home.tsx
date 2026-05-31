@@ -1,11 +1,86 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { PageTransition } from '../components/layout/PageTransition';
 import { Typewriter } from '../components/animations/Typewriter';
 import { RippleButton } from '../components/ui/RippleButton';
 
+const API_BASE_URL = 'http://10.88.202.59:3132';
+
+interface FetchOptions extends RequestInit {
+  timeout?: number;
+}
+
+async function fetchFromApi(endpoint: string, options: FetchOptions = {}) {
+  const { timeout = 5000, ...fetchOptions } = options;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...fetchOptions,
+      signal: controller.signal,
+    });
+    clearTimeout(id);
+    return res;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+}
+
+type VPNSessionStatus = 'good' | 'warning' | 'full' | 'error';
+
 export function Home() {
   const navigate = useNavigate();
+  const [sessionCount, setSessionCount] = useState<number | null>(null);
+  const [sessionStatus, setSessionStatus] = useState<VPNSessionStatus>('error');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkVPNSessionCount() {
+      try {
+        const response = await fetchFromApi('/api/vpn-users?ip=10.88.202.59', { timeout: 5000 });
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error || '获取会话数失败');
+        const count: number = data.sessionCount;
+        if (count === null || count === undefined) throw new Error('会话数数据无效');
+        if (!cancelled) {
+          setSessionCount(Math.max(0, count - 1));
+          if (count < 4) setSessionStatus('good');
+          else if (count >= 4 && count <= 7) setSessionStatus('warning');
+          else setSessionStatus('full');
+        }
+      } catch (err) {
+        console.error('检测 VPN 会话数失败:', err);
+        if (!cancelled) {
+          setSessionStatus('error');
+          setSessionCount(null);
+        }
+      }
+    }
+
+    checkVPNSessionCount();
+    const timer = setInterval(checkVPNSessionCount, 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, []);
+
+  const statusColor: Record<VPNSessionStatus, string> = {
+    good: 'rgb(0, 189, 73)',
+    warning: 'rgb(255, 193, 7)',
+    full: 'rgb(220, 53, 69)',
+    error: 'rgb(128, 128, 128)',
+  };
+
+  const statusText: Record<VPNSessionStatus, string> = {
+    good: '流畅',
+    warning: '一般',
+    full: '拥挤',
+    error: '检测失败',
+  };
 
   return (
     <PageTransition>
@@ -52,10 +127,42 @@ export function Home() {
           欢迎来到学生目录 3.0！
         </motion.p>
 
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center', padding: '0 16px' }}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center', padding: '0 16px', marginBottom: '20px' }}>
+          {/* VPN 状态指示 */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#666',
+              fontSize: '0.85rem',
+              marginBottom: '8px',
+              width: '100%',
+              justifyContent: 'center',
+            }}
+          >
+            <span
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: statusColor[sessionStatus],
+                display: 'inline-block',
+                boxShadow: `0 0 6px ${statusColor[sessionStatus]}`,
+              }}
+            />
+            <span>
+              VPN 状态：{statusText[sessionStatus]}
+              {sessionCount !== null && `（${sessionCount} 人在线）`}
+            </span>
+          </motion.div>
+
           {[
             { text: '教程', path: '/tutorials' },
-            { text: '工具', path: '/tools' },
+            { text: '工具', path: '/tools', vpnColored: true },
             { text: '关于', path: '/about' },
             { text: '共享目录', path: 'http://10.88.202.59:5244' },
           ].map((item, i) => (
@@ -66,6 +173,7 @@ export function Home() {
               transition={{ duration: 0.5, delay: 0.5 + i * 0.1 }}
             >
               <RippleButton
+                color={item.vpnColored ? statusColor[sessionStatus] : '#00ff9d'}
                 onClick={() => {
                   if (item.path.startsWith('http')) {
                     window.open(item.path, '_blank');
