@@ -20,6 +20,36 @@ html, body {
   min-height: 100vh;
 }
 
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00ff9d, #00cc7a);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #00ff9d, #00ff9d);
+  box-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #00ff9d rgba(255, 255, 255, 0.05);
+}
+
 @media (max-width: 768px) {
   :root {
     font-size: 14px;

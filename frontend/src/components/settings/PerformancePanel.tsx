@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePerformance } from '../../context/PerformanceContext';
+import { usePerformance, type PerformanceSettings } from '../../context/PerformanceContext';
 
 const LABELS: Record<keyof PerformanceSettings, string> = {
   backgroundParticles: '背景粒子网络',
@@ -21,7 +21,7 @@ export function PerformancePanel() {
   const { settings, updateSetting, resetSettings } = usePerformance();
   const [open, setOpen] = useState(false);
 
-  const entries = Object.entries(settings) as [keyof PerformanceSettings, boolean][];
+  const entries = Object.entries(settings) as [string, boolean][];
 
   return (
     <>
@@ -116,7 +116,7 @@ export function PerformancePanel() {
 
           {entries.map(([key, value]) => (
             <label
-              key={key}
+              key={key as string}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -135,7 +135,7 @@ export function PerformancePanel() {
               <input
                 type="checkbox"
                 checked={value}
-                onChange={e => updateSetting(key, e.target.checked)}
+                onChange={e => updateSetting(key as keyof PerformanceSettings, e.target.checked)}
                 style={{
                   accentColor: '#00ff9d',
                   width: 16,
