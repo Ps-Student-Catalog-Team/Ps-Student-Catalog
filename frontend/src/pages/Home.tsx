@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { PageTransition } from '../components/layout/PageTransition';
 import { Typewriter } from '../components/animations/Typewriter';
@@ -80,6 +80,22 @@ const glitchKeyframes = `
   70%      { clip-path: inset(0 0 50% 0); transform: translate(-1px, 1px); }
   80%      { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
   90%      { clip-path: inset(20% 0 40% 0); transform: translate(-2px, 2px); }
+}
+@keyframes welcomeShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes welcomeGlow {
+  0%, 100% { 
+    text-shadow: 0 0 5px rgba(0,255,157,0.3), 0 0 10px rgba(0,255,157,0.2); 
+  }
+  50% { 
+    text-shadow: 0 0 10px rgba(0,255,157,0.6), 0 0 20px rgba(0,255,157,0.4), 0 0 30px rgba(0,255,157,0.2); 
+  }
+}
+@keyframes welcomeFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 `;
 
@@ -254,19 +270,25 @@ export function Home() {
         </motion.div>
 
         <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
           style={{
             fontSize: 'clamp(1rem, 3vw, 1.2rem)',
-            color: '#ccc',
             marginBottom: '30px',
             textAlign: 'center',
             maxWidth: '600px',
             padding: '0 16px',
+            background: 'linear-gradient(90deg, #00ff9d 0%, #00cc7a 25%, #ffffff 50%, #00cc7a 75%, #00ff9d 100%)',
+            backgroundSize: '200% auto',
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            color: 'transparent',
+            animation: 'welcomeShimmer 3s linear infinite, welcomeGlow 2s ease-in-out infinite, welcomeFloat 3s ease-in-out infinite',
+            display: 'inline-block',
           }}
         >
-          欢迎来到学生目录 3.0！
+          <Typewriter text="欢迎来到学生目录 3.0！" speed={80} delay={1200} />
         </motion.p>
 
         {/* VPN 状态指示 */}
