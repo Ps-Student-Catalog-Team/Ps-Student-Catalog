@@ -33,7 +33,6 @@ export default function TutorialDetail() {
   const [isContentVisible, setIsContentVisible] = useState(false);
   const [pageTitle, setPageTitle] = useState('');
   const [animateOnLoad, setAnimateOnLoad] = useState(true);
-  const [userHasNavigated, setUserHasNavigated] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const prevFileRef = useRef<string | null>(null);
 
