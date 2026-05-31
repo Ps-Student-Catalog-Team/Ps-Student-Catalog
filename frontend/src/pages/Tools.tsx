@@ -50,12 +50,12 @@ export function Tools() {
         >
           {[
               { title: 'VPN 状态页', desc: '查看 VPN 密码和服务器状态', link: '/newest', isReact: true },
-              { title: '时钟', desc: '展示当前的时间', link: '/clock' },
-              { title: '特殊的时钟', desc: '展示当前时间，引言变得有些奇怪', link: '/clock2' },
-              { title: '留言簿', desc: '一个简单的留言簿', link: '/comment' },
+              { title: '时钟', desc: '展示当前的时间', link: '/pages/clock.html' },
+              { title: '特殊的时钟', desc: '展示当前时间，引言变得有些奇怪', link: '/pages/clock2.html' },
+              { title: '留言簿', desc: '一个简单的留言簿', link: '/pages/comment.html' },
               { title: '学生目录日志', desc: '查看每月月度报告', link: 'https://psstunet.github.io/' },
-              { title: 'Countdown', desc: '高考倒计时', link: '/countdown' },
-              { title: '用户中心', desc: '查看您发送的留言', link: '/user-center' },
+              { title: '用户中心', desc: '查看您发送的留言', link: '/pages/user-center.html' },
+              { title: 'Countdown', desc: '高考倒计时', link: '/countdown', isReact: true },
             ].map((item, index) => (
             <motion.div
               key={item.title}

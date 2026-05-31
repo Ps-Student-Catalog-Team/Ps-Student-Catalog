@@ -11,3 +11,4 @@ dist/
 .github/
 lastOnlineTimes.json*
 .trae/
+.workbuddy/
