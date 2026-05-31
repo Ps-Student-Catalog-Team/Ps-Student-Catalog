@@ -1,0 +1,42 @@
+@media (max-width: 768px) {
+  :root {
+    font-size: 14px;
+  }
+
+  .mobile-hidden {
+    display: none !important;
+  }
+
+  .mobile-center {
+    text-align: center !important;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    font-size: 12px;
+  }
+
+  h1 {
+    font-size: 1.8rem !important;
+  }
+
+  h2 {
+    font-size: 1.4rem !important;
+  }
+
+  h3 {
+    font-size: 1.1rem !important;
+  }
+
+  .btn {
+    padding: 10px 16px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 360px) {
+  :root {
+    font-size: 11px;
+  }
+}
