@@ -675,6 +675,9 @@
                 // 点击平滑滚动
                 a.addEventListener('click', (e) => {
                     e.preventDefault();
+                    // 在通过目录定位时移除入场动画类，避免每次滚动到新标题时触发逐项动画
+                    const contentDiv = document.getElementById('content');
+                    if (contentDiv && contentDiv.classList) contentDiv.classList.remove('animate');
                     heading.scrollIntoView({ behavior: 'smooth' });
                     history.pushState(null, null, `#${id}`);
                 });

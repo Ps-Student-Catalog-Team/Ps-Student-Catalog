@@ -1,0 +1,41 @@
+.card3D {
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 157, 0.3);
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.5s ease-out;
+}
+
+.card3D:active {
+  transform: perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(0.98, 0.98, 0.98) !important;
+  transition: transform 0.1s ease-out;
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card3D:hover .glow {
+  opacity: 1;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card3D {
+    transform: none !important;
+    transition: none !important;
+  }
+}
