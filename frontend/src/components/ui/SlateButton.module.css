@@ -1,0 +1,145 @@
+/* ╔══════════════════════════════════════╗
+   ║ SlateButton — 克制卡牌，联动网格     ║
+   ╚══════════════════════════════════════╝ */
+
+.card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 26px;
+  min-width: 150px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1.2),
+    border-color 0.3s ease,
+    background 0.3s ease,
+    opacity 0.3s ease;
+  overflow: hidden;
+}
+
+/* 左侧装饰线 */
+.card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--accent);
+  opacity: 0.3;
+  transition: opacity 0.3s ease, top 0.3s ease, bottom 0.3s ease;
+}
+
+/* ── 状态：非悬停卡（有别的卡被悬停时） ── */
+.dimmed {
+  opacity: 0.4;
+  transform: scale(0.97);
+}
+
+/* ── 状态：悬停卡 ── */
+.active {
+  transform: scale(1.04);
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.04);
+  z-index: 2;
+}
+
+.active::before {
+  opacity: 1;
+  top: 4px;
+  bottom: 4px;
+}
+
+/* ── 图标 ── */
+.icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.active .icon {
+  transform: scale(1.15) translateX(-2px);
+}
+
+/* ── 文字区 ── */
+.textBlock {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.04em;
+  transition: color 0.3s ease;
+}
+
+.active .title {
+  color: var(--accent);
+}
+
+.subtitle {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 2px;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition:
+    max-height 0.35s ease,
+    opacity 0.25s ease 0.05s,
+    margin-top 0.3s ease;
+  white-space: nowrap;
+}
+
+.active .subtitle {
+  max-height: 20px;
+  opacity: 1;
+  margin-top: 4px;
+}
+
+/* ── 悬停指示箭头 ── */
+.arrow {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+}
+
+.active .arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── disabled ── */
+.card:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── prefers-reduced-motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card::before,
+  .icon,
+  .title,
+  .subtitle,
+  .arrow {
+    transition: none !important;
+  }
+}
