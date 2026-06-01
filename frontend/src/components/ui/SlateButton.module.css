@@ -6,9 +6,9 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 16px 26px;
-  min-width: 150px;
+  gap: 8px;
+  padding: 12px 20px;
+  min-width: 120px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.02);

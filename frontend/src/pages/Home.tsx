@@ -181,10 +181,10 @@ const navButtons: Array<{
   subtitle: string;
   accentColor: string;
 }> = [
-  { text: '教程', path: '/tutorials', icon: '📖', subtitle: '快速入门与文档', accentColor: '#22c55e' },
-  { text: '工具', path: '/tools', icon: '🔧', subtitle: '效率工具箱', accentColor: '#22c55e' },
-  { text: '关于', path: '/about', icon: '✦', subtitle: '项目与团队', accentColor: '#22c55e' },
-  { text: '共享目录', path: 'http://10.88.202.59:5244', icon: '📂', subtitle: '文件共享入口', accentColor: '#22c55e' },
+  { text: '教程', path: '/tutorials', icon: '', subtitle: '快速入门与文档', accentColor: '#22c55e' },
+  { text: '工具', path: '/tools', icon: '', subtitle: '效率工具箱', accentColor: '#22c55e' },
+  { text: '关于', path: '/about', icon: '', subtitle: '项目与团队', accentColor: '#22c55e' },
+  { text: '共享目录', path: 'http://10.88.202.59:5244', icon: '', subtitle: '文件共享入口', accentColor: '#22c55e' },
 ];
 
 export function Home() {
@@ -424,17 +424,17 @@ export function Home() {
               </span>
             </motion.div>
 
-            {/* 扇形卡片区 */}
+            {/* 扇形卡片区 — 半径加大 + 角度拉开，避免重叠 */}
             <div
               style={{
                 position: 'relative',
                 width: '100%',
-                height: '240px',
+                height: '310px',
               }}
             >
               {/* 扇骨连线 SVG */}
               <svg
-                viewBox="0 0 500 240"
+                viewBox="0 0 500 310"
                 preserveAspectRatio="none"
                 style={{
                   position: 'absolute',
@@ -449,11 +449,11 @@ export function Home() {
                 }}
               >
                 {navButtons.map((_, i) => {
-                  const angles = [-56, -20, 20, 56];
-                  const rad = (angles[i] * Math.PI) / 180;
+                  const fanAngles = [-64, -24, 24, 64];
+                  const rad = (fanAngles[i] * Math.PI) / 180;
                   const cx = 250;
                   const cy = 0;
-                  const r = 170;
+                  const r = 240;
                   const x2 = cx + Math.sin(rad) * r;
                   const y2 = cy + Math.cos(rad) * r;
                   const isHovered = hoveredBtnIndex === i;
@@ -474,9 +474,9 @@ export function Home() {
               </svg>
 
               {navButtons.map((item, i) => {
-                const angles = [-56, -20, 20, 56];
-                const rad = (angles[i] * Math.PI) / 180;
-                const radius = 170;
+                const fanAngles = [-64, -24, 24, 64];
+                const rad = (fanAngles[i] * Math.PI) / 180;
+                const radius = 240;
                 const xOffset = Math.sin(rad) * radius;
                 const yOffset = Math.cos(rad) * radius;
 
