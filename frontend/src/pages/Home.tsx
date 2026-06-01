@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { PageTransition } from '../components/layout/PageTransition';
 import { Typewriter } from '../components/animations/Typewriter';
-import { RippleButton } from '../components/ui/RippleButton';
+import { SlateButton } from '../components/ui/SlateButton';
 
 const API_BASE_URL = 'http://10.88.202.59:3132';
 
@@ -173,17 +173,25 @@ const statusText: Record<VPNSessionStatus, string> = {
   error: '检测失败',
 };
 
-const indicators = [
-  { text: '教程', path: '/tutorials' },
-  { text: '工具', path: '/tools' },
-  { text: '关于', path: '/about' },
-  { text: '共享目录', path: 'http://10.88.202.59:5244' },
+// 按钮配置：图标 + 路径 + 副标题 + 独立配色
+const navButtons: Array<{
+  text: string;
+  path: string;
+  icon: string;
+  subtitle: string;
+  accentColor: string;
+}> = [
+  { text: '教程', path: '/tutorials', icon: '📖', subtitle: '快速入门与文档', accentColor: '#22d3ee' },
+  { text: '工具', path: '/tools', icon: '🔧', subtitle: '效率工具箱', accentColor: '#c084fc' },
+  { text: '关于', path: '/about', icon: '✦', subtitle: '项目与团队', accentColor: '#fb7185' },
+  { text: '共享目录', path: 'http://10.88.202.59:5244', icon: '📂', subtitle: '文件共享入口', accentColor: '#fbbf24' },
 ];
 
 export function Home() {
   const navigate = useNavigate();
   const [sessionCount, setSessionCount] = useState<number | null>(null);
   const [sessionStatus, setSessionStatus] = useState<VPNSessionStatus>('error');
+  const [hoveredBtnIndex, setHoveredBtnIndex] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -258,6 +266,33 @@ export function Home() {
           background: 'linear-gradient(135deg, rgba(10,10,10,0.8) 0%, rgba(26,26,46,0.8) 100%)',
         }}
       >
+        {/* 返回旧版按钮 */}
+        <motion.button
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5 }}
+          onClick={() => window.location.href = '/index.html'}
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            padding: '8px 16px',
+            background: 'rgba(0, 255, 157, 0.1)',
+            border: '1px solid rgba(0, 255, 157, 0.3)',
+            borderRadius: '8px',
+            color: '#00ff9d',
+            fontSize: '0.85rem',
+            cursor: 'pointer',
+            zIndex: 1000,
+            transition: 'all 0.3s ease',
+          }}
+          whileHover={{ 
+            background: 'rgba(0, 255, 157, 0.2)',
+            scale: 1.05
+          }}
+        >
+          ← 返回旧版
+        </motion.button>
         {/* 「学生目录」标题 — 4 种动态样式，切换时 CSS transition 平滑过渡 */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -291,61 +326,148 @@ export function Home() {
           <Typewriter text="欢迎来到学生目录 3.0！" speed={80} delay={1200} />
         </motion.p>
 
-        {/* VPN 状态指示 */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
+        {/* ── VPN 状态圆心 + 扇形展开导航 ── */}
+        <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            color: '#666',
-            fontSize: '0.85rem',
-            marginBottom: '20px',
+            position: 'relative',
             width: '100%',
-            justifyContent: 'center',
+            maxWidth: '500px',
+            margin: '0 auto',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
           }}
         >
-          <span
+          {/* 扇柄 / 圆心：VPN 状态 */}
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.5 }}
             style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              background: statusColor[sessionStatus],
-              display: 'inline-block',
-              boxShadow: `0 0 6px ${statusColor[sessionStatus]}`,
-              transition: 'background 0.6s ease, box-shadow 0.6s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              color: '#888',
+              fontSize: '0.8rem',
+              letterSpacing: '0.04em',
+              padding: '8px 20px',
+              borderRadius: '20px',
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              zIndex: 2,
             }}
-          />
-          <span>
-            VPN 状态：{statusText[sessionStatus]}
-            {sessionCount !== null && `（${sessionCount} 人在线）`}
-          </span>
-        </motion.div>
+          >
+            <span
+              style={{
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                background: statusColor[sessionStatus],
+                boxShadow: `0 0 10px ${statusColor[sessionStatus]}, 0 0 20px ${statusColor[sessionStatus]}40`,
+                transition: 'background 0.6s ease, box-shadow 0.6s ease',
+              }}
+            />
+            <span>
+              VPN {statusText[sessionStatus]}
+              {sessionCount !== null && ` · ${sessionCount} 在线`}
+            </span>
+          </motion.div>
 
-        {/* 导航按钮 */}
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center', padding: '0 16px' }}>
-          {indicators.map((item, i) => (
-            <motion.div
-              key={item.text}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.5 + i * 0.1 }}
+          {/* 扇形卡片区 */}
+          <div
+            style={{
+              position: 'relative',
+              width: '100%',
+              height: '240px',
+            }}
+          >
+            {/* 扇骨连线 SVG — preserveAspectRatio="none" 确保坐标系与容器像素对齐 */}
+            <svg
+              viewBox="0 0 500 240"
+              preserveAspectRatio="none"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+                zIndex: 0,
+              }}
             >
-              <RippleButton
-                onClick={() => {
-                  if (item.path.startsWith('http')) {
-                    window.open(item.path, '_blank');
-                  } else {
-                    navigate(item.path);
-                  }
-                }}
-              >
-                {item.text}
-              </RippleButton>
-            </motion.div>
-          ))}
+              {navButtons.map((_, i) => {
+                const angles = [-56, -20, 20, 56];
+                const rad = (angles[i] * Math.PI) / 180;
+                const cx = 250;
+                const cy = 0;
+                const r = 170;
+                const x2 = cx + Math.sin(rad) * r;
+                const y2 = cy + Math.cos(rad) * r;
+                const isHovered = hoveredBtnIndex === i;
+                return (
+                  <line
+                    key={i}
+                    x1={cx}
+                    y1={cy}
+                    x2={x2}
+                    y2={y2}
+                    stroke={isHovered ? navButtons[i].accentColor : 'rgba(255,255,255,0.06)'}
+                    strokeWidth={isHovered ? 1.5 : 0.5}
+                    strokeDasharray={isHovered ? 'none' : '4 8'}
+                    style={{ transition: 'stroke 0.4s ease, stroke-width 0.4s ease' }}
+                  />
+                );
+              })}
+            </svg>
+
+            {navButtons.map((item, i) => {
+              const angles = [-56, -20, 20, 56];
+              const rad = (angles[i] * Math.PI) / 180;
+              const radius = 170;
+              const xOffset = Math.sin(rad) * radius;
+              const yOffset = Math.cos(rad) * radius;
+
+              return (
+                <motion.div
+                  key={item.text}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    duration: 0.65,
+                    delay: 1.15 + i * 0.1,
+                    ease: [0.34, 1.56, 0.64, 1],
+                  }}
+                  style={{
+                    position: 'absolute',
+                    left: `calc(50% + ${xOffset}px)`,
+                    top: `${yOffset}px`,
+                    zIndex: 1,
+                  }}
+                >
+                  {/* 内层纯 div 负责居中，不被 framer-motion 的 transform 覆盖 */}
+                  <div style={{ transform: 'translate(-50%, 0)' }}>
+                    <SlateButton
+                      index={i}
+                      hoveredIndex={hoveredBtnIndex}
+                      onHover={setHoveredBtnIndex}
+                      icon={item.icon}
+                      subtitle={item.subtitle}
+                      accentColor={item.accentColor}
+                      onClick={() => {
+                        if (item.path.startsWith('http')) {
+                          window.open(item.path, '_blank');
+                        } else {
+                          navigate(item.path);
+                        }
+                      }}
+                    >
+                      {item.text}
+                    </SlateButton>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </PageTransition>
