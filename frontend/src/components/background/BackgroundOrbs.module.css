@@ -22,45 +22,47 @@
   will-change: opacity;
 }
 
-/* ── 光球 1：右下暖绿 ── */
+/* ── 光球 1：中下方暖绿（扇形连线背光） ── */
 .container::before {
   content: '';
   position: absolute;
-  width: 50%;
-  height: 45%;
-  right: 5%;
-  bottom: 10%;
+  width: 45%;
+  height: 40%;
+  left: 50%;
+  bottom: 20%;
   border-radius: 50%;
   background: radial-gradient(
     ellipse at center,
-    rgba(34, 197, 94, 0.15) 0%,
-    rgba(34, 197, 94, 0.06) 35%,
+    rgba(34, 197, 94, 0.08) 0%,
+    rgba(34, 197, 94, 0.03) 40%,
     transparent 70%
   );
-  filter: blur(50px);
+  filter: blur(60px);
+  mix-blend-mode: screen;
   will-change: transform;
-  transform: translateZ(0);
+  transform: translate(-50%, 0) translateZ(0);
   pointer-events: none;
 }
 
-/* ── 光球 2：左上冷蓝 ── */
+/* ── 光球 2：中上方冷蓝（形成冷暖对比纵深） ── */
 .container::after {
   content: '';
   position: absolute;
-  width: 55%;
-  height: 50%;
-  left: 5%;
-  top: 5%;
+  width: 50%;
+  height: 42%;
+  left: 50%;
+  top: 30%;
   border-radius: 50%;
   background: radial-gradient(
     ellipse at center,
-    rgba(56, 189, 248, 0.12) 0%,
-    rgba(56, 189, 248, 0.04) 35%,
+    rgba(56, 189, 248, 0.07) 0%,
+    rgba(56, 189, 248, 0.02) 40%,
     transparent 70%
   );
-  filter: blur(50px);
+  filter: blur(70px);
+  mix-blend-mode: screen;
   will-change: transform;
-  transform: translateZ(0);
+  transform: translate(-50%, 0) translateZ(0);
   pointer-events: none;
 }
 
@@ -73,18 +75,18 @@
 }
 
 @keyframes orbDrift1 {
-  0%   { transform: translate3d(0, 0, 0)      scale(1); }
-  25%  { transform: translate3d(-30px, -20px, 0) scale(1.08); }
-  50%  { transform: translate3d(-15px, 10px, 0)  scale(0.96); }
-  75%  { transform: translate3d(20px, -5px, 0)   scale(1.04); }
-  100% { transform: translate3d(0, 0, 0)         scale(1); }
+  0%   { transform: translate(-50%, 0)   translateZ(0) scale(1); }
+  25%  { transform: translate(calc(-50% - 20px), -15px) translateZ(0) scale(1.06); }
+  50%  { transform: translate(calc(-50% + 10px), 5px)   translateZ(0) scale(0.96); }
+  75%  { transform: translate(calc(-50% + 15px), -8px)  translateZ(0) scale(1.03); }
+  100% { transform: translate(-50%, 0)   translateZ(0) scale(1); }
 }
 
 @keyframes orbDrift2 {
-  0%   { transform: translate3d(0, 0, 0)      scale(1); }
-  33%  { transform: translate3d(25px, 15px, 0)  scale(1.05); }
-  66%  { transform: translate3d(-15px, -20px, 0) scale(0.95); }
-  100% { transform: translate3d(0, 0, 0)         scale(1); }
+  0%   { transform: translate(-50%, 0)   translateZ(0) scale(1); }
+  33%  { transform: translate(calc(-50% + 18px), 10px)  translateZ(0) scale(1.04); }
+  66%  { transform: translate(calc(-50% - 12px), -12px) translateZ(0) scale(0.97); }
+  100% { transform: translate(-50%, 0)   translateZ(0) scale(1); }
 }
 
 /* ── 噪点纹理 ── */

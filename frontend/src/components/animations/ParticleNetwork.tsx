@@ -93,10 +93,10 @@ export function ParticleNetwork({
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance < connectionDistance) {
-          const opacity = (1 - distance / connectionDistance) * 0.6;
+          const opacity = (1 - distance / connectionDistance) * 0.25;
           ctx.beginPath();
           ctx.strokeStyle = `rgba(0, 255, 157, ${opacity})`;
-          ctx.lineWidth = 1.2;
+          ctx.lineWidth = 0.8;
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p2.x, p2.y);
           ctx.stroke();
@@ -104,17 +104,17 @@ export function ParticleNetwork({
       }
 
       ctx.beginPath();
-      ctx.fillStyle = particleColor;
-      ctx.arc(p1.x, p1.y, p1.radius + 1, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0, 255, 157, 0.4)`;
+      ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2);
       ctx.fill();
-      
-      // 给粒子加发光效果
-      const gradient = ctx.createRadialGradient(p1.x, p1.y, 0, p1.x, p1.y, p1.radius + 3);
-      gradient.addColorStop(0, 'rgba(0, 255, 157, 0.8)');
+
+      // 给粒子加微弱发光效果
+      const gradient = ctx.createRadialGradient(p1.x, p1.y, 0, p1.x, p1.y, p1.radius + 2);
+      gradient.addColorStop(0, 'rgba(0, 255, 157, 0.25)');
       gradient.addColorStop(1, 'rgba(0, 255, 157, 0)');
       ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.arc(p1.x, p1.y, p1.radius + 3, 0, Math.PI * 2);
+      ctx.arc(p1.x, p1.y, p1.radius + 2, 0, Math.PI * 2);
       ctx.fill();
     });
 
@@ -126,15 +126,15 @@ export function ParticleNetwork({
         const distance = Math.sqrt(dx * dx + dy * dy);
         return { particle: p, distance };
       })
-      .filter(item => item.distance < 250)
+      .filter(item => item.distance < 200)
       .sort((a, b) => a.distance - b.distance)
-      .slice(0, 8);
+      .slice(0, 5);
 
     nearestParticles.forEach(item => {
-      const opacity = (1 - item.distance / 250) * 0.8;
+      const opacity = (1 - item.distance / 200) * 0.3;
       ctx.beginPath();
       ctx.strokeStyle = `rgba(0, 255, 157, ${opacity})`;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 0.8;
       ctx.moveTo(item.particle.x, item.particle.y);
       ctx.lineTo(mouse.x, mouse.y);
       ctx.stroke();
@@ -184,7 +184,7 @@ export function ParticleNetwork({
         top: 0,
         left: 0,
         pointerEvents: 'none',
-        zIndex: 0,
+        zIndex: 1,
       }}
     />
   );

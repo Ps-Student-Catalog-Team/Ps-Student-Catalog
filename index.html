@@ -3,326 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="http://10.88.202.59">
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
     <title>学生目录</title>
-    <!--link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"-->
-    <script>
-        let currentTargetUrl = '';
-
-        function checkPassword(targetUrl) {
-            currentTargetUrl = targetUrl;
-            const modal = document.getElementById('passwordModal');
-            modal.style.display = 'block';
-            document.getElementById('pwdInput').focus();
-        }
-
-        function submitPassword() {
-            const correctPassword = "qwe";
-            const input = document.getElementById('pwdInput');
-            const errorMsg = document.getElementById('errorMsg');
-            
-            if(input.value === correctPassword) {
-                window.location.href = currentTargetUrl;
-            } else {
-                errorMsg.textContent = "密码错误，请重新输入";
-                input.value = '';
-                input.focus();
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('passwordModal').style.display = 'none';
-            document.getElementById('errorMsg').textContent = '';
-        }
-
-        let isFirstAnnouncement = true;
-        const ANNOUNCEMENT_KEY = 'announcementDismissedTime';
-        const ANNOUNCEMENT_HASH_KEY = 'announcementContentHash';
-        const ANNOUNCEMENT_EXPIRE_HOURS = 3;
-        const MOUSE_EFFECT_KEY = 'mouseEffectEnabled';
-        const API_BASE_URL = 'http://10.88.202.59:3132';
-
-        async function fetchFromApi(endpoint, options = {}) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), options.timeout || 5000);
-            
-            // 拼接完整的 API 地址
-            const url = API_BASE_URL + endpoint;
-            
-            try {
-                const response = await fetch(url, {
-                    ...options,
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                
-                if (!response.ok) {
-                    throw new Error(`API请求失败: ${response.status}`);
-                }
-                
-                return response;
-            } catch (error) {
-                clearTimeout(timeoutId);
-                throw error;
-            }
-        }
-
-        function getMouseEffectEnabled() {
-            const value = localStorage.getItem(MOUSE_EFFECT_KEY);
-            return value === null ? true : value === 'true';
-        }
-
-        function setMouseEffectEnabled(enabled) {
-            localStorage.setItem(MOUSE_EFFECT_KEY, enabled.toString());
-            updateMouseEffectUI();
-        }
-
-        function toggleMouseEffect() {
-            const current = getMouseEffectEnabled();
-            setMouseEffectEnabled(!current);
-        }
-
-        function updateMouseEffectUI() {
-            const enabled = getMouseEffectEnabled();
-            const follower = document.querySelector('.mouse-follower');
-            const particles = document.querySelector('.mouse-particles');
-            if (follower) {
-                follower.style.display = enabled ? 'block' : 'none';
-            }
-            if (particles) {
-                particles.style.display = enabled ? 'block' : 'none';
-            }
-            const toggleBtn = document.getElementById('mouseEffectToggle');
-            if (toggleBtn) {
-                toggleBtn.textContent = enabled ? '鼠标特效: 开启' : '鼠标特效: 关闭';
-                toggleBtn.style.opacity = enabled ? '1' : '0.5';
-            }
-        }
-
-        // 计算内容哈希值（简单字符串哈希）
-        function calculateHash(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                const char = str.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash;
-            }
-            return hash.toString();
-        }
-
-        function shouldShowAnnouncement(currentHash) {
-            const dismissedTime = localStorage.getItem(ANNOUNCEMENT_KEY);
-            const savedHash = localStorage.getItem(ANNOUNCEMENT_HASH_KEY);
-            
-            console.log('dismissedTime:', dismissedTime);
-            console.log('savedHash:', savedHash);
-            console.log('currentHash:', currentHash);
-            
-            // 如果内容发生变化，强制显示公告
-            if (savedHash !== currentHash) {
-                console.log('公告内容已改变，需要显示');
-                return true;
-            }
-            
-            if (!dismissedTime) return true;
-            
-            const hoursPassed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60);
-            console.log('hoursPassed:', hoursPassed);
-            return hoursPassed >= ANNOUNCEMENT_EXPIRE_HOURS;
-        }
-
-        async function showAnnouncementModal(forceShow = false) {
-            const modal = document.getElementById('announcementModal');
-            const content = modal.querySelector('.announcement-content');
-            
-            // 先显示页面内容，避免API阻塞页面加载
-            if (isFirstAnnouncement) {
-                isFirstAnnouncement = false;
-                document.getElementById('home-page').style.display = 'flex';
-                document.getElementById('announcementLink').style.display = 'inline-block';
-                document.getElementById('updateLogLink').style.display = 'inline-block';
-                document.getElementById('moreContentLink').style.display = 'inline-block';
-                
-                const progress = document.createElement('div');
-                progress.className = 'progress-bar';
-                document.body.prepend(progress);
-
-                setTimeout(() => {
-                    document.querySelectorAll('.intro-section li').forEach(li => {
-                        li.style.visibility = 'visible';
-                    });
-                }, 1000);
-            }
-            
-            // 从API获取公告内容（使用备用地址机制）
-            try {
-                const response = await fetchFromApi('/api/announcement', { timeout: 1000 });
-                const data = await response.json();
-                
-                if (data.home) {
-                    // 计算当前公告内容的哈希值
-                    const contentString = JSON.stringify(data.home);
-                    const currentHash = calculateHash(contentString);
-                    
-                    // 检查是否需要显示公告
-                    if (!forceShow && !shouldShowAnnouncement(currentHash)) {
-                        return;
-                    }
-                    
-                    // 清空现有内容
-                    content.innerHTML = '';
-                    
-                    // 添加标题
-                    const title = document.createElement('h2');
-                    title.textContent = data.home.title;
-                    content.appendChild(title);
-                    
-                    // 添加分隔线
-                    const hr = document.createElement('hr');
-                    hr.style.cssText = 'border: none; border-top: 1px solid #444; margin: 15px 0;';
-                    content.appendChild(hr);
-                    
-                    // 添加内容
-                    data.home.content.forEach(item => {
-                        const p = document.createElement('p');
-                        p.innerHTML = item;
-                        content.appendChild(p);
-                    });
-                    
-                    // 添加确认按钮
-                    const button = document.createElement('button');
-                    button.className = 'btn-accept';
-                    button.onclick = function() {
-                        // 保存当前公告内容的哈希值
-                        localStorage.setItem(ANNOUNCEMENT_HASH_KEY, currentHash);
-                        hideAnnouncementModal();
-                    };
-                    button.textContent = '确认';
-                    content.appendChild(button);
-                    
-                    // 添加最后修改时间（底部居中）
-                    if (data.serverModifiedTime) {
-                        const timeP = document.createElement('p');
-                        timeP.style.cssText = 'font-size: 0.7em; color: #666; text-align: center; margin-top: 15px; margin-bottom: 0;';
-                        timeP.innerHTML = `<i>最后更新: ${data.serverModifiedTime}</i>`;
-                        content.appendChild(timeP);
-                    }
-                    
-                    content.classList.remove('hide');
-                    modal.style.display = 'flex';
-                }
-            } catch (error) {
-                console.error('获取公告失败:', error);
-            }
-        }
-
-        function hideAnnouncementModal() {
-            let timeoutId;
-            const modal = document.getElementById('announcementModal');
-            const content = modal.querySelector('.announcement-content');
-            content.classList.add('hide');
-            timeoutId = setTimeout(() => {  
-                modal.style.display = 'none';
-                localStorage.setItem(ANNOUNCEMENT_KEY, Date.now().toString());
-                
-                if (isFirstAnnouncement) {
-                    isFirstAnnouncement = false;
-                    document.getElementById('home-page').style.display = 'flex';
-                    document.getElementById('announcementLink').style.display = 'inline-block';
-                    document.getElementById('updateLogLink').style.display = 'inline-block';
-                    document.getElementById('moreContentLink').style.display = 'inline-block';
-                    
-                    const progress = document.createElement('div');
-                    progress.className = 'progress-bar';
-                    document.body.prepend(progress);
-
-                    setTimeout(() => {
-                        document.querySelectorAll('.intro-section li').forEach(li => {
-                            li.style.visibility = 'visible';
-                        });
-                    }, 1000);
-                }
-            }, 350); 
-
-        }
-
-
-
-        // 关闭模态框逻辑
-        console.log('Script loaded, preparing to show announcement');
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOMContentLoaded triggered');
-            showAnnouncementModal();
-        });
-
-        // 检测 VPN 会话数并更新链接颜色
-        async function checkVPNSessionCount() {
-            const linkElement = document.getElementById('vpnStatusLink');
-            const countElement = document.getElementById('vpnSessionCount');
-            
-            try {
-                const response = await fetchFromApi('/api/vpn-users?ip=10.88.202.59', { timeout: 5000 });
-                const data = await response.json();
-                
-                if (!data.success) {
-                    throw new Error(data.error || '获取会话数失败');
-                }
-                
-                const sessionCount = data.sessionCount;
-                if (sessionCount === null || sessionCount === undefined) {
-                    throw new Error('会话数数据无效');
-                }
-                
-                // 显示时减一（去掉自己的连接）
-                const displayCount = Math.max(0, sessionCount - 1);
-                if (countElement) {
-                    countElement.textContent = `(${displayCount}人)`;
-                }
-                
-                // 颜色判断仍使用原始会话数
-                if (sessionCount < 4) {
-                    linkElement.style.setProperty('color', 'rgb(0, 189, 73)', 'important');
-                } else if (sessionCount >= 4 && sessionCount <= 7) {
-                    linkElement.style.setProperty('color', 'rgb(255, 193, 7)', 'important');
-                } else {
-                    linkElement.style.setProperty('color', 'rgb(220, 53, 69)', 'important');
-                }
-            } catch (error) {
-                console.error('检测 VPN 会话数失败:', error);
-                linkElement.style.setProperty('color', 'rgb(128, 128, 128)', 'important');
-                if (countElement) {
-                    countElement.textContent = '(检测失败)';
-                }
-            }
-        }
-        // 确保在 DOM 加载完成后执行
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('passwordModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeModal();
-                }
-            });
-
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeModal();
-                }
-                if (e.key === 'Enter' && document.getElementById('passwordModal').style.display === 'block') {
-                    submitPassword();
-                }
-            });
-
-            updateMouseEffectUI();
-            
-            // 检测 VPN 会话数
-            checkVPNSessionCount();
-            // 每 30 秒刷新一次
-            setInterval(checkVPNSessionCount, 31320);
-        });
-    </script>
 
     <link rel="stylesheet" href="public/css/main.css">
-    <link rel="stylesheet" href="public/css/font-awesome.min.css">
+
+    <style>
+        /* 折叠内容样式 */
+        .collapsed-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+
+        .read-more-btn {
+            display: block;
+            margin: 40px auto 0;
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .read-more-btn:hover {
+            background: rgba(0, 255, 157, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;
+            line-height: 1.8;
+            letter-spacing: 0.5px;
+        }
+
+        /* 标题动画 */
+        h1 {
+            position: relative;
+            animation: typewriter 1.2s steps(12) 0.5s both,
+                       blinkCursor 0.8s infinite;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid var(--accent-color);
+            max-width: max-content;
+        }
+
+        /* 列表项动画 */
+        .intro-section li {
+            opacity: 0;
+            animation: slideIn 0.6s forwards;
+            transform: translateX(-20px);
+        }
+
+        .intro-section li:nth-child(1) { animation-delay: 0.8s; }
+        .intro-section li:nth-child(2) { animation-delay: 1.1s; }
+        .intro-section li:nth-child(3) { animation-delay: 1.4s; }
+        .intro-section li:nth-child(4) { animation-delay: 2.0s; }
+        .intro-section li:nth-child(5) { animation-delay: 2.2s; }
+
+        /* 卡片悬浮特效 */
+        .tutorial-card {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .tutorial-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(0, 255, 157, 0.2),
+                transparent
+            );
+            background-size: 200% 200%;
+            animation: gradientFlow 15s ease infinite;
+            transition: 0.6s;
+        }
+
+        .tutorial-card:hover::before {
+            left: 100%;
+        }
+
+        /* 按钮涟漪效果 */
+        .nav-button {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-button::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: ripple 0.6s ease-out;
+        }
+
+        /* 鼠标选中特效 */
+        ::selection {
+            background-color: rgba(0, 255, 157, 0.3);
+            color: #00ff9d;
+            text-shadow: 0 0 8px rgba(0, 255, 157, 0.8);
+        }
+
+        @keyframes pageLoad {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blinkCursor {
+            from, to { border-color: transparent }
+            50% { border-color: var(--accent-color) }
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* 工具页内部视图切换动画 */
+        #primary-tools-view,
+        #secondary-tools-view {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        #primary-tools-view.slide-out,
+        #secondary-tools-view.slide-out {
+            opacity: 0;
+            transform: translateX(-30px);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #primary-tools-view.slide-in,
+        #secondary-tools-view.slide-in {
+            animation: slideInView 0.3s forwards;
+        }
+
+        @keyframes slideInView {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes ripple {
+            to {
+                transform: translate(-50%, -50%) scale(2);
+                opacity: 0;
+            }
+        }
+
+        /* 进度条动画 */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent-color);
+            animation: progress 2s ease-in-out;
+        }
+
+        @keyframes progress {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        /* 更新确认弹窗样式 */
+        #updateModal pre {
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 200px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        #updateModal .btn-confirm {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #updateModal .btn-confirm:hover {
+            background-color: #00cc80;
+        }
+
+        /* 鼠标跟随动画 */
+        .mouse-follower {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ff9d;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+            opacity: 0.7;
+            transform-origin: center center;
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+
+        .mouse-follower:hover {
+            width: 30px;
+            height: 30px;
+            opacity: 0.9;
+        }
+
+        .mouse-follower.active {
+            width: 40px;
+            height: 40px;
+            opacity: 0.5;
+            background: rgba(0, 255, 157, 0.2);
+            transform-origin: center center;
+        }
+
+        .mouse-follower.hover {
+            width: 35px;
+            height: 35px;
+            opacity: 0.8;
+            background: rgba(0, 255, 157, 0.3);
+            border-color: #00cc80;
+            transform: scale(1.2);
+        }
+
+        /* 鼠标跟随粒子动画 */
+        .mouse-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00ff9d;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.7;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+
+        .particle.hover {
+            background: #00cc80;
+            box-shadow: 0 0 8px #00ff9d;
+            transform: scale(1.5);
+        }
+
+        @media (max-width: 640px) {
+            .mouse-effect-toggle {
+                bottom: 50px !important;
+                right: 10px !important;
+                font-size: 0.7em !important;
+                padding: 6px 8px !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -362,7 +337,7 @@
                 <ul style="list-style: none;">
                     <li style="padding: 10px 0;">✔ 校园网络接入服务</li>
                     <li style="padding: 10px 0;">✔ 学生共享文件传输服务</li>
-                    <li style="padding: 10px 0;">✔ 其他技术支持<br><br></li> 
+                    <li style="padding: 10px 0;">✔ 其他技术支持<br><br></li>
                     <li style="padding: 10px 0;">初来乍到？ 前往 <a class="footer-link" style="color:rgb(0, 189, 73);" href="public/pages/readme.html">学生目录使用说明</a></li>
                     <li style="padding: 10px 0;">欢迎新一届高中牲入学(/≧▽≦)/</li>
                 </ul>
@@ -375,25 +350,9 @@
                 <button class="nav-button" onclick="navigateToTools()">更多工具</button>
                 <button class="nav-button" onclick="navigateToAbout()">关于</button>
                 <button class="nav-button" style="background: linear-gradient(135deg, #00ff9d, #00a9ff); border-color: #00ff9d; color: #082b57; font-weight: 600;" onclick="location.href='/frontend/'">体验新版</button>
-                <!--button class="download-mc-btn" onclick='window.open("http://10.88.202.59:5244/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C/Minecraft.zip")'>下载mc</button-->
-                <!--div style="display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto;">
-                    <p style="margin: 0;">Status:</p>
-                    <div class="circle green tooltip" style="margin-left: 10px;">
-                        <span class="tooltip-content">
-                                if ($session_count < 5) {
-                                    echo "<br>会话数较少，VPN质量较为稳定";
-                                } elseif ($session_count >= 5 && $session_count <= 8) {
-                                    echo "<br>会话数较多，VPN质量可能不稳定";
-                                } else {
-                                    echo "<br>会话数较多，VPN速度可能较慢";
-                                }
-                            ?>
-                        </span>
-                    </div>
-                </div-->
 
                 <div style="text-align: center; margin-top: 10px;">
-                    <a id="vpnStatusLink" style="color:rgb(128, 128, 128);" class="footer-link" href="public/pages/newest.html">查看当前VPN状态</a>      
+                    <a id="vpnStatusLink" style="color:rgb(128, 128, 128);" class="footer-link" href="public/pages/newest.html">查看当前VPN状态</a>
                     <span id="vpnSessionCount" style="font-size: 0.8em; margin-left: 8px; color: #666;"></span>
                 </div>
 
@@ -414,46 +373,46 @@
                 <div class="tutorial-card">
                     <h3>怎么在学校访问互联网</h3>
                     <p>介绍了如何使用正确的方法在学校访问互联网</p>
-                    <a href="public/tutorial/show.html?file=web" class="btn btn-outline-primary">查看教程</a> 
+                    <a href="public/tutorial/show.html?file=web" class="btn btn-outline-primary">查看教程</a>
                 </div>
-                
+
                 <div class="tutorial-card">
                      <h3>更好的在学校中上网</h3>
                     <p>如何在学校内通过电脑移动热点上网</p>
-                    <a href="public/tutorial/show.html?file=wed3" class="btn btn-outline-primary">查看教程</a> 
+                    <a href="public/tutorial/show.html?file=wed3" class="btn btn-outline-primary">查看教程</a>
                 </div>
-                
+
                 <div class="tutorial-card">
                     <h3>教师目录密码</h3>
                     <p>教师目录密码登记</p>
                     <a class="btn btn-outline-primary" onclick="checkPassword('public/tutorial/show.html?file=password')">查看教程</a>
                 </div>
-                
+
                 <div class="tutorial-card">
                     <h3>教学楼中的WiFi密码登记</h3>
                     <p>登记了教学楼中的WiFi密码</p>
-                    <a onclick="checkPassword('public/tutorial/show.html?file=web2')" class="btn btn-outline-primary">查看教程</a> 
+                    <a onclick="checkPassword('public/tutorial/show.html?file=web2')" class="btn btn-outline-primary">查看教程</a>
                 </div>
 
                 <div class="tutorial-card">
                      <h3>连接我们的Minecraft服务器</h3>
                     <p>包含了如何连接我们的Minecraft服务器</p>
-                    <a href="public/tutorial/show.html?file=minecraft_server" class="btn btn-outline-primary">查看教程</a> 
+                    <a href="public/tutorial/show.html?file=minecraft_server" class="btn btn-outline-primary">查看教程</a>
                 </div>
 
                 <div class="tutorial-card">
                      <h3>Network Repair 使用说明</h3>
                     <p>详细介绍了Network Repair的使用方法</p>
-                    <a href="public/tutorial/show.html?file=Networkrepair" class="btn btn-outline-primary">查看教程</a>   
+                    <a href="public/tutorial/show.html?file=Networkrepair" class="btn btn-outline-primary">查看教程</a>
                 </div>
 
                 <div class="tutorial-card">
                      <h3>如何使用我们的时间同步服务器</h3>
                     <p>详细介绍了Windows time server的使用方法</p>
-                    <a href="public/tutorial/show.html?file=Windowstimesserver" class="btn btn-outline-primary">查看教程</a>   
+                    <a href="public/tutorial/show.html?file=Windowstimesserver" class="btn btn-outline-primary">查看教程</a>
                 </div>
             </div>
-            
+
             <!-- 密码验证模态框 -->
             <div class="passwordModal" id="passwordModal">
                 <div class="modal-content">
@@ -469,7 +428,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- 更新确认模态框 -->
             <div class="announcement-modal" id="updateModal" style="display: none;">
                 <div class="announcement-content">
@@ -484,7 +443,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- 关于页 -->
         <div id="about-page">
             <button class="back-button" onclick="goBack()">返回首页</button>
@@ -540,7 +499,6 @@
         </div>
 
         <!-- 工具选择页面 -->
-        <!-- 工具选择页面 -->
 <div id="tools-page">
     <button id="toolsBackButton" class="back-button" onclick="goBack()">返回首页</button>
     <h2>工具选择</h2>
@@ -595,11 +553,6 @@
     <div id="secondary-tools-view" style="display: none;">
         <h3 style="margin-bottom: 20px; color: var(--accent-color);">更多工具</h3>
         <div class="tutorial-grid">
-            <!--div class="tutorial-card">
-                <h3>种子下载</h3>
-                <p>使用Qbittorrent下载种子文件</p>
-                <a href="http://10.88.202.59:8080" class="btn btn-outline-primary">进入</a>
-            </div-->
             <div class="tutorial-card">
                 <h3>VPN日志分析</h3>
                 <p>一个小小的日志分析网站</p>
@@ -620,7 +573,7 @@
 </div>
 
     </div>
-    
+
     <!-- 鼠标跟随元素 -->
     <div class="mouse-follower"></div>
     <!-- 鼠标跟随粒子容器 -->
@@ -628,682 +581,510 @@
 
     <!-- 页面底部链接 -->
 <div class="footer-container">
-    <a class="footer-link footer-links" href="https://github.com/Ps-Student-Catalog-Team/Ps-Student-Catalog" target="_blank" title="GitHub仓库" style="position: absolute; bottom: 10px; left: 20px; font-size: 0.8em; color: #666;"><i class="fa fa-github"></i></a>
+    <a class="footer-link footer-links" href="https://github.com/Ps-Student-Catalog-Team/Ps-Student-Catalog" target="_blank" title="GitHub仓库" style="position: absolute; bottom: 10px; left: 20px; font-size: 0.8em; color: #666;"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -0.125em;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
     <a class="footer-link footer-links" id="announcementLink" href="javascript:void(0)" onclick="showAnnouncementModal(true)" style="display: none;">查看公告</a>
     <a class="footer-link footer-links" id="updateLogLink" href="public/pages/about_us.html" style="display: none;">关于我们</a>
     <a class="footer-link footer-links" id="moreContentLink" href="https://psstunet.github.io/" style="display: none;">更多内容</a>
     <a class="version-info" href="javascript:void(0)" onclick="pullUpdates()" style="position: absolute; bottom: 10px; right: 20px; font-size: 0.8em; color: #666; cursor: pointer; text-decoration: underline;">版本: 2.3.4</a>
-    <button id="mouseEffectToggle" class="mouse-effect-toggle" onclick="toggleMouseEffect()" style="position: absolute; bottom: 10px; right: 100px; font-size: 0.8em; padding: 4px 10px; border: 1px solid var(--accent-color); background: transparent; color: var(--accent-color); border-radius: 4px; cursor: pointer; transition: all 0.3s ease; opacity: 1; z-index: 10000;">鼠标特效: 开启</button>
-    
-    <style>
-        @media (max-width: 640px) {
-            .mouse-effect-toggle {
-                bottom: 50px !important;
-                right: 10px !important;
-                font-size: 0.7em !important;
-                padding: 6px 8px !important;
-            }
-        }
-    </style>
+    <button id="mouseEffectToggle" class="mouse-effect-toggle" onclick="toggleMouseEffect()" style="position: absolute; bottom: 10px; right: 100px; font-size: 0.8em; padding: 4px 10px; border: 1px solid var(--accent-color); background: transparent; color: var(--accent-color); border-radius: 4px; cursor: pointer; transition: opacity 0.3s ease; opacity: 1; z-index: 10000;">鼠标特效: 开启</button>
 </div>
 
-
 <script>
+    // ========== 导航函数 ==========
     function navigateToTutorials() {
         document.getElementById('home-page').classList.add('slide-out');
         document.getElementById('tutorial-page').classList.add('slide-in');
     }
-    
+
     function navigateToAbout() {
         document.getElementById('home-page').classList.add('slide-out');
         document.getElementById('about-page').classList.add('slide-in');
     }
 
     function navigateToTools() {
-    document.getElementById('home-page').classList.add('slide-out');
-    document.getElementById('tools-page').classList.add('slide-in');
+        document.getElementById('home-page').classList.add('slide-out');
+        document.getElementById('tools-page').classList.add('slide-in');
 
-    // 确保工具页显示一级视图，且按钮状态正确
-    var primary = document.getElementById('primary-tools-view');
-    var secondary = document.getElementById('secondary-tools-view');
-    if (primary && secondary) {
-        primary.style.display = 'block';
-        secondary.style.display = 'none';
-        primary.classList.remove('slide-out', 'slide-in');
-        secondary.classList.remove('slide-out', 'slide-in');
+        var primary = document.getElementById('primary-tools-view');
+        var secondary = document.getElementById('secondary-tools-view');
+        if (primary && secondary) {
+            primary.style.display = 'block';
+            secondary.style.display = 'none';
+            primary.classList.remove('slide-out', 'slide-in');
+            secondary.classList.remove('slide-out', 'slide-in');
+        }
+        var backBtn = document.getElementById('toolsBackButton');
+        if (backBtn) {
+            backBtn.textContent = '返回首页';
+            backBtn.onclick = goBack;
+        }
     }
-    var backBtn = document.getElementById('toolsBackButton');
-    if (backBtn) {
+
+    function showSecondaryTools() {
+        var primary = document.getElementById('primary-tools-view');
+        var secondary = document.getElementById('secondary-tools-view');
+        var backBtn = document.getElementById('toolsBackButton');
+
+        primary.classList.add('slide-out');
+
+        setTimeout(function() {
+            primary.style.display = 'none';
+            primary.classList.remove('slide-out');
+
+            secondary.style.display = 'block';
+            secondary.classList.add('slide-in');
+
+            setTimeout(function() {
+                secondary.classList.remove('slide-in');
+            }, 300);
+        }, 300);
+
+        backBtn.textContent = '返回';
+        backBtn.onclick = showPrimaryTools;
+    }
+
+    function showPrimaryTools() {
+        var primary = document.getElementById('primary-tools-view');
+        var secondary = document.getElementById('secondary-tools-view');
+        var backBtn = document.getElementById('toolsBackButton');
+
+        secondary.classList.add('slide-out');
+
+        setTimeout(function() {
+            secondary.style.display = 'none';
+            secondary.classList.remove('slide-out');
+
+            primary.style.display = 'block';
+            primary.classList.add('slide-in');
+
+            setTimeout(function() {
+                primary.classList.remove('slide-in');
+            }, 300);
+        }, 300);
+
         backBtn.textContent = '返回首页';
         backBtn.onclick = goBack;
     }
-}
 
-    // 显示二级工具视图（从一级滑到二级）
-function showSecondaryTools() {
-    var primary = document.getElementById('primary-tools-view');
-    var secondary = document.getElementById('secondary-tools-view');
-    var backBtn = document.getElementById('toolsBackButton');
+    function goBack() {
+        document.getElementById('home-page').classList.remove('slide-out');
+        document.getElementById('tutorial-page').classList.remove('slide-in');
+        document.getElementById('about-page').classList.remove('slide-in');
+        document.getElementById('tools-page').classList.remove('slide-in');
 
-    // 一级视图滑出
-    primary.classList.add('slide-out');
-    
-    setTimeout(() => {
-        primary.style.display = 'none';
-        primary.classList.remove('slide-out');
-        
-        // 显示二级视图并滑入
-        secondary.style.display = 'block';
-        secondary.classList.add('slide-in');
-        
-        setTimeout(() => {
-            secondary.classList.remove('slide-in');
-        }, 300);
-    }, 300);
+        var primary = document.getElementById('primary-tools-view');
+        var secondary = document.getElementById('secondary-tools-view');
+        if (primary && secondary) {
+            primary.style.display = 'block';
+            secondary.style.display = 'none';
+            primary.classList.remove('slide-out', 'slide-in');
+            secondary.classList.remove('slide-out', 'slide-in');
+        }
 
-    // 修改顶部返回按钮
-    backBtn.textContent = '返回';
-    backBtn.onclick = showPrimaryTools;
-}
-
-// 返回一级工具视图（从二级滑回一级）
-function showPrimaryTools() {
-    var primary = document.getElementById('primary-tools-view');
-    var secondary = document.getElementById('secondary-tools-view');
-    var backBtn = document.getElementById('toolsBackButton');
-
-    // 二级视图滑出
-    secondary.classList.add('slide-out');
-    
-    setTimeout(() => {
-        secondary.style.display = 'none';
-        secondary.classList.remove('slide-out');
-        
-        // 显示一级视图并滑入
-        primary.style.display = 'block';
-        primary.classList.add('slide-in');
-        
-        setTimeout(() => {
-            primary.classList.remove('slide-in');
-        }, 300);
-    }, 300);
-
-    // 恢复顶部返回按钮
-    backBtn.textContent = '返回首页';
-    backBtn.onclick = goBack;
-}
-
-// 返回首页（确保重置工具页状态）
-function goBack() {
-    document.getElementById('home-page').classList.remove('slide-out');
-    document.getElementById('tutorial-page').classList.remove('slide-in');
-    document.getElementById('about-page').classList.remove('slide-in');
-    document.getElementById('tools-page').classList.remove('slide-in');
-
-    // 重置工具页内部为一级视图（无动画直接重置，因为已经离开工具页）
-    var primary = document.getElementById('primary-tools-view');
-    var secondary = document.getElementById('secondary-tools-view');
-    if (primary && secondary) {
-        primary.style.display = 'block';
-        secondary.style.display = 'none';
-        primary.classList.remove('slide-out', 'slide-in');
-        secondary.classList.remove('slide-out', 'slide-in');
+        var backBtn = document.getElementById('toolsBackButton');
+        if (backBtn) {
+            backBtn.textContent = '返回首页';
+            backBtn.onclick = goBack;
+        }
     }
 
-    var backBtn = document.getElementById('toolsBackButton');
-    if (backBtn) {
-        backBtn.textContent = '返回首页';
-        backBtn.onclick = goBack;
-    }
-}
     function toggleReadMore(btn) {
-        const content = btn.parentElement.querySelector('.collapsed-content');
-        const isExpanded = content.style.maxHeight;
-        
+        var content = btn.parentElement.querySelector('.collapsed-content');
+        var isExpanded = content.style.maxHeight;
+
         if (isExpanded) {
             content.style.maxHeight = null;
-            btn.textContent = '阅读更多 ↓';
+            btn.textContent = '阅读更多 \u2193';
         } else {
             content.style.maxHeight = content.scrollHeight + 'px';
-            btn.textContent = '收起 ↑';
-        }
-    }
-</script>
-
-<style>
-    /* 折叠内容样式 */
-    .collapsed-content {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.4s ease-out;
-    }
-
-    .read-more-btn {
-        display: block;
-        margin: 40px auto 0;
-        padding: 8px 16px;
-        background: transparent;
-        border: 1px solid var(--accent-color);
-        color: var(--accent-color);
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .read-more-btn:hover {
-        background: rgba(0, 255, 157, 0.1);
-    }
-
-    body {
-        font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;
-        line-height: 1.8;
-        letter-spacing: 0.5px;
-    }
-
-    /* 标题动画 */
-    h1 {
-        position: relative;
-        animation: typewriter 1.2s steps(12) 0.5s both,
-                   blinkCursor 0.8s infinite;
-        overflow: hidden;
-        white-space: nowrap;
-        border-right: 2px solid var(--accent-color);
-        max-width: max-content;
-    }
-
-    /* 列表项动画 */
-    .intro-section li {
-        opacity: 0;
-        animation: slideIn 0.6s forwards;
-        transform: translateX(-20px);
-    }
-
-    .intro-section li:nth-child(1) { animation-delay: 0.8s; }
-    .intro-section li:nth-child(2) { animation-delay: 1.1s; }
-    .intro-section li:nth-child(3) { animation-delay: 1.4s; }
-    .intro-section li:nth-child(4) { animation-delay: 2.0s; }
-    .intro-section li:nth-child(5) { animation-delay: 2.2s; }
-
-    /* 卡片悬浮特效 */
-    .tutorial-card {
-        position: relative;
-        overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-
-    .tutorial-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(0, 255, 157, 0.2),
-            transparent
-        );
-        background-size: 200% 200%;
-        animation: gradientFlow 15s ease infinite;
-        transition: 0.6s;
-    }
-
-    .tutorial-card:hover::before {
-        left: 100%;
-    }
-
-    /* 按钮涟漪效果 */
-    .nav-button {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .nav-button::after {
-        content: '';
-        position: absolute;
-        width: 100px;
-        height: 100px;
-        background: rgba(255,255,255,0.2);
-        border-radius: 50%;
-        transform: translate(-50%, -50%) scale(0);
-        animation: ripple 0.6s ease-out;
-    }
-
-    /* 鼠标选中特效 */
-    ::selection {
-        background-color: rgba(0, 255, 157, 0.3);
-        color: #00ff9d;
-        text-shadow: 0 0 8px rgba(0, 255, 157, 0.8);
-    }
-
-    ::-moz-selection {
-        background-color: rgba(0, 255, 157, 0.3);
-        color: #00ff9d;
-        text-shadow: 0 0 8px rgba(0, 255, 157, 0.8);
-    }
-
-    @keyframes pageLoad {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes typewriter {
-        from { width: 0; }
-        to { width: 100%; }
-    }
-
-    @keyframes blinkCursor {
-        from, to { border-color: transparent }
-        50% { border-color: var(--accent-color) }
-    }
-
-    @keyframes slideIn {
-        to { 
-            opacity: 1;
-            transform: translateX(0);
+            btn.textContent = '收起 \u2191';
         }
     }
 
-    /* 工具页内部视图切换动画 */
-#primary-tools-view,
-#secondary-tools-view {
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    opacity: 1;
-    transform: translateX(0);
-}
+    // ========== 密码验证 ==========
+    let currentTargetUrl = '';
 
-#primary-tools-view.slide-out,
-#secondary-tools-view.slide-out {
-    opacity: 0;
-    transform: translateX(-30px);
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-#primary-tools-view.slide-in,
-#secondary-tools-view.slide-in {
-    animation: slideInView 0.3s forwards;
-}
-
-@keyframes slideInView {
-    from {
-        opacity: 0;
-        transform: translateX(30px);
+    function checkPassword(targetUrl) {
+        currentTargetUrl = targetUrl;
+        document.getElementById('passwordModal').style.display = 'block';
+        document.getElementById('pwdInput').focus();
     }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
 
-    @keyframes ripple {
-        to {
-            transform: translate(-50%, -50%) scale(2);
-            opacity: 0;
+    function submitPassword() {
+        var input = document.getElementById('pwdInput');
+        var errorMsg = document.getElementById('errorMsg');
+
+        if (input.value === "qwe") {
+            window.location.href = currentTargetUrl;
+        } else {
+            errorMsg.textContent = "密码错误，请重新输入";
+            input.value = '';
+            input.focus();
         }
     }
 
-    /* 动态背景效果 */
-    body::after {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: radial-gradient(circle at 50% 50%, 
-            rgba(0, 255, 157, 0.1) 0%, 
-            transparent 60%);
-        pointer-events: none;
-        z-index: -1;
-        animation: pulse 8s infinite;
+    function closeModal() {
+        document.getElementById('passwordModal').style.display = 'none';
+        document.getElementById('errorMsg').textContent = '';
     }
 
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.2); }
+    // ========== 公告系统 ==========
+    let isFirstAnnouncement = true;
+    const ANNOUNCEMENT_KEY = 'announcementDismissedTime';
+    const ANNOUNCEMENT_HASH_KEY = 'announcementContentHash';
+    const ANNOUNCEMENT_EXPIRE_HOURS = 3;
+    const MOUSE_EFFECT_KEY = 'mouseEffectEnabled';
+    const API_BASE_URL = 'http://10.88.202.59:3132';
+
+    async function fetchFromApi(endpoint, options) {
+        options = options || {};
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function() { controller.abort(); }, options.timeout || 5000);
+
+        var url = API_BASE_URL + endpoint;
+
+        try {
+            var response = await fetch(url, Object.assign({}, options, { signal: controller.signal }));
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error('API\u8BF7\u6C42\u5931\u8D25: ' + response.status);
+            }
+
+            return response;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            throw error;
+        }
     }
 
-    /* 进度条动画 */
-    .progress-bar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 3px;
-        background: var(--accent-color);
-        animation: progress 2s ease-in-out;
+    // ========== 鼠标特效开关 ==========
+    function getMouseEffectEnabled() {
+        var value = localStorage.getItem(MOUSE_EFFECT_KEY);
+        return value === null ? true : value === 'true';
     }
 
-    @keyframes progress {
-        from { width: 0; }
-        to { width: 100%; }
+    function setMouseEffectEnabled(enabled) {
+        localStorage.setItem(MOUSE_EFFECT_KEY, enabled.toString());
+        updateMouseEffectUI();
     }
 
-    /* 更新确认弹窗样式 */
-    #updateModal pre {
-        background-color: rgba(0, 0, 0, 0.1);
-        padding: 10px;
-        border-radius: 4px;
-        overflow-x: auto;
-        max-height: 200px;
-        font-family: monospace;
-        font-size: 12px;
-        line-height: 1.4;
+    function toggleMouseEffect() {
+        setMouseEffectEnabled(!getMouseEffectEnabled());
     }
 
-    #updateModal .btn-confirm {
-        padding: 8px 16px;
-        border: none;
-        border-radius: 4px;
-        background-color: var(--accent-color);
-        color: white;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
+    function updateMouseEffectUI() {
+        var enabled = getMouseEffectEnabled();
+        var follower = document.querySelector('.mouse-follower');
+        var particles = document.querySelector('.mouse-particles');
+        if (follower) {
+            follower.style.display = enabled ? 'block' : 'none';
+        }
+        if (particles) {
+            particles.style.display = enabled ? 'block' : 'none';
+        }
+        var toggleBtn = document.getElementById('mouseEffectToggle');
+        if (toggleBtn) {
+            toggleBtn.textContent = enabled ? '鼠标特效: 开启' : '鼠标特效: 关闭';
+            toggleBtn.style.opacity = enabled ? '1' : '0.5';
+        }
     }
 
-    #updateModal .btn-confirm:hover {
-        background-color: #00cc80;
+    // ========== 公告逻辑 ==========
+    function calculateHash(str) {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+            hash = ((hash << 5) - hash) + str.charCodeAt(i);
+            hash = hash & hash;
+        }
+        return hash.toString();
     }
 
-    /* 鼠标跟随动画 */
-    .mouse-follower {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 20px;
-        height: 20px;
-        border: 2px solid #00ff9d;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 9998;
-        transition: transform 0.1s ease-out, width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
-        opacity: 0.7;
-        transform-origin: center center;
+    function shouldShowAnnouncement(currentHash) {
+        var dismissedTime = localStorage.getItem(ANNOUNCEMENT_KEY);
+        var savedHash = localStorage.getItem(ANNOUNCEMENT_HASH_KEY);
+
+        if (savedHash !== currentHash) return true;
+        if (!dismissedTime) return true;
+
+        var hoursPassed = (Date.now() - parseInt(dismissedTime)) / 3600000;
+        return hoursPassed >= ANNOUNCEMENT_EXPIRE_HOURS;
     }
 
-    .mouse-follower:hover {
-        width: 30px;
-        height: 30px;
-        opacity: 0.9;
+    async function showAnnouncementModal(forceShow) {
+        var modal = document.getElementById('announcementModal');
+        var content = modal.querySelector('.announcement-content');
+
+        if (isFirstAnnouncement) {
+            isFirstAnnouncement = false;
+            document.getElementById('home-page').style.display = 'flex';
+            document.getElementById('announcementLink').style.display = 'inline-block';
+            document.getElementById('updateLogLink').style.display = 'inline-block';
+            document.getElementById('moreContentLink').style.display = 'inline-block';
+
+            var progress = document.createElement('div');
+            progress.className = 'progress-bar';
+            document.body.prepend(progress);
+
+            setTimeout(function() {
+                document.querySelectorAll('.intro-section li').forEach(function(li) {
+                    li.style.visibility = 'visible';
+                });
+            }, 1000);
+        }
+
+        try {
+            var response = await fetchFromApi('/api/announcement', { timeout: 1000 });
+            var data = await response.json();
+
+            if (data.home) {
+                var contentString = JSON.stringify(data.home);
+                var currentHash = calculateHash(contentString);
+
+                if (!forceShow && !shouldShowAnnouncement(currentHash)) return;
+
+                content.innerHTML = '';
+
+                var title = document.createElement('h2');
+                title.textContent = data.home.title;
+                content.appendChild(title);
+
+                var hr = document.createElement('hr');
+                hr.style.cssText = 'border: none; border-top: 1px solid #444; margin: 15px 0;';
+                content.appendChild(hr);
+
+                data.home.content.forEach(function(item) {
+                    var p = document.createElement('p');
+                    p.innerHTML = item;
+                    content.appendChild(p);
+                });
+
+                var button = document.createElement('button');
+                button.className = 'btn-accept';
+                button.onclick = function() {
+                    localStorage.setItem(ANNOUNCEMENT_HASH_KEY, currentHash);
+                    hideAnnouncementModal();
+                };
+                button.textContent = '确认';
+                content.appendChild(button);
+
+                if (data.serverModifiedTime) {
+                    var timeP = document.createElement('p');
+                    timeP.style.cssText = 'font-size: 0.7em; color: #666; text-align: center; margin-top: 15px; margin-bottom: 0;';
+                    timeP.innerHTML = '<i>最后更新: ' + data.serverModifiedTime + '</i>';
+                    content.appendChild(timeP);
+                }
+
+                content.classList.remove('hide');
+                modal.style.display = 'flex';
+            }
+        } catch (error) {
+            console.error('获取公告失败:', error);
+        }
     }
 
-    .mouse-follower.active {
-        width: 40px;
-        height: 40px;
-        opacity: 0.5;
-        background: rgba(0, 255, 157, 0.2);
-        transform-origin: center center;
+    function hideAnnouncementModal() {
+        var modal = document.getElementById('announcementModal');
+        var content = modal.querySelector('.announcement-content');
+        content.classList.add('hide');
+        setTimeout(function() {
+            modal.style.display = 'none';
+            localStorage.setItem(ANNOUNCEMENT_KEY, Date.now().toString());
+        }, 350);
     }
 
-    .mouse-follower.hover {
-        width: 35px;
-        height: 35px;
-        opacity: 0.8;
-        background: rgba(0, 255, 157, 0.3);
-        border-color: #00cc80;
-        transform: scale(1.2);
+    // ========== VPN 状态检测 ==========
+    async function checkVPNSessionCount() {
+        var linkElement = document.getElementById('vpnStatusLink');
+        var countElement = document.getElementById('vpnSessionCount');
+
+        try {
+            var response = await fetchFromApi('/api/vpn-users?ip=10.88.202.59', { timeout: 5000 });
+            var data = await response.json();
+
+            if (!data.success) throw new Error(data.error || '获取会话数失败');
+
+            var sessionCount = data.sessionCount;
+            if (sessionCount === null || sessionCount === undefined) throw new Error('会话数数据无效');
+
+            var displayCount = Math.max(0, sessionCount - 1);
+            if (countElement) countElement.textContent = '(' + displayCount + '人)';
+
+            if (sessionCount < 4) {
+                linkElement.style.setProperty('color', 'rgb(0, 189, 73)', 'important');
+            } else if (sessionCount <= 7) {
+                linkElement.style.setProperty('color', 'rgb(255, 193, 7)', 'important');
+            } else {
+                linkElement.style.setProperty('color', 'rgb(220, 53, 69)', 'important');
+            }
+        } catch (error) {
+            linkElement.style.setProperty('color', 'rgb(128, 128, 128)', 'important');
+            if (countElement) countElement.textContent = '(检测失败)';
+        }
     }
 
-    /* 鼠标跟随粒子动画 */
-    .mouse-particles {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 9999;
-        overflow: hidden;
-    }
-
-    .particle {
-        position: absolute;
-        width: 4px;
-        height: 4px;
-        background: #00ff9d;
-        border-radius: 50%;
-        pointer-events: none;
-        opacity: 0.7;
-        transition: all 0.3s ease;
-    }
-
-    .particle.hover {
-        background: #00cc80;
-        box-shadow: 0 0 8px #00ff9d;
-        transform: scale(1.5);
-    }
-</style>
-
-<script>
-    // 增强按钮点击效果
-    document.querySelectorAll('.nav-button').forEach(button => {
-        button.addEventListener('click', function(e) {
-            // 创建涟漪效果
-            const ripple = document.createElement('div');
-            ripple.style.cssText = `
-                position: absolute;
-                width: 100px;
-                height: 100px;
-                background: rgba(255,255,255,0.2);
-                border-radius: 50%;
-                transform: translate(-50%, -50%) scale(0);
-                animation: ripple 0.6s ease-out;
-            `;
-            this.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
-        });
-    });
-
-    // 增强卡片交互
-    document.querySelectorAll('.tutorial-card').forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            card.style.setProperty('--mouse-x', `${x}px`);
-            card.style.setProperty('--mouse-y', `${y}px`);
-        });
-    });
-
-    // 拉取同步最新更改的函数
+    // ========== 更新拉取 ==========
     function pullUpdates() {
-        // 打开确认弹窗
-        const modal = document.getElementById('updateModal');
-        const resultDiv = document.getElementById('updateResult');
+        var modal = document.getElementById('updateModal');
+        var resultDiv = document.getElementById('updateResult');
         resultDiv.innerHTML = '';
         modal.style.display = 'flex';
     }
 
-    // 执行拉取更新命令
     function confirmPullUpdates() {
-        const resultDiv = document.getElementById('updateResult');
+        var resultDiv = document.getElementById('updateResult');
         resultDiv.innerHTML = '<p>正在拉取同步最新更改，请稍候...</p>';
-        
-        // 发送请求到服务器
+
         fetch('/api/pull-updates')
-            .then(response => response.json())
-            .then(data => {
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
                 if (data.success) {
-                    resultDiv.innerHTML = `<p style="color: green;">拉取同步成功！</p><pre>${data.output}</pre><button class="btn-confirm" onclick="closeUpdateModal(); location.reload();">刷新页面</button>`;
+                    resultDiv.innerHTML = '<p style="color: green;">拉取同步成功！</p><pre>' + data.output + '</pre><button class="btn-confirm" onclick="closeUpdateModal(); location.reload();">刷新页面</button>';
                 } else {
-                    resultDiv.innerHTML = `<p style="color: red;">拉取同步失败：</p><pre>${data.error}\n\n${data.details || ''}</pre><button class="btn-confirm" onclick="closeUpdateModal();">关闭</button>`;
+                    resultDiv.innerHTML = '<p style="color: red;">拉取同步失败：</p><pre>' + data.error + '\n\n' + (data.details || '') + '</pre><button class="btn-confirm" onclick="closeUpdateModal();">关闭</button>';
                 }
             })
-            .catch(error => {
-                resultDiv.innerHTML = `<p style="color: red;">拉取同步失败：</p><pre>${error.message}</pre><button class="btn-confirm" onclick="closeUpdateModal();">关闭</button>`;
+            .catch(function(error) {
+                resultDiv.innerHTML = '<p style="color: red;">拉取同步失败：</p><pre>' + error.message + '</pre><button class="btn-confirm" onclick="closeUpdateModal();">关闭</button>';
             });
     }
 
-    // 关闭更新弹窗
     function closeUpdateModal() {
         document.getElementById('updateModal').style.display = 'none';
     }
 
-    // 鼠标跟随动画
-    document.addEventListener('DOMContentLoaded', () => {
-        // 圆形跟随动画
-        const follower = document.querySelector('.mouse-follower');
-        let mouseX = 0, mouseY = 0;
-        let followerX = 0, followerY = 0;
+    // ========== 初始化 ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        showAnnouncementModal();
 
-        function animateFollower() {
-            if (!getMouseEffectEnabled()) {
-                requestAnimationFrame(animateFollower);
-                return;
-            }
-            // 计算跟随元素的新位置（更快的跟随效果）
-            followerX += (mouseX - followerX) * 0.6;
-            followerY += (mouseY - followerY) * 0.6;
+        document.getElementById('passwordModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
 
-            // 动态获取当前尺寸并计算偏移量，确保以中心定位
-            const currentWidth = follower.offsetWidth;
-            const currentHeight = follower.offsetHeight;
-            const offsetX = currentWidth / 2;
-            const offsetY = currentHeight / 2;
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+            if (e.key === 'Enter' && document.getElementById('passwordModal').style.display === 'block') submitPassword();
+        });
 
-            // 应用位置
-            follower.style.transform = `translate(${followerX - offsetX}px, ${followerY - offsetY}px)`;
+        updateMouseEffectUI();
+        checkVPNSessionCount();
+        setInterval(checkVPNSessionCount, 30000);
 
-            requestAnimationFrame(animateFollower);
-        }
+        // 增强按钮点击效果
+        document.querySelectorAll('.nav-button').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                var ripple = document.createElement('div');
+                ripple.style.cssText = 'position:absolute;width:100px;height:100px;background:rgba(255,255,255,0.2);border-radius:50%;transform:translate(-50%,-50%) scale(0);animation:ripple 0.6s ease-out;';
+                this.appendChild(ripple);
+                setTimeout(function() { ripple.remove(); }, 600);
+            });
+        });
 
-        // 粒子跟随动画
-        const particlesContainer = document.querySelector('.mouse-particles');
-        let isHovering = false;
+        // 增强卡片交互
+        document.querySelectorAll('.tutorial-card').forEach(function(card) {
+            card.addEventListener('mousemove', function(e) {
+                var rect = card.getBoundingClientRect();
+                card.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+                card.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+            });
+        });
 
-        // 粒子数组
-        const particles = [];
-        const maxParticles = 50;
+        // ========== 鼠标跟随动画（合并 rAF 循环） ==========
+        var follower = document.querySelector('.mouse-follower');
+        var mouseX = 0, mouseY = 0;
+        var followerX = 0, followerY = 0;
 
-        // 创建粒子
+        var particlesContainer = document.querySelector('.mouse-particles');
+        var particles = [];
+        var maxParticles = 50;
+
         function createParticle(x, y) {
             if (!getMouseEffectEnabled()) return;
             if (particles.length >= maxParticles) {
-                // 移除最旧的粒子
-                const oldestParticle = particles.shift();
-                if (oldestParticle) {
-                    particlesContainer.removeChild(oldestParticle.element);
-                }
+                var oldest = particles.shift();
+                if (oldest) particlesContainer.removeChild(oldest.element);
             }
 
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = x + 'px';
-            particle.style.top = y + 'px';
+            var el = document.createElement('div');
+            el.className = 'particle';
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
 
-            // 随机属性
-            const size = Math.random() * 4 + 2;
-            particle.style.width = size + 'px';
-            particle.style.height = size + 'px';
+            var size = Math.random() * 4 + 2;
+            el.style.width = size + 'px';
+            el.style.height = size + 'px';
+            el.style.opacity = Math.random() * 0.5 + 0.3;
 
-            const opacity = Math.random() * 0.5 + 0.3;
-            particle.style.opacity = opacity;
-
-            const speedX = (Math.random() - 0.5) * 2;
-            const speedY = (Math.random() - 0.5) * 2;
-
-            particlesContainer.appendChild(particle);
+            particlesContainer.appendChild(el);
 
             particles.push({
-                element: particle,
-                x: x,
-                y: y,
-                speedX: speedX,
-                speedY: speedY,
-                size: size,
-                opacity: opacity,
+                element: el,
+                x: x, y: y,
+                speedX: (Math.random() - 0.5) * 2,
+                speedY: (Math.random() - 0.5) * 2,
                 life: 1.0,
                 decay: Math.random() * 0.02 + 0.01
             });
         }
 
-        // 动画循环
-        function animateParticles() {
-            if (!getMouseEffectEnabled()) {
-                requestAnimationFrame(animateParticles);
-                return;
-            }
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const particle = particles[i];
+        // 合并的动画循环
+        function animationLoop() {
+            if (getMouseEffectEnabled()) {
+                followerX += (mouseX - followerX) * 0.6;
+                followerY += (mouseY - followerY) * 0.6;
 
-                // 更新位置
-                particle.x += particle.speedX;
-                particle.y += particle.speedY;
+                var offsetX = follower.offsetWidth / 2;
+                var offsetY = follower.offsetHeight / 2;
+                follower.style.transform = 'translate(' + (followerX - offsetX) + 'px,' + (followerY - offsetY) + 'px)';
 
-                // 更新透明度
-                particle.life -= particle.decay;
-                particle.element.style.opacity = particle.life;
+                for (var i = particles.length - 1; i >= 0; i--) {
+                    var p = particles[i];
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+                    p.life -= p.decay;
+                    p.element.style.opacity = p.life;
+                    p.element.style.left = p.x + 'px';
+                    p.element.style.top = p.y + 'px';
 
-                // 应用样式
-                particle.element.style.left = particle.x + 'px';
-                particle.element.style.top = particle.y + 'px';
-
-                // 移除死亡粒子
-                if (particle.life <= 0) {
-                    particlesContainer.removeChild(particle.element);
-                    particles.splice(i, 1);
+                    if (p.life <= 0) {
+                        particlesContainer.removeChild(p.element);
+                        particles.splice(i, 1);
+                    }
                 }
             }
-
-            requestAnimationFrame(animateParticles);
+            requestAnimationFrame(animationLoop);
         }
 
-        // 鼠标移动事件
-        document.addEventListener('mousemove', (e) => {
+        document.addEventListener('mousemove', function(e) {
             mouseX = e.clientX;
             mouseY = e.clientY;
-
-            // 每移动一定距离创建粒子
-            if (Math.random() > 0.7) {
-                createParticle(mouseX, mouseY);
-            }
+            if (Math.random() > 0.7) createParticle(mouseX, mouseY);
         });
 
-        // 鼠标按下事件
-        document.addEventListener('mousedown', () => {
-            if (getMouseEffectEnabled()) {
-                follower.classList.add('active');
-            }
+        document.addEventListener('mousedown', function() {
+            if (getMouseEffectEnabled()) follower.classList.add('active');
         });
-
-        // 鼠标释放事件
-        document.addEventListener('mouseup', () => {
+        document.addEventListener('mouseup', function() {
             follower.classList.remove('active');
         });
 
         // 为可点击元素添加悬停效果
-        const clickableElements = document.querySelectorAll('a, button, .nav-button, .btn, .read-more-btn, .btn-confirm, .btn-accept');
-
-        clickableElements.forEach(element => {
-            element.addEventListener('mouseenter', () => {
+        var clickableElements = document.querySelectorAll('a, button, .nav-button, .btn, .read-more-btn, .btn-confirm, .btn-accept');
+        clickableElements.forEach(function(element) {
+            element.addEventListener('mouseenter', function() {
                 if (!getMouseEffectEnabled()) return;
-                isHovering = true;
                 follower.classList.add('hover');
-                // 给现有粒子添加悬停效果
-                particles.forEach(particle => {
-                    particle.element.classList.add('hover');
-                });
+                particles.forEach(function(p) { p.element.classList.add('hover'); });
             });
-
-            element.addEventListener('mouseleave', () => {
-                isHovering = false;
+            element.addEventListener('mouseleave', function() {
                 follower.classList.remove('hover');
-                // 移除悬停效果
-                particles.forEach(particle => {
-                    particle.element.classList.remove('hover');
-                });
+                particles.forEach(function(p) { p.element.classList.remove('hover'); });
             });
         });
 
-        // 开始动画
-        animateFollower();
-        animateParticles();
+        animationLoop();
     });
-
-    
 </script>
-
 
 </body>
 </html>

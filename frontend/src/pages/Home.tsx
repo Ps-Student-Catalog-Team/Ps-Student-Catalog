@@ -469,10 +469,13 @@ export function Home() {
                       y1={cy}
                       x2={x2}
                       y2={y2}
-                      stroke={isHovered ? '#22c55e' : 'rgba(255,255,255,0.06)'}
-                      strokeWidth={isHovered ? 1.5 : 0.5}
-                      strokeDasharray={isHovered ? 'none' : '4 8'}
-                      style={{ transition: 'stroke 0.4s ease, stroke-width 0.4s ease' }}
+                      stroke={isHovered ? '#22c55e' : 'rgba(255,255,255,0.12)'}
+                      strokeWidth={isHovered ? 2 : 0.8}
+                      strokeDasharray={isHovered ? 'none' : '6 10'}
+                      filter={isHovered ? 'drop-shadow(0 0 6px rgba(34,197,94,0.5))' : 'none'}
+                      style={{
+                        transition: 'stroke 0.4s ease, stroke-width 0.4s ease, filter 0.4s ease',
+                      }}
                     />
                   );
                 })}
