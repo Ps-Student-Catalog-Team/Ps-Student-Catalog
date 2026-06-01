@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { PageTransition } from '../components/layout/PageTransition';
 import { Typewriter } from '../components/animations/Typewriter';
 import { SlateButton } from '../components/ui/SlateButton';
+import { BackgroundOrbs } from '../components/background/BackgroundOrbs';
 
 const API_BASE_URL = 'http://10.88.202.59:3132';
 
@@ -264,15 +265,19 @@ export function Home() {
         `}</style>
       )}
 
+      {/* 高性能 CSS 光球背景 */}
+      <BackgroundOrbs />
+
       <div
         style={{
+          position: 'relative',
+          zIndex: 1,
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           padding: '20px',
-          background: 'linear-gradient(135deg, rgba(10,10,10,0.8) 0%, rgba(26,26,46,0.8) 100%)',
         }}
       >
         {/* 返回旧版按钮 */}
