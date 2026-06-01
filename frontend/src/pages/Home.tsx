@@ -57,10 +57,22 @@ const statusGlow: Record<VPNSessionStatus, string> = {
 
 const statusText: Record<VPNSessionStatus, string> = {
   good: '畅通',
-  warning: '一般',
+  warning: '警告',
   full: '拥挤',
   error: '检测失败',
 };
+
+const ANNOUNCEMENT_KEY = 'announcementDismissedTime';
+const ANNOUNCEMENT_HASH_KEY = 'announcementContentHash';
+const ANNOUNCEMENT_EXPIRE_HOURS = 3;
+
+interface Announcement {
+  home?: {
+    title: string;
+    content: string[];
+  };
+  serverModifiedTime?: string;
+}
 
 const navButtons: Array<{
   text: string;
@@ -109,6 +121,61 @@ export function Home() {
   const [sessionStatus, setSessionStatus] = useState<VPNSessionStatus>('error');
   const [hoveredBtnIndex, setHoveredBtnIndex] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [announcement, setAnnouncement] = useState<Announcement | null>(null);
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+  const [currentAnnouncementHash, setCurrentAnnouncementHash] = useState<string>('');
+
+  function calculateHash(str: string) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash = hash & hash;
+    }
+    return hash.toString();
+  }
+
+  function shouldShowAnnouncement(currentHash: string) {
+    const dismissedTime = localStorage.getItem(ANNOUNCEMENT_KEY);
+    const savedHash = localStorage.getItem(ANNOUNCEMENT_HASH_KEY);
+
+    if (savedHash !== currentHash) return true;
+    if (!dismissedTime) return true;
+
+    const hoursPassed = (Date.now() - parseInt(dismissedTime)) / 3600000;
+    return hoursPassed >= ANNOUNCEMENT_EXPIRE_HOURS;
+  }
+
+  async function fetchAnnouncement() {
+    try {
+      const response = await fetchFromApi('/api/announcement', { timeout: 1000 });
+      const data: Announcement = await response.json();
+      setAnnouncement(data);
+
+      if (data.home) {
+        const contentString = JSON.stringify(data.home);
+        const hash = calculateHash(contentString);
+        setCurrentAnnouncementHash(hash);
+
+        if (shouldShowAnnouncement(hash)) {
+          setShowAnnouncementModal(true);
+        }
+      }
+    } catch (error) {
+      console.error('获取公告失败:', error);
+    }
+  }
+
+  function handleShowAnnouncement() {
+    setShowAnnouncementModal(true);
+  }
+
+  function handleHideAnnouncement() {
+    setShowAnnouncementModal(false);
+    if (currentAnnouncementHash) {
+      localStorage.setItem(ANNOUNCEMENT_HASH_KEY, currentAnnouncementHash);
+    }
+    localStorage.setItem(ANNOUNCEMENT_KEY, Date.now().toString());
+  }
 
   const titleStyle = useMemo(() => ({
     fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
@@ -194,6 +261,10 @@ export function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    fetchAnnouncement();
+  }, []);
+
   return (
     <PageTransition>
       <BackgroundOrbs />
@@ -219,7 +290,7 @@ export function Home() {
           style={{
             position: 'fixed',
             top: '20px',
-            right: '20px',
+            right: '140px',
             padding: '8px 16px',
             background: 'rgba(0, 255, 157, 0.1)',
             border: '1px solid rgba(0, 255, 157, 0.3)',
@@ -236,6 +307,34 @@ export function Home() {
           }}
         >
           ← 返回旧版
+        </motion.button>
+
+        {/* 查看公告按钮 */}
+        <motion.button
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.6 }}
+          onClick={handleShowAnnouncement}
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            padding: '8px 16px',
+            background: 'rgba(0, 255, 157, 0.1)',
+            border: '1px solid rgba(0, 255, 157, 0.3)',
+            borderRadius: '8px',
+            color: '#00ff9d',
+            fontSize: '0.85rem',
+            cursor: 'pointer',
+            zIndex: 1000,
+            transition: 'all 0.3s ease',
+          }}
+          whileHover={{ 
+            background: 'rgba(0, 255, 157, 0.2)',
+            scale: 1.05
+          }}
+        >
+          查看公告
         </motion.button>
         {/* 「学生目录」标题 */}
         <motion.div
@@ -449,6 +548,112 @@ export function Home() {
           </div>
         )}
       </div>
+
+      {/* 公告模态框 */}
+      {showAnnouncementModal && announcement?.home && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000,
+            padding: '20px',
+          }}
+          onClick={handleHideAnnouncement}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            style={{
+              background: 'linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(17, 24, 39, 0.95) 100%)',
+              borderRadius: '16px',
+              padding: '30px',
+              maxWidth: '500px',
+              width: '100%',
+              border: '1px solid rgba(0, 255, 157, 0.2)',
+              boxShadow: '0 0 30px rgba(0, 255, 157, 0.1)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              style={{
+                color: '#00ff9d',
+                fontSize: '1.5rem',
+                marginBottom: '15px',
+                textAlign: 'center',
+                textShadow: '0 0 10px rgba(0, 255, 157, 0.3)',
+              }}
+            >
+              {announcement.home.title}
+            </h2>
+            <hr
+              style={{
+                border: 'none',
+                borderTop: '1px solid rgba(0, 255, 157, 0.2)',
+                margin: '15px 0',
+              }}
+            />
+            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              {announcement.home.content.map((item, i) => (
+                <p
+                  key={i}
+                  style={{
+                    color: '#ccc',
+                    fontSize: '1rem',
+                    lineHeight: '1.8',
+                    marginBottom: '10px',
+                  }}
+                  dangerouslySetInnerHTML={{ __html: item }}
+                />
+              ))}
+            </div>
+            {announcement.serverModifiedTime && (
+              <p
+                style={{
+                  fontSize: '0.75rem',
+                  color: '#666',
+                  textAlign: 'center',
+                  marginTop: '15px',
+                  marginBottom: '0',
+                }}
+              >
+                <i>最后更新: {announcement.serverModifiedTime}</i>
+              </p>
+            )}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleHideAnnouncement}
+              style={{
+                width: '100%',
+                marginTop: '20px',
+                padding: '12px 24px',
+                background: 'linear-gradient(135deg, rgba(0, 255, 157, 0.2) 0%, rgba(0, 255, 157, 0.1) 100%)',
+                border: '1px solid rgba(0, 255, 157, 0.3)',
+                borderRadius: '8px',
+                color: '#00ff9d',
+                fontSize: '1rem',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                fontWeight: '600',
+              }}
+            >
+              确认
+            </motion.button>
+          </motion.div>
+        </motion.div>
+      )}
     </PageTransition>
   );
 }
