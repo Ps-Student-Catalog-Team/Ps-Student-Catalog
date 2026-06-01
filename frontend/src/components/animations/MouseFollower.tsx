@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, memo } from 'react';
 import { useMousePosition } from '../../hooks/useMousePosition';
 import { useAnimationFrame } from '../../hooks/useAnimationFrame';
 
@@ -6,7 +6,7 @@ interface MouseFollowerProps {
   enabled?: boolean;
 }
 
-export function MouseFollower({ enabled = true }: MouseFollowerProps) {
+export const MouseFollower = memo(function MouseFollower({ enabled = true }: MouseFollowerProps) {
   const followerRef = useRef<HTMLDivElement>(null);
   const mouse = useMousePosition();
   const positionRef = useRef({ x: 0, y: 0 });
@@ -40,4 +40,4 @@ export function MouseFollower({ enabled = true }: MouseFollowerProps) {
       }}
     />
   );
-}
+});

@@ -1,6 +1,7 @@
-import { useRef, useEffect, useCallback, useState } from 'react';
+import { useRef, useEffect, useCallback, useState, memo } from 'react';
 import { useMousePosition } from '../../hooks/useMousePosition';
 import { useAnimationFrame } from '../../hooks/useAnimationFrame';
+import { usePerformance } from '../../context/PerformanceContext';
 
 interface ParticleNetworkProps {
   particleCount?: number;
@@ -15,9 +16,74 @@ interface Particle {
   vx: number;
   vy: number;
   radius: number;
+  gridX: number;
+  gridY: number;
 }
 
-export function ParticleNetwork({
+class SpatialGrid {
+  private cellSize: number;
+  private _cols: number;
+  private _rows: number;
+  private grid: Map<string, Particle[]>;
+
+  constructor(width: number, height: number, cellSize: number) {
+    this.cellSize = cellSize;
+    this._cols = Math.ceil(width / cellSize);
+    this._rows = Math.ceil(height / cellSize);
+    this.grid = new Map();
+  }
+
+  private getKey(col: number, row: number): string {
+    return `${col},${row}`;
+  }
+
+  clear(): void {
+    this.grid.clear();
+  }
+
+  resize(width: number, height: number): void {
+    this._cols = Math.ceil(width / this.cellSize);
+    this._rows = Math.ceil(height / this.cellSize);
+    this.grid.clear();
+  }
+
+  get cols() { return this._cols; }
+  get rows() { return this._rows; }
+
+  insert(particle: Particle): void {
+    const col = Math.floor(particle.x / this.cellSize);
+    const row = Math.floor(particle.y / this.cellSize);
+    particle.gridX = col;
+    particle.gridY = row;
+    const key = this.getKey(col, row);
+    const cell = this.grid.get(key);
+    if (cell) {
+      cell.push(particle);
+    } else {
+      this.grid.set(key, [particle]);
+    }
+  }
+
+  getNeighbors(particle: Particle, maxDistance: number): Particle[] {
+    const neighbors: Particle[] = [];
+    const maxCellDistance = Math.ceil(maxDistance / this.cellSize);
+
+    for (let dx = -maxCellDistance; dx <= maxCellDistance; dx++) {
+      for (let dy = -maxCellDistance; dy <= maxCellDistance; dy++) {
+        const col = particle.gridX + dx;
+        const row = particle.gridY + dy;
+        const key = this.getKey(col, row);
+        const cell = this.grid.get(key);
+        if (cell) {
+          neighbors.push(...cell);
+        }
+      }
+    }
+    return neighbors;
+  }
+}
+
+function ParticleNetworkComponent({
   particleCount = 150,
   connectionDistance = 200,
   particleColor = '#00ff9d',
@@ -28,17 +94,20 @@ export function ParticleNetwork({
   const particlesRef = useRef<Particle[]>([]);
   const initializedRef = useRef(false);
   const [effectiveParticleCount, setEffectiveParticleCount] = useState(particleCount);
+  const spatialGridRef = useRef<SpatialGrid | null>(null);
+  const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { particleCountMultiplier } = usePerformance();
 
   useEffect(() => {
     const updateParticleCount = () => {
-      const count = window.innerWidth < 768 ? 60 : window.innerWidth < 1024 ? 100 : 150;
-      setEffectiveParticleCount(count);
+      const baseCount = window.innerWidth < 768 ? 60 : window.innerWidth < 1024 ? 100 : 150;
+      setEffectiveParticleCount(Math.round(baseCount * particleCountMultiplier));
     };
 
     updateParticleCount();
     window.addEventListener('resize', updateParticleCount);
     return () => window.removeEventListener('resize', updateParticleCount);
-  }, [particleCount]);
+  }, [particleCount, particleCountMultiplier]);
 
   const createParticle = useCallback((canvas: HTMLCanvasElement): Particle => {
     return {
@@ -47,6 +116,8 @@ export function ParticleNetwork({
       vx: (Math.random() - 0.5) * 0.5,
       vy: (Math.random() - 0.5) * 0.5,
       radius: Math.random() * 2 + 1,
+      gridX: 0,
+      gridY: 0,
     };
   }, []);
 
@@ -58,7 +129,13 @@ export function ParticleNetwork({
     for (let i = 0; i < effectiveParticleCount; i++) {
       particlesRef.current.push(createParticle(canvas));
     }
-  }, [createParticle, effectiveParticleCount]);
+
+    spatialGridRef.current = new SpatialGrid(canvas.width, canvas.height, connectionDistance);
+
+    offscreenCanvasRef.current = document.createElement('canvas');
+    offscreenCanvasRef.current.width = canvas.width;
+    offscreenCanvasRef.current.height = canvas.height;
+  }, [createParticle, effectiveParticleCount, connectionDistance]);
 
   const updateParticles = useCallback(() => {
     const particles = particlesRef.current;
@@ -71,6 +148,9 @@ export function ParticleNetwork({
 
       if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
       if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+      p.x = Math.max(0, Math.min(canvas.width, p.x));
+      p.y = Math.max(0, Math.min(canvas.height, p.y));
     });
   }, []);
 
@@ -82,17 +162,34 @@ export function ParticleNetwork({
     if (!ctx) return;
 
     const particles = particlesRef.current;
+    const grid = spatialGridRef.current;
+    if (!grid) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    grid.clear();
+    particles.forEach(p => grid.insert(p));
+
+    const checkedPairs = new Set<string>();
+
     particles.forEach((p1, i) => {
-      for (let j = i + 1; j < particles.length; j++) {
-        const p2 = particles[j];
+      const neighbors = grid.getNeighbors(p1, connectionDistance);
+
+      for (const p2 of neighbors) {
+        const j = particles.indexOf(p2);
+        if (j <= i) continue;
+
+        const pairKey = i < j ? `${i}-${j}` : `${j}-${i}`;
+        if (checkedPairs.has(pairKey)) continue;
+        checkedPairs.add(pairKey);
+
         const dx = p1.x - p2.x;
         const dy = p1.y - p2.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+        const distanceSq = dx * dx + dy * dy;
+        const maxDistSq = connectionDistance * connectionDistance;
 
-        if (distance < connectionDistance) {
+        if (distanceSq < maxDistSq) {
+          const distance = Math.sqrt(distanceSq);
           const opacity = (1 - distance / connectionDistance) * 0.25;
           ctx.beginPath();
           ctx.strokeStyle = `rgba(0, 255, 157, ${opacity})`;
@@ -108,7 +205,6 @@ export function ParticleNetwork({
       ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2);
       ctx.fill();
 
-      // 给粒子加微弱发光效果
       const gradient = ctx.createRadialGradient(p1.x, p1.y, 0, p1.x, p1.y, p1.radius + 2);
       gradient.addColorStop(0, 'rgba(0, 255, 157, 0.25)');
       gradient.addColorStop(1, 'rgba(0, 255, 157, 0)');
@@ -118,19 +214,20 @@ export function ParticleNetwork({
       ctx.fill();
     });
 
-    // 鼠标连线到最近的多个粒子
-    const nearestParticles = [...particles]
-      .map(p => {
-        const dx = mouse.x - p.x;
-        const dy = mouse.y - p.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        return { particle: p, distance };
-      })
-      .filter(item => item.distance < 200)
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 5);
+    const nearestParticles: { particle: Particle; distance: number }[] = [];
+    for (const p of particles) {
+      const dx = mouse.x - p.x;
+      const dy = mouse.y - p.y;
+      const distanceSq = dx * dx + dy * dy;
+      if (distanceSq < 40000) {
+        nearestParticles.push({ particle: p, distance: Math.sqrt(distanceSq) });
+      }
+    }
 
-    nearestParticles.forEach(item => {
+    nearestParticles.sort((a, b) => a.distance - b.distance);
+    const topNearest = nearestParticles.slice(0, 5);
+
+    topNearest.forEach(item => {
       const opacity = (1 - item.distance / 200) * 0.3;
       ctx.beginPath();
       ctx.strokeStyle = `rgba(0, 255, 157, ${opacity})`;
@@ -189,3 +286,5 @@ export function ParticleNetwork({
     />
   );
 }
+
+export const ParticleNetwork = memo(ParticleNetworkComponent);

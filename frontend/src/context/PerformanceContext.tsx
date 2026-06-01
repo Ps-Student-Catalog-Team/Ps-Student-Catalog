@@ -1,12 +1,15 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
+import { useFpsMonitor } from '../hooks/useFpsMonitor';
 
 export interface PerformanceSettings {
-  backgroundParticles: boolean;   // ParticleNetwork 背景粒子
-  mouseFollower: boolean;        // MouseFollower 鼠标跟随
-  canvasParticles: boolean;       // CanvasParticleSystem 鼠标粒子轨迹
-  pageTransitions: boolean;       // 页面切换动画
-  reducedMotion: boolean;         // 全局减少动画
+  backgroundParticles: boolean;
+  mouseFollower: boolean;
+  canvasParticles: boolean;
+  pageTransitions: boolean;
+  reducedMotion: boolean;
 }
+
+export type AdaptiveLevel = 'high' | 'medium' | 'low';
 
 const DEFAULT_SETTINGS: PerformanceSettings = {
   backgroundParticles: true,
@@ -18,12 +21,17 @@ const DEFAULT_SETTINGS: PerformanceSettings = {
 
 const STORAGE_KEY = 'ps-student-catalog-performance';
 
+const PARTICLE_MULTIPLIERS: Record<AdaptiveLevel, number> = {
+  high: 1.0,
+  medium: 0.7,
+  low: 0.5,
+};
+
 function loadSettings(): PerformanceSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { ...DEFAULT_SETTINGS };
     const parsed = JSON.parse(raw);
-    // 合并默认值，兼容旧版本
     return { ...DEFAULT_SETTINGS, ...parsed };
   } catch {
     return { ...DEFAULT_SETTINGS };
@@ -37,8 +45,11 @@ interface PerformanceContextValue {
     value: PerformanceSettings[K]
   ) => void;
   resetSettings: () => void;
-  /** 是否正在从 localStorage 恢复（避免首次渲染闪烁） */
   isLoaded: boolean;
+  currentFps: number;
+  adaptiveLevel: AdaptiveLevel;
+  particleCountMultiplier: number;
+  updateFps: (fps: number) => void;
 }
 
 const PerformanceContext = createContext<PerformanceContextValue | null>(null);
@@ -46,17 +57,18 @@ const PerformanceContext = createContext<PerformanceContextValue | null>(null);
 export function PerformanceProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<PerformanceSettings>(loadSettings);
   const [isLoaded, _setIsLoaded] = useState(true);
+  const [currentFps, setCurrentFps] = useState(60);
+  const [adaptiveLevel, setAdaptiveLevel] = useState<AdaptiveLevel>('high');
+  const lowFpsStartTimeRef = useRef<number | null>(null);
 
-  // 持久化到 localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     } catch {
-      // 静默失败（隐私模式等情况）
+      // 静默失败
     }
   }, [settings]);
 
-  // 当 reducedMotion 改变时同步到 CSS 媒体查询
   useEffect(() => {
     if (settings.reducedMotion) {
       document.documentElement.style.setProperty('--motion-speed', '0');
@@ -76,8 +88,45 @@ export function PerformanceProvider({ children }: { children: ReactNode }) {
     setSettings({ ...DEFAULT_SETTINGS });
   }, []);
 
+  const updateFps = useCallback((fps: number) => {
+    setCurrentFps(fps);
+
+    const now = performance.now();
+
+    if (fps < 30) {
+      if (lowFpsStartTimeRef.current === null) {
+        lowFpsStartTimeRef.current = now;
+      } else if (now - lowFpsStartTimeRef.current >= 5000) {
+        setAdaptiveLevel('low');
+      }
+    } else {
+      lowFpsStartTimeRef.current = null;
+
+      if (fps >= 50) {
+        setAdaptiveLevel('high');
+      } else if (fps >= 30) {
+        setAdaptiveLevel('medium');
+      }
+    }
+  }, []);
+
+  useFpsMonitor(updateFps, 1000);
+
+  const particleCountMultiplier = PARTICLE_MULTIPLIERS[adaptiveLevel];
+
   return (
-    <PerformanceContext.Provider value={{ settings, updateSetting, resetSettings, isLoaded }}>
+    <PerformanceContext.Provider
+      value={{
+        settings,
+        updateSetting,
+        resetSettings,
+        isLoaded,
+        currentFps,
+        adaptiveLevel,
+        particleCountMultiplier,
+        updateFps,
+      }}
+    >
       {children}
     </PerformanceContext.Provider>
   );

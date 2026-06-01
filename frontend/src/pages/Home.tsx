@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { PageTransition } from '../components/layout/PageTransition';
 import { Typewriter } from '../components/animations/Typewriter';
 import { SlateButton } from '../components/ui/SlateButton';
 import { BackgroundOrbs } from '../components/background/BackgroundOrbs';
+import animations from './HomeAnimations.module.css';
+import { getCache, setCache } from '../utils/cache';
 
 const API_BASE_URL = 'http://10.88.202.59:3132';
 
@@ -31,74 +33,13 @@ async function fetchFromApi(endpoint: string, options: FetchOptions = {}) {
 
 type VPNSessionStatus = 'good' | 'warning' | 'full' | 'error';
 
-// 注入动画 keyframes（只注入一次）
-const glitchKeyframes = `
-@keyframes titleShimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
+const VPN_CACHE_KEY = 'vpn-status';
+const VPN_CACHE_TTL = 30000;
+
+interface VPNCacheData {
+  sessionCount: number;
+  sessionStatus: VPNSessionStatus;
 }
-@keyframes titleBreath {
-  0%, 100% { opacity: 1; filter: brightness(1); }
-  50%      { opacity: 0.7; filter: brightness(1.3); }
-}
-@keyframes titleShake {
-  0%, 100% { transform: translateX(0); }
-  10%       { transform: translateX(-3px) rotate(-0.5deg); }
-  20%       { transform: translateX(3px) rotate(0.5deg); }
-  30%       { transform: translateX(-2px) rotate(-0.3deg); }
-  40%       { transform: translateX(2px) rotate(0.3deg); }
-  50%       { transform: translateX(-1px); }
-  60%       { transform: translateX(1px); }
-}
-@keyframes titleGlitch {
-  0%   { transform: translate(0); opacity: 1; }
-  20%  { transform: translate(-2px, 1px); opacity: 0.8; }
-  40%  { transform: translate(2px, -1px); opacity: 0.6; }
-  60%  { transform: translate(-1px, 2px); opacity: 0.9; }
-  80%  { transform: translate(1px, -2px); opacity: 0.7; }
-  100% { transform: translate(0); opacity: 1; }
-}
-@keyframes glitchBefore {
-  0%, 100% { clip-path: inset(0 0 85% 0); transform: translate(-2px, -1px); }
-  10%      { clip-path: inset(15% 0 65% 0); transform: translate(2px, 1px); }
-  20%      { clip-path: inset(35% 0 40% 0); transform: translate(-1px, 2px); }
-  30%      { clip-path: inset(60% 0 10% 0); transform: translate(1px, -2px); }
-  40%      { clip-path: inset(80% 0 0 0); transform: translate(-2px, 1px); }
-  50%      { clip-path: inset(0 0 50% 0); transform: translate(2px, -1px); }
-  60%      { clip-path: inset(25% 0 25% 0); transform: translate(-1px, 2px); }
-  70%      { clip-path: inset(50% 0 0 0); transform: translate(1px, -1px); }
-  80%      { clip-path: inset(10% 0 60% 0); transform: translate(-2px, 1px); }
-  90%      { clip-path: inset(40% 0 20% 0); transform: translate(2px, -2px); }
-}
-@keyframes glitchAfter {
-  0%, 100% { clip-path: inset(85% 0 0 0); transform: translate(2px, 1px); }
-  10%      { clip-path: inset(0 0 15% 0); transform: translate(-2px, -1px); }
-  20%      { clip-path: inset(60% 0 35% 0); transform: translate(1px, -2px); }
-  30%      { clip-path: inset(10% 0 60% 0); transform: translate(-1px, 2px); }
-  40%      { clip-path: inset(0 0 80% 0); transform: translate(2px, -1px); }
-  50%      { clip-path: inset(50% 0 0 0); transform: translate(-2px, 1px); }
-  60%      { clip-path: inset(25% 0 25% 0); transform: translate(1px, -2px); }
-  70%      { clip-path: inset(0 0 50% 0); transform: translate(-1px, 1px); }
-  80%      { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
-  90%      { clip-path: inset(20% 0 40% 0); transform: translate(-2px, 2px); }
-}
-@keyframes welcomeShimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-@keyframes welcomeGlow {
-  0%, 100% { 
-    text-shadow: 0 0 5px rgba(0,255,157,0.3), 0 0 10px rgba(0,255,157,0.2); 
-  }
-  50% { 
-    text-shadow: 0 0 10px rgba(0,255,157,0.6), 0 0 20px rgba(0,255,157,0.4), 0 0 30px rgba(0,255,157,0.2); 
-  }
-}
-@keyframes welcomeFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-`;
 
 const statusColor: Record<VPNSessionStatus, string> = {
   good: '#00ff9d',
@@ -114,59 +55,6 @@ const statusGlow: Record<VPNSessionStatus, string> = {
   error: '0 0 10px rgba(136,136,136,0.3)',
 };
 
-// 4 种标题样式（带 CSS transition，样式切换时平滑过渡）
-const titleStyle: Record<VPNSessionStatus, React.CSSProperties> = {
-  good: {
-    fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
-    fontSize: 'clamp(1.8rem, 8vw, 3rem)',
-    marginBottom: '20px',
-    textAlign: 'center',
-    background: `linear-gradient(90deg, ${statusColor.good} 0%, ${statusColor.good} 30%, #ffffff 50%, ${statusColor.good} 70%, ${statusColor.good} 100%)`,
-    backgroundSize: '200% 100%',
-    WebkitBackgroundClip: 'text',
-    backgroundClip: 'text',
-    color: 'transparent',
-    animation: 'titleShimmer 2.5s linear infinite',
-    textShadow: statusGlow.good,
-    transition: 'text-shadow 0.6s ease',
-    display: 'inline-block',
-  },
-  warning: {
-    fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
-    fontSize: 'clamp(1.8rem, 8vw, 3rem)',
-    marginBottom: '20px',
-    textAlign: 'center',
-    color: statusColor.warning,
-    animation: 'titleBreath 1.8s ease-in-out infinite',
-    textShadow: statusGlow.warning,
-    transition: 'text-shadow 0.6s ease, color 0.6s ease, filter 0.6s ease',
-    display: 'inline-block',
-  },
-  full: {
-    fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
-    fontSize: 'clamp(1.8rem, 8vw, 3rem)',
-    marginBottom: '20px',
-    textAlign: 'center',
-    color: statusColor.full,
-    animation: 'titleShake 0.8s ease-in-out infinite',
-    textShadow: statusGlow.full,
-    transition: 'text-shadow 0.6s ease, color 0.6s ease, filter 0.6s ease',
-    display: 'inline-block',
-  },
-  error: {
-    fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
-    fontSize: 'clamp(1.8rem, 8vw, 3rem)',
-    marginBottom: '20px',
-    textAlign: 'center',
-    color: statusColor.error,
-    animation: 'titleGlitch 3s infinite',
-    textShadow: statusGlow.error,
-    position: 'relative' as const,
-    transition: 'text-shadow 0.6s ease, color 0.6s ease',
-    display: 'inline-block',
-  },
-};
-
 const statusText: Record<VPNSessionStatus, string> = {
   good: '畅通',
   warning: '一般',
@@ -174,7 +62,6 @@ const statusText: Record<VPNSessionStatus, string> = {
   error: '检测失败',
 };
 
-// 按钮配置：图标 + 路径 + 副标题 + 独立配色
 const navButtons: Array<{
   text: string;
   path: string;
@@ -188,12 +75,66 @@ const navButtons: Array<{
   { text: '共享目录', path: 'http://10.88.202.59:5244', icon: '', subtitle: '文件共享入口', accentColor: '#22c55e' },
 ];
 
+const titleStyleBase: Record<VPNSessionStatus, React.CSSProperties> = {
+  good: {
+    background: `linear-gradient(90deg, ${statusColor.good} 0%, ${statusColor.good} 30%, #ffffff 50%, ${statusColor.good} 70%, ${statusColor.good} 100%)`,
+    backgroundSize: '200% 100%',
+    WebkitBackgroundClip: 'text',
+    backgroundClip: 'text',
+    color: 'transparent',
+    animation: 'titleShimmer 2.5s linear infinite',
+    textShadow: statusGlow.good,
+  },
+  warning: {
+    color: statusColor.warning,
+    animation: 'titleBreath 1.8s ease-in-out infinite',
+    textShadow: statusGlow.warning,
+  },
+  full: {
+    color: statusColor.full,
+    animation: 'titleShake 0.8s ease-in-out infinite',
+    textShadow: statusGlow.full,
+  },
+  error: {
+    color: statusColor.error,
+    animation: 'titleGlitch 3s infinite',
+    textShadow: statusGlow.error,
+    position: 'relative' as const,
+  },
+};
+
 export function Home() {
   const navigate = useNavigate();
   const [sessionCount, setSessionCount] = useState<number | null>(null);
   const [sessionStatus, setSessionStatus] = useState<VPNSessionStatus>('error');
   const [hoveredBtnIndex, setHoveredBtnIndex] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+
+  const titleStyle = useMemo(() => ({
+    fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
+    fontSize: 'clamp(1.8rem, 8vw, 3rem)',
+    marginBottom: '20px',
+    textAlign: 'center' as const,
+    display: 'inline-block',
+    transition: 'text-shadow 0.6s ease, color 0.6s ease',
+    ...titleStyleBase[sessionStatus],
+  }), [sessionStatus]);
+
+  const handleHover = useCallback((index: number | null) => {
+    setHoveredBtnIndex(index);
+  }, []);
+
+  const handleButtonClick = useCallback((path: string) => {
+    if (path.startsWith('http')) {
+      window.open(path, '_blank');
+    } else {
+      navigate(path);
+    }
+  }, [navigate]);
+
+  const handleReturnClick = useCallback(() => {
+    window.location.href = '/index.html';
+  }, []);
 
   // 移动端检测
   useEffect(() => {
@@ -207,6 +148,15 @@ export function Home() {
     let cancelled = false;
 
     async function checkVPNSessionCount() {
+      const cached = getCache<VPNCacheData>(VPN_CACHE_KEY);
+      if (cached) {
+        if (!cancelled) {
+          setSessionCount(cached.sessionCount);
+          setSessionStatus(cached.sessionStatus);
+        }
+        return;
+      }
+
       try {
         const response = await fetchFromApi('/api/vpn-users?ip=10.88.202.59', { timeout: 5000 });
         const data = await response.json();
@@ -214,10 +164,18 @@ export function Home() {
         const count: number = data.sessionCount;
         if (count === null || count === undefined) throw new Error('会话数数据无效');
         if (!cancelled) {
-          setSessionCount(Math.max(0, count - 1));
-          if (count < 4) setSessionStatus('good');
-          else if (count >= 4 && count <= 7) setSessionStatus('warning');
-          else setSessionStatus('full');
+          const displayCount = Math.max(0, count - 1);
+          let status: VPNSessionStatus = 'good';
+          if (count >= 8) status = 'full';
+          else if (count >= 4) status = 'warning';
+          
+          setSessionCount(displayCount);
+          setSessionStatus(status);
+          
+          setCache<VPNCacheData>(VPN_CACHE_KEY, {
+            sessionCount: displayCount,
+            sessionStatus: status,
+          }, VPN_CACHE_TTL);
         }
       } catch (err) {
         console.error('检测 VPN 会话数失败:', err);
@@ -238,34 +196,6 @@ export function Home() {
 
   return (
     <PageTransition>
-      {/* 注入动画 keyframes（全局一次） */}
-      <style>{glitchKeyframes}</style>
-
-      {/* Glitch 伪元素样式（仅 error 状态生效） */}
-      {sessionStatus === 'error' && (
-        <style>{`
-          .glitch-title::before,
-          .glitch-title::after {
-            content: "学生目录";
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-          }
-          .glitch-title::before {
-            color: #ff0000;
-            animation: glitchBefore 3s infinite;
-            z-index: -1;
-          }
-          .glitch-title::after {
-            color: #00ffff;
-            animation: glitchAfter 3s infinite;
-            z-index: -1;
-          }
-        `}</style>
-      )}
-
-      {/* 高性能 CSS 光球背景 */}
       <BackgroundOrbs />
 
       <div
@@ -285,7 +215,7 @@ export function Home() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.5 }}
-          onClick={() => window.location.href = '/index.html'}
+          onClick={handleReturnClick}
           style={{
             position: 'fixed',
             top: '20px',
@@ -312,8 +242,8 @@ export function Home() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: hoveredBtnIndex !== null ? 0.35 : 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          style={titleStyle[sessionStatus]}
-          className={sessionStatus === 'error' ? 'glitch-title' : ''}
+          style={titleStyle}
+          className={sessionStatus === 'error' ? animations.glitchTitle : ''}
         >
           <Typewriter text="学生目录" speed={100} delay={500} />
         </motion.div>
@@ -364,17 +294,11 @@ export function Home() {
                 <SlateButton
                   index={i}
                   hoveredIndex={hoveredBtnIndex}
-                  onHover={setHoveredBtnIndex}
+                  onHover={handleHover}
                   icon={item.icon}
                   subtitle={item.subtitle}
                   accentColor={item.accentColor}
-                  onClick={() => {
-                    if (item.path.startsWith('http')) {
-                      window.open(item.path, '_blank');
-                    } else {
-                      navigate(item.path);
-                    }
-                  }}
+                  onClick={() => handleButtonClick(item.path)}
                 >
                   {item.text}
                 </SlateButton>
@@ -509,17 +433,11 @@ export function Home() {
                       <SlateButton
                         index={i}
                         hoveredIndex={hoveredBtnIndex}
-                        onHover={setHoveredBtnIndex}
+                        onHover={handleHover}
                         icon={item.icon}
                         subtitle={item.subtitle}
                         accentColor={item.accentColor}
-                        onClick={() => {
-                          if (item.path.startsWith('http')) {
-                            window.open(item.path, '_blank');
-                          } else {
-                            navigate(item.path);
-                          }
-                        }}
+                        onClick={() => handleButtonClick(item.path)}
                       >
                         {item.text}
                       </SlateButton>

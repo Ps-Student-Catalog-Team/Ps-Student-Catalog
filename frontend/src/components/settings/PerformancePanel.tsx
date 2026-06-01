@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePerformance, type PerformanceSettings } from '../../context/PerformanceContext';
+import { usePerformance, type PerformanceSettings, type AdaptiveLevel } from '../../context/PerformanceContext';
 
 const LABELS: Record<keyof PerformanceSettings, string> = {
   backgroundParticles: '背景粒子网络',
@@ -17,11 +17,38 @@ const DESCRIPTIONS: Record<keyof PerformanceSettings, string> = {
   reducedMotion: '关闭所有 Framer Motion 动画',
 };
 
+const LEVEL_LABELS: Record<AdaptiveLevel, string> = {
+  high: '高性能',
+  medium: '中等',
+  low: '低性能',
+};
+
+const PERFORMANCE_TIPS: Record<AdaptiveLevel, string | null> = {
+  high: null,
+  medium: '性能一般，建议关闭部分动画效果',
+  low: '性能较低，已自动降级粒子数量',
+};
+
+function getFpsColor(fps: number): string {
+  if (fps >= 50) return '#00ff9d';
+  if (fps >= 30) return '#ffc107';
+  return '#ff4757';
+}
+
+function getLevelColor(level: AdaptiveLevel): string {
+  switch (level) {
+    case 'high': return '#00ff9d';
+    case 'medium': return '#ffc107';
+    case 'low': return '#ff4757';
+  }
+}
+
 export function PerformancePanel() {
-  const { settings, updateSetting, resetSettings } = usePerformance();
+  const { settings, updateSetting, resetSettings, currentFps, adaptiveLevel, particleCountMultiplier } = usePerformance();
   const [open, setOpen] = useState(false);
 
   const entries = Object.entries(settings) as [string, boolean][];
+  const tip = PERFORMANCE_TIPS[adaptiveLevel];
 
   return (
     <>
@@ -113,6 +140,48 @@ export function PerformancePanel() {
               重置默认
             </button>
           </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 12,
+            marginBottom: 14,
+            paddingBottom: 12,
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>FPS</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: getFpsColor(currentFps) }}>
+                {Math.round(currentFps)}
+              </div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>性能等级</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: getLevelColor(adaptiveLevel) }}>
+                {LEVEL_LABELS[adaptiveLevel]}
+              </div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>粒子倍率</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#ccc' }}>
+                {(particleCountMultiplier * 100).toFixed(0)}%
+              </div>
+            </div>
+          </div>
+
+          {tip && (
+            <div style={{
+              marginBottom: 12,
+              padding: '8px 10px',
+              background: adaptiveLevel === 'low' ? 'rgba(255,71,87,0.1)' : 'rgba(255,193,7,0.1)',
+              border: `1px solid ${adaptiveLevel === 'low' ? 'rgba(255,71,87,0.3)' : 'rgba(255,193,7,0.3)'}`,
+              borderRadius: 6,
+              fontSize: 11,
+              color: adaptiveLevel === 'low' ? '#ff6b7a' : '#ffd43b',
+            }}>
+              ⚠ {tip}
+            </div>
+          )}
 
           {entries.map(([key, value]) => (
             <label
