@@ -62,7 +62,7 @@ export function SlateButton({
   return (
     <motion.button
       className={classNames}
-      style={{ '--accent': accentColor } as React.CSSProperties}
+      style={{ '--accent': accentColor, '--index': index } as React.CSSProperties}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}

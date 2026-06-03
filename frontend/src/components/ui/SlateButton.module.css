@@ -22,6 +22,11 @@
     background 0.3s ease,
     opacity 0.3s ease;
   overflow: hidden;
+  animation: cardIdleFloat 4s ease-in-out infinite;
+  animation-delay: calc(var(--index) * 0.5s);
+  will-change: transform;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
 
 /* 左侧装饰线 */
@@ -132,6 +137,44 @@
   pointer-events: none;
 }
 
+/* ── 静止时动画 ── */
+@keyframes cardIdleFloat {
+  0%, 100% { 
+    transform: translateY(0) scale(1);
+  }
+  50% { 
+    transform: translateY(-6px) scale(1.015);
+  }
+}
+
+@keyframes leftLinePulse {
+  0%, 100% { 
+    opacity: 0.25;
+  }
+  50% { 
+    opacity: 0.85;
+  }
+}
+
+/* 左侧装饰线脉冲动画 */
+.card::before {
+  animation: leftLinePulse 3s ease-in-out infinite;
+  animation-delay: calc(var(--index) * 0.5s + 0.3s);
+}
+
+/* 悬停时暂停静止动画 */
+.card:hover,
+.card.active,
+.card.dimmed {
+  animation-play-state: paused;
+}
+
+.card:hover::before,
+.card.active::before,
+.card.dimmed::before {
+  animation-play-state: paused;
+}
+
 /* ── prefers-reduced-motion ── */
 @media (prefers-reduced-motion: reduce) {
   .card,
@@ -141,5 +184,6 @@
   .subtitle,
   .arrow {
     transition: none !important;
+    animation: none !important;
   }
 }

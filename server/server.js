@@ -45,19 +45,14 @@ const saveLastOnlineTimes = () => {
 
 loadLastOnlineTimes();
 
-let lastNetworkStats = {
-    timestamp: 0,
-    bytesReceived: 0,
-    bytesSent: 0
-};
-
 app.get('/api/vpn-speed', (req, res) => {
     console.log(`[${new Date().toISOString()}] 查询VPN速率`);
 
+    // 使用通配符匹配所有网络接口，避免匹配失败
     const psCommand = `
         $counters = Get-Counter -Counter @(
-            "\\Network Interface(*int*)\\Bytes Received/sec",
-            "\\Network Interface(*int*)\\Bytes Sent/sec"
+            "\\Network Interface(*)\\Bytes Received/sec",
+            "\\Network Interface(*)\\Bytes Sent/sec"
         ) -ErrorAction SilentlyContinue
         if ($counters) {
             $totalReceived = ($counters.CounterSamples | Where-Object { $_.Path -match 'Bytes Received' } | Measure-Object -Property CookedValue -Sum).Sum
@@ -78,28 +73,13 @@ app.get('/api/vpn-speed', (req, res) => {
         const parts = output.split(',');
         
         if (parts.length >= 2) {
-            const bytesReceived = parseInt(parts[0] || '0', 10);
-            const bytesSent = parseInt(parts[1] || '0', 10);
+            const bytesReceivedPerSec = parseInt(parts[0] || '0', 10);
+            const bytesSentPerSec = parseInt(parts[1] || '0', 10);
             const now = Date.now();
 
-            let uploadSpeed = 0;
-            let downloadSpeed = 0;
-
-            if (lastNetworkStats.timestamp > 0 && now - lastNetworkStats.timestamp < 5000) {
-                const timeDiff = (now - lastNetworkStats.timestamp) / 1000;
-                downloadSpeed = Math.round((bytesReceived - lastNetworkStats.bytesReceived) / timeDiff);
-                uploadSpeed = Math.round((bytesSent - lastNetworkStats.bytesSent) / timeDiff);
-            }
-
-            lastNetworkStats = {
-                timestamp: now,
-                bytesReceived,
-                bytesSent
-            };
-
             res.json({
-                uploadSpeed: Math.max(0, uploadSpeed),
-                downloadSpeed: Math.max(0, downloadSpeed),
+                uploadSpeed: Math.max(0, bytesSentPerSec),
+                downloadSpeed: Math.max(0, bytesReceivedPerSec),
                 timestamp: now
             });
         } else {
