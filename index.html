@@ -935,7 +935,7 @@
         var resultDiv = document.getElementById('updateResult');
         resultDiv.innerHTML = '<p>正在拉取同步最新更改，请稍候...</p>';
 
-        fetch('/api/pull-updates')
+        fetch('http://10.88.202.59:3132/api/pull-updates')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data.success) {
