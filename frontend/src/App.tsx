@@ -8,6 +8,8 @@ import { Home } from './pages/Home';
 import { PerformanceProvider } from './context/PerformanceContext';
 import { PerformancePanel } from './components/settings/PerformancePanel';
 import { usePerformance } from './context/PerformanceContext';
+import { useHover, HoverProvider } from './context/HoverContext';
+import { VpnSpeedProvider } from './context/VpnSpeedContext';
 import './index.css';
 
 const Tutorials = lazy(() => import('./pages/Tutorials').then(m => ({ default: m.Tutorials })));
@@ -37,11 +39,12 @@ function AnimatedApp() {
 
 function AppInner() {
   const { settings } = usePerformance();
+  const { isHovering } = useHover();
 
   return (
     <BrowserRouter>
       <div style={{ margin: 0, padding: 0, position: 'relative' }}>
-        {settings.backgroundParticles && <ParticleNetwork />}
+        {settings.backgroundParticles && <ParticleNetwork dimmed={isHovering} />}
         <AnimatedApp />
         {settings.mouseFollower && <MouseFollower />}
         <PerformancePanel />
@@ -53,7 +56,11 @@ function AppInner() {
 function App() {
   return (
     <PerformanceProvider>
-      <AppInner />
+      <VpnSpeedProvider>
+        <HoverProvider>
+          <AppInner />
+        </HoverProvider>
+      </VpnSpeedProvider>
     </PerformanceProvider>
   );
 }
