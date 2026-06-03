@@ -5,6 +5,8 @@ import { PageTransition } from '../components/layout/PageTransition';
 import { Typewriter } from '../components/animations/Typewriter';
 import { SlateButton } from '../components/ui/SlateButton';
 import { BackgroundOrbs } from '../components/background/BackgroundOrbs';
+import { useHover } from '../context/HoverContext';
+import { VpnSpeedMonitor } from '../components/monitor/VpnSpeedMonitor';
 import animations from './HomeAnimations.module.css';
 import { getCache, setCache } from '../utils/cache';
 
@@ -117,6 +119,7 @@ const titleStyleBase: Record<VPNSessionStatus, React.CSSProperties> = {
 
 export function Home() {
   const navigate = useNavigate();
+  const { setIsHovering } = useHover();
   const [sessionCount, setSessionCount] = useState<number | null>(null);
   const [sessionStatus, setSessionStatus] = useState<VPNSessionStatus>('error');
   const [hoveredBtnIndex, setHoveredBtnIndex] = useState<number | null>(null);
@@ -189,7 +192,8 @@ export function Home() {
 
   const handleHover = useCallback((index: number | null) => {
     setHoveredBtnIndex(index);
-  }, []);
+    setIsHovering(index !== null);
+  }, [setIsHovering]);
 
   const handleButtonClick = useCallback((path: string) => {
     if (path.startsWith('http')) {
@@ -267,7 +271,7 @@ export function Home() {
 
   return (
     <PageTransition>
-      <BackgroundOrbs />
+      <BackgroundOrbs dimmed={hoveredBtnIndex !== null} />
 
       <div
         style={{
@@ -450,6 +454,15 @@ export function Home() {
                 VPN {statusText[sessionStatus]}
                 {sessionCount !== null && ` · ${sessionCount} 在线`}
               </span>
+            </motion.div>
+
+            {/* VPN 速率监控 */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: hoveredBtnIndex !== null ? 0.4 : 1, y: 0 }}
+              transition={{ delay: 1.2, duration: 0.5 }}
+            >
+              <VpnSpeedMonitor />
             </motion.div>
 
             {/* 扇形卡片区 — 半径加大 + 角度拉开，避免重叠 */}
