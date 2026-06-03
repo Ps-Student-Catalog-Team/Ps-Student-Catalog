@@ -53,7 +53,7 @@ export function VpnSpeedProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchSpeed();
-    const interval = setInterval(fetchSpeed, 1000);
+    const interval = setInterval(fetchSpeed, 3000);
     return () => clearInterval(interval);
   }, [fetchSpeed]);
 
