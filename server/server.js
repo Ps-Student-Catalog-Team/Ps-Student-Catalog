@@ -45,6 +45,70 @@ const saveLastOnlineTimes = () => {
 
 loadLastOnlineTimes();
 
+let lastNetworkStats = {
+    timestamp: 0,
+    bytesReceived: 0,
+    bytesSent: 0
+};
+
+app.get('/api/vpn-speed', (req, res) => {
+    console.log(`[${new Date().toISOString()}] 查询VPN速率`);
+
+    const psCommand = `
+        $counters = Get-Counter -Counter @(
+            "\\Network Interface(*int*)\\Bytes Received/sec",
+            "\\Network Interface(*int*)\\Bytes Sent/sec"
+        ) -ErrorAction SilentlyContinue
+        if ($counters) {
+            $totalReceived = ($counters.CounterSamples | Where-Object { $_.Path -match 'Bytes Received' } | Measure-Object -Property CookedValue -Sum).Sum
+            $totalSent = ($counters.CounterSamples | Where-Object { $_.Path -match 'Bytes Sent' } | Measure-Object -Property CookedValue -Sum).Sum
+            Write-Output ("{0},{1}" -f [math]::Round($totalReceived), [math]::Round($totalSent))
+        } else {
+            Write-Output "0,0"
+        }
+    `.trim();
+
+    exec(`powershell -Command "${psCommand}"`, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`[ERROR] 获取网络速率失败: ${error.message}`);
+            return res.json({ uploadSpeed: 0, downloadSpeed: 0, timestamp: Date.now() });
+        }
+
+        const output = stdout.trim();
+        const parts = output.split(',');
+        
+        if (parts.length >= 2) {
+            const bytesReceived = parseInt(parts[0] || '0', 10);
+            const bytesSent = parseInt(parts[1] || '0', 10);
+            const now = Date.now();
+
+            let uploadSpeed = 0;
+            let downloadSpeed = 0;
+
+            if (lastNetworkStats.timestamp > 0 && now - lastNetworkStats.timestamp < 5000) {
+                const timeDiff = (now - lastNetworkStats.timestamp) / 1000;
+                downloadSpeed = Math.round((bytesReceived - lastNetworkStats.bytesReceived) / timeDiff);
+                uploadSpeed = Math.round((bytesSent - lastNetworkStats.bytesSent) / timeDiff);
+            }
+
+            lastNetworkStats = {
+                timestamp: now,
+                bytesReceived,
+                bytesSent
+            };
+
+            res.json({
+                uploadSpeed: Math.max(0, uploadSpeed),
+                downloadSpeed: Math.max(0, downloadSpeed),
+                timestamp: now
+            });
+        } else {
+            console.error('[ERROR] 无法解析网络速率输出:', output);
+            res.json({ uploadSpeed: 0, downloadSpeed: 0, timestamp: Date.now() });
+        }
+    });
+});
+
 app.get('/api/vpn-status', async (req, res) => {
     console.log(`[${new Date().toISOString()}] 检测IP: ${req.query.ip}`);
 

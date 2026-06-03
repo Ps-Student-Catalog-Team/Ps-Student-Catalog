@@ -8,6 +8,7 @@ interface ParticleNetworkProps {
   connectionDistance?: number;
   particleColor?: string;
   enabled?: boolean;
+  dimmed?: boolean;
 }
 
 interface Particle {
@@ -88,6 +89,7 @@ function ParticleNetworkComponent({
   connectionDistance = 200,
   particleColor = '#00ff9d',
   enabled = true,
+  dimmed = false,
 }: ParticleNetworkProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouse = useMousePosition();
@@ -97,6 +99,8 @@ function ParticleNetworkComponent({
   const spatialGridRef = useRef<SpatialGrid | null>(null);
   const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const { particleCountMultiplier } = usePerformance();
+  const dimFactorRef = useRef(dimmed ? 0.35 : 1);
+  const targetDimFactorRef = useRef(dimmed ? 0.35 : 1);
 
   useEffect(() => {
     const updateParticleCount = () => {
@@ -138,11 +142,14 @@ function ParticleNetworkComponent({
   }, [createParticle, effectiveParticleCount, connectionDistance]);
 
   const updateParticles = useCallback(() => {
-    const particles = particlesRef.current;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    particles.forEach((p) => {
+    targetDimFactorRef.current = dimmed ? 0.35 : 1;
+    const lerpFactor = 0.08;
+    dimFactorRef.current += (targetDimFactorRef.current - dimFactorRef.current) * lerpFactor;
+
+    particlesRef.current.forEach((p) => {
       p.x += p.vx;
       p.y += p.vy;
 
@@ -152,7 +159,7 @@ function ParticleNetworkComponent({
       p.x = Math.max(0, Math.min(canvas.width, p.x));
       p.y = Math.max(0, Math.min(canvas.height, p.y));
     });
-  }, []);
+  }, [dimmed]);
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -171,6 +178,7 @@ function ParticleNetworkComponent({
     particles.forEach(p => grid.insert(p));
 
     const checkedPairs = new Set<string>();
+    const dimFactor = dimFactorRef.current;
 
     particles.forEach((p1, i) => {
       const neighbors = grid.getNeighbors(p1, connectionDistance);
@@ -190,7 +198,7 @@ function ParticleNetworkComponent({
 
         if (distanceSq < maxDistSq) {
           const distance = Math.sqrt(distanceSq);
-          const opacity = (1 - distance / connectionDistance) * 0.25;
+          const opacity = (1 - distance / connectionDistance) * 0.25 * dimFactor;
           ctx.beginPath();
           ctx.strokeStyle = `rgba(0, 255, 157, ${opacity})`;
           ctx.lineWidth = 0.8;
@@ -201,12 +209,12 @@ function ParticleNetworkComponent({
       }
 
       ctx.beginPath();
-      ctx.fillStyle = `rgba(0, 255, 157, 0.4)`;
+      ctx.fillStyle = `rgba(0, 255, 157, ${0.4 * dimFactor})`;
       ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2);
       ctx.fill();
 
       const gradient = ctx.createRadialGradient(p1.x, p1.y, 0, p1.x, p1.y, p1.radius + 2);
-      gradient.addColorStop(0, 'rgba(0, 255, 157, 0.25)');
+      gradient.addColorStop(0, `rgba(0, 255, 157, ${0.25 * dimFactor})`);
       gradient.addColorStop(1, 'rgba(0, 255, 157, 0)');
       ctx.fillStyle = gradient;
       ctx.beginPath();
@@ -228,7 +236,7 @@ function ParticleNetworkComponent({
     const topNearest = nearestParticles.slice(0, 5);
 
     topNearest.forEach(item => {
-      const opacity = (1 - item.distance / 200) * 0.3;
+      const opacity = (1 - item.distance / 200) * 0.3 * dimFactor;
       ctx.beginPath();
       ctx.strokeStyle = `rgba(0, 255, 157, ${opacity})`;
       ctx.lineWidth = 0.8;
