@@ -48,19 +48,21 @@ loadLastOnlineTimes();
 app.get('/api/vpn-speed', (req, res) => {
     console.log(`[${new Date().toISOString()}] 查询VPN速率`);
 
-    // 使用通配符匹配所有网络接口，避免匹配失败
     const psCommand = `
-        $counters = Get-Counter -Counter @(
-            "\\Network Interface(*)\\Bytes Received/sec",
-            "\\Network Interface(*)\\Bytes Sent/sec"
-        ) -ErrorAction SilentlyContinue
-        if ($counters) {
-            $totalReceived = ($counters.CounterSamples | Where-Object { $_.Path -match 'Bytes Received' } | Measure-Object -Property CookedValue -Sum).Sum
-            $totalSent = ($counters.CounterSamples | Where-Object { $_.Path -match 'Bytes Sent' } | Measure-Object -Property CookedValue -Sum).Sum
-            Write-Output ("{0},{1}" -f [math]::Round($totalReceived), [math]::Round($totalSent))
-        } else {
-            Write-Output "0,0"
+        $received = Get-Counter -Counter "\\Network Interface(*)\\Bytes Received/sec" -ErrorAction SilentlyContinue
+        $sent = Get-Counter -Counter "\\Network Interface(*)\\Bytes Sent/sec" -ErrorAction SilentlyContinue
+        
+        $totalReceived = 0
+        if ($received) {
+            $totalReceived = ($received.CounterSamples | Measure-Object -Property CookedValue -Sum).Sum
         }
+        
+        $totalSent = 0
+        if ($sent) {
+            $totalSent = ($sent.CounterSamples | Measure-Object -Property CookedValue -Sum).Sum
+        }
+        
+        Write-Output ("{0},{1}" -f [math]::Round($totalReceived), [math]::Round($totalSent))
     `.trim();
 
     exec(`powershell -Command "${psCommand}"`, (error, stdout, stderr) => {
@@ -70,6 +72,8 @@ app.get('/api/vpn-speed', (req, res) => {
         }
 
         const output = stdout.trim();
+        console.log(`[DEBUG] PowerShell output: "${output}"`);
+        
         const parts = output.split(',');
         
         if (parts.length >= 2) {
