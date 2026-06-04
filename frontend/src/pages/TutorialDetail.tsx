@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { marked, Renderer } from 'marked';
 import { PageTransition } from '../components/layout/PageTransition';
@@ -145,10 +145,9 @@ export default function TutorialDetail() {
     const timer = setTimeout(() => {
       if (!contentRef.current) return;
 
-      const headingElements = contentRef.current.querySelectorAll('h1, h2, h3');
+      const headingElements = contentRef.current.querySelectorAll('h1, h2, h3, h4, h5, h6');
       if (headingElements.length === 0) return;
 
-      // 当没有其他可见标题时，默认选中第一个
       if (headings.length > 0 && !activeHeading) {
         setActiveHeading(headings[0].id);
       }
@@ -158,7 +157,6 @@ export default function TutorialDetail() {
           const visibleEntries = entries
             .filter(entry => entry.isIntersecting)
             .sort((a, b) => {
-              // 优先选择更靠近视口顶部的标题
               return a.boundingClientRect.top - b.boundingClientRect.top;
             });
 
@@ -177,7 +175,7 @@ export default function TutorialDetail() {
       const handleScroll = () => {
         if (!contentRef.current) return;
         
-        const headingsInDoc = contentRef.current.querySelectorAll('h1, h2, h3');
+        const headingsInDoc = contentRef.current.querySelectorAll('h1, h2, h3, h4, h5, h6');
         let currentHeading: Element | null = null;
         let minDistance = Infinity;
         
@@ -280,11 +278,11 @@ export default function TutorialDetail() {
       if (e.key === 'Escape' && selectedImage) {
         handleImageOverlayClick();
       }
-      if (e.key === 'ArrowUp' || e.key === 'k') {
-        window.scrollBy({ top: -100, behavior: 'smooth' });
-      }
-      if (e.key === 'ArrowDown' || e.key === 'j') {
+      if (e.key === 'j' || e.key === 'J') {
         window.scrollBy({ top: 100, behavior: 'smooth' });
+      }
+      if (e.key === 'k' || e.key === 'K') {
+        window.scrollBy({ top: -100, behavior: 'smooth' });
       }
     };
 
@@ -308,7 +306,6 @@ export default function TutorialDetail() {
   useEffect(() => {
     if (content && !loading) {
       const timer = setTimeout(() => setIsContentVisible(true), 100);
-      // 在入场动画完成后移除 animate 类，防止滚动时重新触发动画
       const animationEndTimer = setTimeout(() => {
         if (contentRef.current) {
           contentRef.current.classList.remove('animate');
@@ -368,7 +365,13 @@ export default function TutorialDetail() {
 
   return (
     <PageTransition>
-      <div className="tutorial-page">
+      <motion.div 
+        className="tutorial-page"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <div className="reading-progress-bar" style={{ width: `${scrollProgress}%` }} />
 
         <div className="fixed-buttons">
@@ -381,7 +384,12 @@ export default function TutorialDetail() {
         </div>
 
         <div className="page-layout">
-          <div className="content-wrapper">
+          <motion.div 
+            className="content-wrapper"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             {pageTitle && (
               <motion.h1
                 className="tutorial-title"
@@ -400,77 +408,96 @@ export default function TutorialDetail() {
               transition={{ duration: animateOnLoad ? 0.6 : 0 }}
               dangerouslySetInnerHTML={{ __html: content }}
             />
-          </div>
+          </motion.div>
 
-          {headings.length > 0 && (
-            <aside className="toc-sidebar">
-              <div className="toc-header">
-                <div className="toc-title">目录</div>
-                <div className="toc-progress">
-                  进度 {scrollProgress.toFixed(0)}%
-                </div>
-              </div>
-              <div className="toc-list">
-                {headings.map((heading) => (
-                  <div
-                    key={heading.id}
-                    onClick={() => scrollToHeading(heading.id)}
-                    className={`toc-item toc-h${heading.level} ${activeHeading === heading.id ? 'active' : ''}`}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        scrollToHeading(heading.id);
-                      }
-                    }}
-                  >
-                    <div className="toc-indicator" />
-                    <span className="toc-text">{heading.text}</span>
+          <AnimatePresence>
+            {headings.length > 0 && (
+              <motion.aside 
+                className="toc-sidebar"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+              >
+                <div className="toc-header">
+                  <div className="toc-title">目录</div>
+                  <div className="toc-progress">
+                    进度 {scrollProgress.toFixed(0)}%
                   </div>
-                ))}
-              </div>
-            </aside>
-          )}
+                </div>
+                <div className="toc-list">
+                  {headings.map((heading) => (
+                    <motion.div
+                      key={heading.id}
+                      onClick={() => scrollToHeading(heading.id)}
+                      className={`toc-item toc-h${heading.level} ${activeHeading === heading.id ? 'active' : ''}`}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          scrollToHeading(heading.id);
+                        }
+                      }}
+                      whileHover={{ x: 4 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className="toc-indicator" />
+                      <span className="toc-text">{heading.text}</span>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.aside>
+            )}
+          </AnimatePresence>
         </div>
 
-        {showBackToTop && (
-          <motion.button
-            className="back-to-top-button"
-            onClick={scrollToTop}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            ↑
-          </motion.button>
-        )}
+        <AnimatePresence>
+          {showBackToTop && (
+            <motion.button
+              className="back-to-top-button"
+              onClick={scrollToTop}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              ↑
+            </motion.button>
+          )}
+        </AnimatePresence>
 
-        {selectedImage && (
-          <motion.div
-            className="img-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={handleImageOverlayClick}
-          >
-            <motion.img
-              src={selectedImage}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              style={{ cursor: 'zoom-out' }}
-            />
-          </motion.div>
-        )}
-      </div>
+        <AnimatePresence>
+          {selectedImage && (
+            <motion.div
+              className="img-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleImageOverlayClick}
+            >
+              <motion.img
+                src={selectedImage}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                style={{ cursor: 'zoom-out' }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="keyboard-hints">
+          <span>J/K 滚动</span>
+          <span>Esc 关闭</span>
+        </div>
+      </motion.div>
 
       <style>{`
         .tutorial-page {
           min-height: 100vh;
-          background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(26, 26, 46, 0.95) 100%);
+          background: linear-gradient(135deg, rgba(10, 10, 10, 0.95), rgba(26, 26, 46, 0.95));
           padding-bottom: 40px;
           position: relative;
         }
@@ -534,25 +561,25 @@ export default function TutorialDetail() {
 
         .page-layout {
           display: flex;
-          max-width: 1400px;
+          max-width: 1200px;
           margin: 0 auto;
           padding: 80px 30px 30px;
-          gap: 60px;
+          gap: 40px;
           width: 100%;
           justify-content: center;
         }
 
         .content-wrapper {
-          flex: 0 1 auto;
+          flex: 1;
           width: 100%;
-          max-width: 850px;
+          max-width: 800px;
           display: flex;
           flex-direction: column;
           gap: 20px;
         }
 
         .toc-sidebar {
-          width: 250px;
+          width: 280px;
           flex-shrink: 0;
           position: sticky;
           top: 80px;
@@ -754,7 +781,10 @@ export default function TutorialDetail() {
 
         .markdown-container h1,
         .markdown-container h2,
-        .markdown-container h3 {
+        .markdown-container h3,
+        .markdown-container h4,
+        .markdown-container h5,
+        .markdown-container h6 {
           scroll-margin-top: 100px;
           color: #00ff9d;
           margin-top: 1.8rem;
@@ -762,8 +792,16 @@ export default function TutorialDetail() {
           font-weight: bold;
         }
 
+        .markdown-container h1 {
+          font-size: 1.8em;
+          border-bottom: 2px solid rgba(0, 255, 157, 0.2);
+          padding-bottom: 0.5rem;
+        }
+
         .markdown-container h2 {
           font-size: 1.5em;
+          border-bottom: 1px solid rgba(0, 255, 157, 0.15);
+          padding-bottom: 0.3rem;
         }
 
         .markdown-container h3 {
@@ -773,7 +811,7 @@ export default function TutorialDetail() {
         .markdown-container h4,
         .markdown-container h5,
         .markdown-container h6 {
-          color: #00ff9d;
+          color: #00a9ff;
           margin-top: 1.5rem;
           margin-bottom: 1rem;
           font-weight: bold;
@@ -818,7 +856,7 @@ export default function TutorialDetail() {
         }
 
         .markdown-container a {
-          color: #00bd49;
+          color: #00a9ff;
           text-decoration: none;
           padding: 5px 0;
           position: relative;
@@ -863,13 +901,24 @@ export default function TutorialDetail() {
 
         .markdown-container blockquote {
           border-left: 4px solid #00ff9d;
-          padding-left: 15px;
           margin: 1.5rem 0;
-          color: #aaa;
-          font-size: 1em;
           background: rgba(0, 255, 157, 0.05);
           padding: 16px 20px 16px 24px;
           border-radius: 0 10px 10px 0;
+        }
+
+        .markdown-container blockquote p {
+          color: #aaa;
+          margin-bottom: 0;
+        }
+
+        .markdown-container blockquote::before {
+          content: '"';
+          font-size: 2em;
+          color: rgba(0, 255, 157, 0.3);
+          line-height: 1;
+          display: block;
+          margin-bottom: -10px;
         }
 
         .markdown-container code {
@@ -1028,7 +1077,7 @@ export default function TutorialDetail() {
           box-shadow: 0 0 50px rgba(0, 255, 157, 0.25);
         }
 
-        table {
+        .markdown-container table {
           width: 100%;
           border-collapse: collapse;
           margin: 2rem 0;
@@ -1039,12 +1088,13 @@ export default function TutorialDetail() {
           border: 1px solid rgba(0, 255, 157, 0.15);
         }
 
-        th, td {
+        .markdown-container th, 
+        .markdown-container td {
           padding: 14px 18px;
           border-bottom: 1px solid rgba(0, 255, 157, 0.12);
         }
 
-        th {
+        .markdown-container th {
           background: linear-gradient(135deg, rgba(0, 255, 157, 0.2), rgba(0, 169, 255, 0.1));
           font-weight: 700;
           color: #00ff9d;
@@ -1054,22 +1104,40 @@ export default function TutorialDetail() {
           border-bottom: 2px solid rgba(0, 255, 157, 0.3);
         }
 
-        td {
+        .markdown-container td {
           text-align: left;
           color: #e0e0e0;
           font-size: 0.95em;
         }
 
-        tr:nth-child(even) {
+        .markdown-container tr:nth-child(even) {
           background: rgba(0, 255, 157, 0.06);
         }
 
-        tr:nth-child(odd) {
+        .markdown-container tr:nth-child(odd) {
           background: rgba(255, 255, 255, 0.02);
         }
 
-        tr:hover {
+        .markdown-container tr:hover {
           background: rgba(0, 255, 157, 0.15);
+        }
+
+        .keyboard-hints {
+          position: fixed;
+          bottom: 20px;
+          left: 20px;
+          display: flex;
+          gap: 12px;
+          font-size: 0.75em;
+          color: rgba(255, 255, 255, 0.3);
+          z-index: 998;
+        }
+
+        .keyboard-hints span {
+          padding: 4px 8px;
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 4px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .loading-container,
@@ -1118,14 +1186,14 @@ export default function TutorialDetail() {
           margin-bottom: 1.5rem;
         }
 
-        @media (max-width: 1024px) {
+        @media (max-width: 1200px) {
           .page-layout {
-            gap: 24px;
-            padding: 80px 20px 20px;
+            gap: 30px;
+            padding: 80px 24px 24px;
           }
 
           .toc-sidebar {
-            width: 220px;
+            width: 250px;
           }
 
           .toc-item {
@@ -1141,7 +1209,7 @@ export default function TutorialDetail() {
           }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
           .page-layout {
             flex-direction: column;
             padding: 70px 16px 16px;
@@ -1213,6 +1281,10 @@ export default function TutorialDetail() {
             font-size: 1.25rem;
           }
 
+          .markdown-container h1 {
+            font-size: 1.5em;
+          }
+
           .markdown-container h2 {
             font-size: 1.35em;
           }
@@ -1236,12 +1308,17 @@ export default function TutorialDetail() {
             font-size: 0.75em;
           }
 
-          table {
+          .markdown-container table {
             font-size: 0.88em;
           }
 
-          th, td {
+          .markdown-container th, 
+          .markdown-container td {
             padding: 0.8rem;
+          }
+
+          .keyboard-hints {
+            display: none;
           }
         }
       `}</style>
