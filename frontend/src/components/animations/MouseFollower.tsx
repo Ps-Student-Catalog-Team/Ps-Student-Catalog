@@ -1,234 +1,240 @@
-import { useRef, memo, useState, useEffect } from 'react';
+import { useRef, memo, useEffect, useCallback } from 'react';
 import { useMousePosition } from '../../hooks/useMousePosition';
 import { useAnimationFrame } from '../../hooks/useAnimationFrame';
 import { useHover } from '../../context/HoverContext';
+import { usePerformance } from '../../context/PerformanceContext';
 
 interface MouseFollowerProps {
   enabled?: boolean;
 }
 
-interface Particle {
+interface Ripple {
+  id: number;
   x: number;
   y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  life: number;
-  maxLife: number;
+  createdAt: number;
 }
 
-interface OrbitParticle {
-  angle: number;
-  radius: number;
-  speed: number;
-  size: number;
-  phase: number;
+interface Point {
+  x: number;
+  y: number;
 }
 
-export const MouseFollower = memo(function MouseFollower({ enabled = true }: MouseFollowerProps) {
-  const followerRef = useRef<HTMLDivElement>(null);
-  const innerDotRef = useRef<HTMLDivElement>(null);
+export const MouseFollower = memo(function MouseFollower({ enabled: externalEnabled = true }: MouseFollowerProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rippleContainerRef = useRef<HTMLDivElement>(null);
   const mouse = useMousePosition();
-  const positionRef = useRef({ x: 0, y: 0 });
-  const innerPositionRef = useRef({ x: 0, y: 0 });
-  const particlesRef = useRef<Particle[]>([]);
-  const orbitParticlesRef = useRef<OrbitParticle[]>([]);
-  const [pulseScale, setPulseScale] = useState(1);
-  const [rotation, setRotation] = useState(0);
-  const [breathScale, setBreathScale] = useState(1);
-  const pulseTimerRef = useRef(0);
   const { isHovering } = useHover();
+  const { settings } = usePerformance();
+
+  const currentPos = useRef<Point>({ x: 0, y: 0 });
+  const velocity = useRef<Point>({ x: 0, y: 0 });
+  const ripples = useRef<Ripple[]>([]);
+  const isPressed = useRef(false);
+  const pressTime = useRef(0);
+
+  const isEnabled = externalEnabled && settings.mouseFollower;
+
+  const easeOutExpo = (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+  const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
+
+  const updateRipples = useCallback(() => {
+    if (!rippleContainerRef.current) return;
+    
+    const now = performance.now();
+    ripples.current = ripples.current.filter(r => now - r.createdAt < 1000);
+    
+    let html = '';
+    ripples.current.forEach(ripple => {
+      const age = now - ripple.createdAt;
+      const progress = Math.min(age / 1000, 1);
+      
+      const rings = 3;
+      for (let i = 0; i < rings; i++) {
+        const ringDelay = i * 0.15;
+        const ringProgress = Math.max(0, Math.min(1, progress - ringDelay));
+        const eased = easeOutExpo(ringProgress);
+        const opacity = (1 - easeOutQuart(ringProgress)) * (1 - i * 0.25);
+        
+        const maxRadius = 15 + i * 20;
+        const radius = eased * maxRadius;
+        const borderOpacity = 0.5 * opacity;
+        const left = ripple.x - radius;
+        const top = ripple.y - radius;
+        const size = radius * 2;
+
+        html += `
+          <div style="
+            position: fixed;
+            left: ${left}px;
+            top: ${top}px;
+            width: ${size}px;
+            height: ${size}px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(0, 255, 157, ${borderOpacity});
+            box-shadow: 0 0 ${8 + i * 4}px rgba(0, 255, 157, ${0.2 * opacity}), inset 0 0 ${6 + i * 3}px rgba(0, 255, 157, ${0.1 * opacity});
+            pointer-events: none;
+            z-index: 9997;
+          "></div>
+        `;
+      }
+      
+      if (progress < 0.2) {
+        const innerProgress = progress / 0.2;
+        const innerOpacity = (1 - innerProgress) * 0.8;
+        const innerScale = 1 - innerProgress * 0.5;
+        const centerSize = 8 * innerScale;
+        
+        html += `
+          <div style="
+            position: fixed;
+            left: ${ripple.x - centerSize / 2}px;
+            top: ${ripple.y - centerSize / 2}px;
+            width: ${centerSize}px;
+            height: ${centerSize}px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 255, 157, ${innerOpacity}) 0%, rgba(0, 255, 157, 0) 70%);
+            pointer-events: none;
+            z-index: 9998;
+          "></div>
+        `;
+      }
+    });
+    
+    rippleContainerRef.current.innerHTML = html;
+  }, []);
 
   useEffect(() => {
-    orbitParticlesRef.current = [
-      { angle: 0, radius: 14, speed: 0.025, size: 2.5, phase: 0 },
-      { angle: Math.PI / 2, radius: 16, speed: -0.02, size: 2, phase: Math.PI / 3 },
-      { angle: Math.PI, radius: 13, speed: 0.03, size: 2.2, phase: Math.PI * 2 / 3 },
-      { angle: Math.PI * 3 / 2, radius: 15, speed: -0.028, size: 2.3, phase: Math.PI },
-    ];
+    let lastPressed = false;
+    
+    const handleMouseDown = () => {
+      isPressed.current = true;
+      pressTime.current = performance.now();
+    };
+    const handleMouseUp = () => {
+      isPressed.current = false;
+    };
+
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    const tick = () => {
+      if (isPressed.current && !lastPressed) {
+        ripples.current.push({
+          id: Date.now() + Math.random(),
+          x: currentPos.current.x,
+          y: currentPos.current.y,
+          createdAt: performance.now(),
+        });
+      }
+      lastPressed = isPressed.current;
+    };
+
+    const intervalId = setInterval(tick, 16);
+    
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
   }, []);
 
   useAnimationFrame(() => {
-    if (!enabled || !followerRef.current) return;
+    if (!isEnabled) return;
 
-    const lerpFactor = isHovering ? 0.85 : 0.6;
-    const innerLerpFactor = isHovering ? 0.95 : 0.85;
+    updateRipples();
 
-    positionRef.current.x += (mouse.x - positionRef.current.x) * lerpFactor;
-    positionRef.current.y += (mouse.y - positionRef.current.y) * lerpFactor;
+    if (!containerRef.current) return;
 
-    innerPositionRef.current.x += (mouse.x - innerPositionRef.current.x) * innerLerpFactor;
-    innerPositionRef.current.y += (mouse.y - innerPositionRef.current.y) * innerLerpFactor;
+    const targetPos = mouse;
+    
+    const lerpFactor = isHovering ? 0.28 : 0.18;
+    const dx = targetPos.x - currentPos.current.x;
+    const dy = targetPos.y - currentPos.current.y;
+    
+    velocity.current.x = velocity.current.x * 0.75 + dx * 0.25;
+    velocity.current.y = velocity.current.y * 0.75 + dy * 0.25;
+    
+    currentPos.current.x += dx * lerpFactor;
+    currentPos.current.y += dy * lerpFactor;
 
-    if (followerRef.current) {
-      const scale = isHovering ? 1.4 : 1;
-      followerRef.current.style.transform = `translate(${positionRef.current.x - 22}px, ${positionRef.current.y - 22}px) scale(${scale * breathScale}) rotate(${rotation}deg)`;
+    const speed = Math.sqrt(velocity.current.x ** 2 + velocity.current.y ** 2);
+    const stretch = Math.min(speed / 15, 1);
+    
+    const baseSize = 32;
+    const hoverScale = isHovering ? 1.4 : 1;
+    
+    let pressScale = 1;
+    if (isPressed.current) {
+      const pressDuration = performance.now() - pressTime.current;
+      if (pressDuration < 100) {
+        pressScale = 1 - (pressDuration / 100) * 0.25;
+      } else {
+        pressScale = 0.75;
+      }
     }
+    
+    const scale = baseSize * hoverScale * pressScale;
 
-    if (innerDotRef.current) {
-      innerDotRef.current.style.transform = `translate(${innerPositionRef.current.x - 4}px, ${innerPositionRef.current.y - 4}px)`;
-    }
+    const angle = Math.atan2(velocity.current.y, velocity.current.x);
+    const stretchX = 1 + stretch * 0.35;
+    const stretchY = 1 - stretch * 0.15;
 
-    pulseTimerRef.current += 0.016;
-    const pulse = 1 + Math.sin(pulseTimerRef.current * 3) * 0.05;
-    setPulseScale(isHovering ? pulse * 1.2 : pulse);
-    setBreathScale(1 + Math.sin(pulseTimerRef.current * 1.5) * 0.03);
-    setRotation((prev) => (prev + (isHovering ? 1.2 : 0.4)) % 360);
-
-    orbitParticlesRef.current.forEach((p) => {
-      p.angle += p.speed * (isHovering ? 1.5 : 1);
-      p.phase += 0.05;
-    });
-
-    particlesRef.current.forEach((p) => {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vx *= 0.95;
-      p.vy *= 0.95;
-      p.life -= 0.02;
-    });
-
-    particlesRef.current = particlesRef.current.filter(p => p.life > 0);
+    containerRef.current.style.transform = `
+      translate(${currentPos.current.x - scale / 2}px, ${currentPos.current.y - scale / 2}px)
+      rotate(${angle}rad)
+      scaleX(${stretchX})
+      scaleY(${stretchY})
+      scale(${scale / baseSize})
+    `;
   });
 
-  const handleMouseMove = () => {
-    if (!isHovering) return;
-
-    for (let i = 0; i < 2; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 3 + 1;
-      particlesRef.current.push({
-        x: mouse.x,
-        y: mouse.y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        size: Math.random() * 4 + 2,
-        life: 1,
-        maxLife: 1,
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (enabled) {
-      window.addEventListener('mousemove', handleMouseMove);
-    }
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, [enabled, isHovering, mouse.x, mouse.y]);
-
-  if (!enabled) return null;
-
-  const glowColor = isHovering ? 'rgba(0, 255, 157, 0.4)' : 'rgba(0, 255, 157, 0.2)';
+  if (!isEnabled) return null;
 
   return (
     <>
+      <div ref={rippleContainerRef} />
       <div
-        ref={followerRef}
+        ref={containerRef}
         style={{
           position: 'fixed',
           top: 0,
           left: 0,
-          width: 44,
-          height: 44,
+          width: 32,
+          height: 32,
           pointerEvents: 'none',
           zIndex: 9998,
-          opacity: isHovering ? 0.9 : 0.6,
           willChange: 'transform',
-          transition: 'opacity 0.3s ease',
         }}
       >
         <div
           style={{
             position: 'absolute',
-            top: 0,
             left: 0,
-            width: 44,
-            height: 44,
-            border: isHovering ? '2px solid rgba(0, 255, 157, 0.7)' : '1.5px solid rgba(0, 255, 157, 0.5)',
+            top: 0,
+            width: '100%',
+            height: '100%',
             borderRadius: '50%',
-            boxShadow: `0 0 ${isHovering ? 12 : 6}px ${glowColor}`,
+            border: `1.5px solid rgba(0, 255, 157, ${isHovering ? 0.75 : 0.45})`,
+            boxShadow: isHovering 
+              ? '0 0 14px rgba(0, 255, 157, 0.35), 0 0 28px rgba(0, 255, 157, 0.15)' 
+              : '0 0 8px rgba(0, 255, 157, 0.2)',
           }}
         />
         <div
           style={{
             position: 'absolute',
-            top: 11,
-            left: 11,
-            width: 22,
-            height: 22,
-            border: '1px solid rgba(0, 255, 157, 0.35)',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: isPressed.current ? 7 : 6,
+            height: isPressed.current ? 7 : 6,
             borderRadius: '50%',
+            background: 'rgba(0, 255, 157, 0.95)',
+            boxShadow: `0 0 ${isHovering ? 10 : 5}px rgba(0, 255, 157, 0.5)`,
           }}
         />
-        <div
-          style={{
-            position: 'absolute',
-            top: 5,
-            left: 5,
-            width: 34,
-            height: 34,
-            border: '1px dashed rgba(0, 255, 157, 0.25)',
-            borderRadius: '50%',
-          }}
-        />
-        {orbitParticlesRef.current.map((p, i) => {
-          const breath = Math.sin(pulseTimerRef.current * 2 + p.phase) * 0.3;
-          const currentRadius = p.radius + breath;
-          return (
-            <div
-              key={i}
-              style={{
-                position: 'absolute',
-                left: 22 + Math.cos(p.angle) * currentRadius - p.size / 2,
-                top: 22 + Math.sin(p.angle) * currentRadius - p.size / 2,
-                width: p.size,
-                height: p.size,
-                borderRadius: '50%',
-                background: isHovering ? 'rgba(0, 255, 157, 0.9)' : 'rgba(0, 255, 157, 0.6)',
-                boxShadow: `0 0 ${p.size * 3}px rgba(0, 255, 157, 0.4)`,
-              }}
-            />
-          );
-        })}
       </div>
-      <div
-        ref={innerDotRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, #00ff9d 0%, #00cc7a 100%)',
-          pointerEvents: 'none',
-          zIndex: 9999,
-          opacity: isHovering ? 1 : 0.8,
-          willChange: 'transform',
-          boxShadow: `0 0 8px rgba(0, 255, 157, 0.6), 0 0 16px rgba(0, 255, 157, 0.3)`,
-          transform: `scale(${pulseScale})`,
-        }}
-      />
-      {particlesRef.current.map((p, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: p.size,
-            height: p.size,
-            borderRadius: '50%',
-            background: `rgba(0, 255, 157, ${p.life})`,
-            pointerEvents: 'none',
-            zIndex: 9997,
-            transform: `translate(${p.x - p.size / 2}px, ${p.y - p.size / 2}px)`,
-            boxShadow: `0 0 ${p.size * 2}px rgba(0, 255, 157, ${p.life * 0.5})`,
-          }}
-        />
-      ))}
     </>
   );
 });

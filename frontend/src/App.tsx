@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { MouseFollower } from './components/animations/MouseFollower';
 import { ParticleNetwork } from './components/animations/ParticleNetwork';
 import { PageTransitionWrapper } from './components/layout/PageTransition';
@@ -42,14 +42,14 @@ function AppInner() {
   const { isHovering } = useHover();
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <div style={{ margin: 0, padding: 0, position: 'relative' }}>
         {settings.backgroundParticles && <ParticleNetwork dimmed={isHovering} />}
         <AnimatedApp />
         {settings.mouseFollower && <MouseFollower />}
         <PerformancePanel />
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
