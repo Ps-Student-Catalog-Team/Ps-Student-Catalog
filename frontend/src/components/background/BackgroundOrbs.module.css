@@ -15,11 +15,14 @@
     radial-gradient(ellipse 80% 1px at 50% 55%, rgba(34,197,94,0.08) 0%, transparent 100%),
     #0a0a0a;
   background-size: 24px 24px, 100% 100%, 100% 100%;
-  background-position: 0 0, 50% 55%, 0 0;
+  background-position: 
+    calc(var(--grid-x, 0)) calc(var(--grid-y, 0)),
+    50% 55%,
+    0 0;
 
   /* GPU 合成优化（不用 contain:paint，否则 blur 光球被裁剪） */
   transform: translateZ(0);
-  will-change: opacity;
+  will-change: background-position, opacity;
 }
 
 /* ── 光球 1：中下方暖绿（扇形连线背光） ── */
@@ -40,7 +43,10 @@
   filter: blur(60px);
   mix-blend-mode: screen;
   will-change: transform;
-  transform: translate(-50%, 0) translateZ(0);
+  transform: 
+    translate(-50%, 0) 
+    translateZ(0)
+    translate(var(--orb1-x, 0), var(--orb1-y, 0));
   pointer-events: none;
 }
 
@@ -62,7 +68,10 @@
   filter: blur(70px);
   mix-blend-mode: screen;
   will-change: transform;
-  transform: translate(-50%, 0) translateZ(0);
+  transform: 
+    translate(-50%, 0) 
+    translateZ(0)
+    translate(var(--orb2-x, 0), var(--orb2-y, 0));
   pointer-events: none;
 }
 
