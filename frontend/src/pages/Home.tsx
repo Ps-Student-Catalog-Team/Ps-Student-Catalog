@@ -10,7 +10,7 @@ import { VpnSpeedMonitor } from '../components/monitor/VpnSpeedMonitor';
 import animations from './HomeAnimations.module.css';
 import { getCache, setCache } from '../utils/cache';
 
-const API_BASE_URL = 'http://10.88.202.59:3132';
+const API_BASE_URL = '';
 
 interface FetchOptions extends RequestInit {
   timeout?: number;
