@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback, memo } from 'react';
-import { useMousePosition } from '../../hooks/useMousePosition';
+import { useMousePositionRef } from '../../hooks/useMousePosition';
 import { useAnimationFrame } from '../../hooks/useAnimationFrame';
 
 interface Particle {
@@ -84,7 +84,7 @@ function CanvasParticleSystemComponent({
   enabled = true,
 }: CanvasParticleSystemProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouse = useMousePosition();
+  const mouseRef = useMousePositionRef();
   const particlePoolRef = useRef<ParticlePool | null>(null);
   const lastSpawnRef = useRef(0);
   const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -146,6 +146,7 @@ function CanvasParticleSystemComponent({
     const pool = particlePoolRef.current;
     if (!pool) return;
 
+    const mouse = mouseRef.current;
     const now = Date.now();
     if (now - lastSpawnRef.current > 50 && pool.getActiveCount() < maxParticles) {
       pool.acquire(mouse.x, mouse.y);

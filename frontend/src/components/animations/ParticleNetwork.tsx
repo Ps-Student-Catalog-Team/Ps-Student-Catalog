@@ -1,12 +1,11 @@
 import { useRef, useEffect, useCallback, useState, memo } from 'react';
-import { useMousePosition } from '../../hooks/useMousePosition';
+import { useMousePositionRef } from '../../hooks/useMousePosition';
 import { useAnimationFrame } from '../../hooks/useAnimationFrame';
 import { usePerformance } from '../../context/PerformanceContext';
 
 interface ParticleNetworkProps {
   particleCount?: number;
   connectionDistance?: number;
-  particleColor?: string;
   enabled?: boolean;
   dimmed?: boolean;
 }
@@ -87,12 +86,11 @@ class SpatialGrid {
 function ParticleNetworkComponent({
   particleCount = 150,
   connectionDistance = 200,
-  particleColor = '#00ff9d',
   enabled = true,
   dimmed = false,
 }: ParticleNetworkProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouse = useMousePosition();
+  const mouseRef = useMousePositionRef();
   const particlesRef = useRef<Particle[]>([]);
   const initializedRef = useRef(false);
   const [effectiveParticleCount, setEffectiveParticleCount] = useState(particleCount);
@@ -222,6 +220,7 @@ function ParticleNetworkComponent({
       ctx.fill();
     });
 
+    const mouse = mouseRef.current;
     const nearestParticles: { particle: Particle; distance: number }[] = [];
     for (const p of particles) {
       const dx = mouse.x - p.x;
@@ -244,7 +243,7 @@ function ParticleNetworkComponent({
       ctx.lineTo(mouse.x, mouse.y);
       ctx.stroke();
     });
-  }, [mouse, connectionDistance, particleColor]);
+  }, [connectionDistance]);
 
   useEffect(() => {
     if (initializedRef.current && canvasRef.current) {

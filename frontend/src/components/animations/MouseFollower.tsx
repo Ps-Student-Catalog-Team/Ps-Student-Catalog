@@ -1,5 +1,5 @@
 import { useRef, memo, useEffect, useCallback } from 'react';
-import { useMousePosition } from '../../hooks/useMousePosition';
+import { useMousePositionRef } from '../../hooks/useMousePosition';
 import { useAnimationFrame } from '../../hooks/useAnimationFrame';
 import { useHover } from '../../context/HoverContext';
 import { usePerformance } from '../../context/PerformanceContext';
@@ -13,6 +13,7 @@ interface Ripple {
   x: number;
   y: number;
   createdAt: number;
+  type: 'click' | 'press';
 }
 
 interface Point {
@@ -23,7 +24,7 @@ interface Point {
 export const MouseFollower = memo(function MouseFollower({ enabled: externalEnabled = true }: MouseFollowerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rippleContainerRef = useRef<HTMLDivElement>(null);
-  const mouse = useMousePosition();
+  const mouseRef = useMousePositionRef();
   const { isHovering } = useHover();
   const { settings } = usePerformance();
 
@@ -31,7 +32,7 @@ export const MouseFollower = memo(function MouseFollower({ enabled: externalEnab
   const velocity = useRef<Point>({ x: 0, y: 0 });
   const ripples = useRef<Ripple[]>([]);
   const isPressed = useRef(false);
-  const pressTime = useRef(0);
+  const pressTimeRef = useRef(0);
 
   const isEnabled = externalEnabled && settings.mouseFollower;
 
@@ -105,37 +106,31 @@ export const MouseFollower = memo(function MouseFollower({ enabled: externalEnab
   }, []);
 
   useEffect(() => {
-    let lastPressed = false;
-    
     const handleMouseDown = () => {
       isPressed.current = true;
-      pressTime.current = performance.now();
+      pressTimeRef.current = performance.now();
     };
     const handleMouseUp = () => {
       isPressed.current = false;
     };
+    const handleClick = (e: MouseEvent) => {
+      ripples.current.push({
+        id: Date.now() + Math.random(),
+        x: e.clientX,
+        y: e.clientY,
+        createdAt: performance.now(),
+        type: 'click',
+      });
+    };
 
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mouseup', handleMouseUp);
-
-    const tick = () => {
-      if (isPressed.current && !lastPressed) {
-        ripples.current.push({
-          id: Date.now() + Math.random(),
-          x: currentPos.current.x,
-          y: currentPos.current.y,
-          createdAt: performance.now(),
-        });
-      }
-      lastPressed = isPressed.current;
-    };
-
-    const intervalId = setInterval(tick, 16);
+    window.addEventListener('click', handleClick);
     
     return () => {
-      clearInterval(intervalId);
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('click', handleClick);
     };
   }, []);
 
@@ -146,7 +141,7 @@ export const MouseFollower = memo(function MouseFollower({ enabled: externalEnab
 
     if (!containerRef.current) return;
 
-    const targetPos = mouse;
+    const targetPos = mouseRef.current;
     
     const lerpFactor = isHovering ? 0.28 : 0.18;
     const dx = targetPos.x - currentPos.current.x;
@@ -166,7 +161,7 @@ export const MouseFollower = memo(function MouseFollower({ enabled: externalEnab
     
     let pressScale = 1;
     if (isPressed.current) {
-      const pressDuration = performance.now() - pressTime.current;
+      const pressDuration = performance.now() - pressTimeRef.current;
       if (pressDuration < 100) {
         pressScale = 1 - (pressDuration / 100) * 0.25;
       } else {
