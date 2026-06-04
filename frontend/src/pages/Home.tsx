@@ -196,12 +196,13 @@ export function Home() {
   }, [setIsHovering]);
 
   const handleButtonClick = useCallback((path: string) => {
+    setIsHovering(false);
     if (path.startsWith('http')) {
       window.open(path, '_blank');
     } else {
       navigate(path);
     }
-  }, [navigate]);
+  }, [navigate, setIsHovering]);
 
   const handleReturnClick = useCallback(() => {
     window.location.href = '/index.html';
