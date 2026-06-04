@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { PageTransition } from '../components/layout/PageTransition';
 import { RippleButton } from '../components/ui/RippleButton';
 
-const API_BASE_URL = 'http://10.88.202.59:3132';
+const API_BASE_URL = '';
 
 const VPN_IPS = [
   '10.88.194.142',

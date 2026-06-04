@@ -21,7 +21,7 @@ interface VpnSpeedContextValue {
 
 const VpnSpeedContext = createContext<VpnSpeedContextValue | null>(null);
 
-const API_BASE_URL = 'http://10.88.202.59:3132';
+const API_BASE_URL = '';
 
 export function VpnSpeedProvider({ children }: { children: ReactNode }) {
   const [speed, setSpeed] = useState<VpnSpeedData>({
