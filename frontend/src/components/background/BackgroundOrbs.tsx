@@ -16,8 +16,7 @@ export function BackgroundOrbs({ dimmed = false }: BackgroundOrbsProps) {
   const [orb1Pos, setOrb1Pos] = useState({ x: 0, y: 0 });
   const [orb2Pos, setOrb2Pos] = useState({ x: 0, y: 0 });
   const [gridOffset, setGridOffset] = useState({ x: 0, y: 0 });
-  const animationFrameRef = useRef<number>();
-  const lastMouseRef = useRef({ x: 0, y: 0 });
+  const animationFrameRef = useRef<number>(0);
 
   useEffect(() => {
     if (!isAnimated || isMobile) return;

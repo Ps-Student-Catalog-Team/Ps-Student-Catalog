@@ -48,48 +48,65 @@ loadLastOnlineTimes();
 app.get('/api/vpn-speed', (req, res) => {
     console.log(`[${new Date().toISOString()}] 查询VPN速率`);
 
-    const psCommand = `
-        $received = Get-Counter -Counter "\\Network Interface(*)\\Bytes Received/sec" -ErrorAction SilentlyContinue
-        $sent = Get-Counter -Counter "\\Network Interface(*)\\Bytes Sent/sec" -ErrorAction SilentlyContinue
-        
-        $totalReceived = 0
-        if ($received) {
-            $totalReceived = ($received.CounterSamples | Measure-Object -Property CookedValue -Sum).Sum
+    const psScript = `
+try {
+    $nicStats = Get-WmiObject -Class Win32_PerfFormattedData_Tcpip_NetworkInterface -ErrorAction SilentlyContinue
+    if ($nicStats) {
+        $totalReceived = ($nicStats | Measure-Object -Property BytesReceivedPerSec -Sum).Sum
+        $totalSent = ($nicStats | Measure-Object -Property BytesSentPerSec -Sum).Sum
+    } else {
+        $nicStats = Get-CimInstance -ClassName Win32_PerfFormattedData_Tcpip_NetworkInterface -ErrorAction SilentlyContinue
+        if ($nicStats) {
+            $totalReceived = ($nicStats | Measure-Object -Property BytesReceivedPerSec -Sum).Sum
+            $totalSent = ($nicStats | Measure-Object -Property BytesSentPerSec -Sum).Sum
         }
-        
-        $totalSent = 0
-        if ($sent) {
-            $totalSent = ($sent.CounterSamples | Measure-Object -Property CookedValue -Sum).Sum
-        }
-        
-        Write-Output ("{0},{1}" -f [math]::Round($totalReceived), [math]::Round($totalSent))
-    `.trim();
+    }
+    
+    if ($totalReceived -eq $null) { $totalReceived = 0 }
+    if ($totalSent -eq $null) { $totalSent = 0 }
+    
+    Write-Output ("{0},{1}" -f [math]::Round($totalReceived), [math]::Round($totalSent))
+} catch {
+    Write-Output "0,0"
+}
+`;
 
-    exec(`powershell -Command "${psCommand}"`, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`[ERROR] 获取网络速率失败: ${error.message}`);
+    const tempFilePath = path.join(__dirname, 'temp_speed_check.ps1');
+    
+    fs.writeFile(tempFilePath, psScript, (writeErr) => {
+        if (writeErr) {
+            console.error(`[ERROR] 写入临时文件失败: ${writeErr.message}`);
             return res.json({ uploadSpeed: 0, downloadSpeed: 0, timestamp: Date.now() });
         }
 
-        const output = stdout.trim();
-        console.log(`[DEBUG] PowerShell output: "${output}"`);
-        
-        const parts = output.split(',');
-        
-        if (parts.length >= 2) {
-            const bytesReceivedPerSec = parseInt(parts[0] || '0', 10);
-            const bytesSentPerSec = parseInt(parts[1] || '0', 10);
-            const now = Date.now();
+        exec(`powershell -ExecutionPolicy Bypass -Command "& '${tempFilePath}'"`, (error, stdout, stderr) => {
+            fs.unlink(tempFilePath, () => {});
 
-            res.json({
-                uploadSpeed: Math.max(0, bytesSentPerSec),
-                downloadSpeed: Math.max(0, bytesReceivedPerSec),
-                timestamp: now
-            });
-        } else {
-            console.error('[ERROR] 无法解析网络速率输出:', output);
-            res.json({ uploadSpeed: 0, downloadSpeed: 0, timestamp: Date.now() });
-        }
+            if (error) {
+                console.error(`[ERROR] 获取网络速率失败: ${error.message}`);
+                return res.json({ uploadSpeed: 0, downloadSpeed: 0, timestamp: Date.now() });
+            }
+
+            const output = stdout.trim();
+            console.log(`[DEBUG] PowerShell output: "${output}"`);
+            
+            const parts = output.split(',');
+            
+            if (parts.length >= 2) {
+                const downloadSpeed = parseInt(parts[0] || '0', 10);
+                const uploadSpeed = parseInt(parts[1] || '0', 10);
+                const now = Date.now();
+
+                res.json({
+                    uploadSpeed: Math.max(0, uploadSpeed),
+                    downloadSpeed: Math.max(0, downloadSpeed),
+                    timestamp: now
+                });
+            } else {
+                console.error('[ERROR] 无法解析网络速率输出:', output);
+                res.json({ uploadSpeed: 0, downloadSpeed: 0, timestamp: Date.now() });
+            }
+        });
     });
 });
 
