@@ -68,7 +68,7 @@ export function Newest() {
 
   const checkVPNStatus = useCallback(async (ip: string) => {
     try {
-      const response = await fetchFromApi(`/api/vpn-status?ip=${ip}`);
+      const response = await fetchFromApi(`/api/vpn-status?ip=${encodeURIComponent(ip)}`);
       const data = await response.json();
 
       const status: VPNStatus = {
@@ -79,7 +79,7 @@ export function Newest() {
 
       if (data.online) {
         try {
-          const sessionResponse = await fetchFromApi(`/api/vpn-users?ip=${ip}`);
+          const sessionResponse = await fetchFromApi(`/api/vpn-users?ip=${encodeURIComponent(ip)}`);
           const sessionData = await sessionResponse.json();
           status.sessionCount = sessionData.sessionCount;
         } catch (e) {

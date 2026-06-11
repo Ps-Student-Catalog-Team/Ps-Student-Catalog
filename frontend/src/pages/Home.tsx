@@ -230,7 +230,7 @@ export function Home() {
       }
 
       try {
-        const response = await fetchFromApi('/api/vpn-users?ip=10.88.202.59', { timeout: 5000 });
+        const response = await fetchFromApi(`/api/vpn-users?ip=${encodeURIComponent('10.88.202.59')}`, { timeout: 5000 });
         const data = await response.json();
         if (!data.success) throw new Error(data.error || '获取会话数失败');
         const count: number = data.sessionCount;

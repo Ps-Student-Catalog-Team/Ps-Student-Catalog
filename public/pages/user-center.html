@@ -170,7 +170,7 @@
             <div style="text-align: center; margin: 20px 0;">
                 <p>是否需要在 AList 上创建账户？</p>
                 <div style="margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="createAlistAccount()">是</button>
+                    <button class="btn btn-primary" onclick="openAlistModal()">是</button>
                     <button class="btn" onclick="cancelAlistCreation()" style="margin-left: 10px; background-color: #e2e8f0; color: #4a5568;">暂不</button>
                 </div>
                 <div id="alistResult" style="margin-top: 20px; font-weight: bold;"></div>
@@ -251,26 +251,50 @@
             window.location.href = 'login.html';
         }
 
-        // 创建AList账户
-        async function createAlistAccount() {
+        // 打开模态框以输入密码并创建 AList 账户
+        function openAlistModal() {
             const username = localStorage.getItem('username');
+            if (!username) {
+                alert('请先登录后再创建 AList 账户');
+                return;
+            }
+            const modal = document.getElementById('alistModal');
+            const userSpan = document.getElementById('alistModalUsername');
+            userSpan.textContent = username;
+            modal.style.display = 'block';
+            document.getElementById('alistPasswordInput').value = '';
+            document.getElementById('alistResult').textContent = '';
+        }
+
+        async function submitAlistModal() {
+            const username = localStorage.getItem('username');
+            const password = document.getElementById('alistPasswordInput').value.trim();
             const resultDiv = document.getElementById('alistResult');
-            
+
+            if (!username) {
+                alert('未检测到登录用户');
+                return;
+            }
+            if (password.length < 6) {
+                alert('密码长度至少 6 位');
+                return;
+            }
+
+            resultDiv.textContent = '正在创建AList账户...';
+            resultDiv.style.color = '#333';
+
             try {
-                resultDiv.textContent = '正在创建AList账户...';
-                
                 const response = await fetch('../php/create-alist-account.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ username })
+                    body: JSON.stringify({ username, password })
                 });
-                
+
                 const data = await response.json();
-                
                 if (data.success) {
-                    resultDiv.textContent = `AList账户创建成功！用户名：${username}，密码：${data.password}`;
+                    resultDiv.textContent = `AList账户创建成功！用户名：${username}，密码：${password}`;
                     resultDiv.style.color = '#48bb78';
                 } else {
                     resultDiv.textContent = `创建失败：${data.error}`;
@@ -279,7 +303,13 @@
             } catch (error) {
                 resultDiv.textContent = `创建失败：${error.message}`;
                 resultDiv.style.color = '#f56565';
+            } finally {
+                closeAlistModal();
             }
+        }
+
+        function closeAlistModal() {
+            document.getElementById('alistModal').style.display = 'none';
         }
 
         // 取消创建AList账户
@@ -292,5 +322,18 @@
         // 页面加载时检查登录状态
         window.onload = checkLogin;
     </script>
+    <!-- AList 创建模态框 -->
+    <div id="alistModal" style="display:none; position:fixed; left:0; top:0; right:0; bottom:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:20px; border-radius:8px; width:320px; margin:80px auto; position:relative;">
+            <h3 style="margin-bottom:8px;">为 <span id="alistModalUsername"></span> 创建 AList 密码</h3>
+            <div style="margin-bottom:12px;">
+                <input id="alistPasswordInput" type="password" placeholder="请输入密码（至少6位）" style="width:100%; padding:8px; box-sizing:border-box;">
+            </div>
+            <div style="text-align:right; display:flex; gap:8px; justify-content:flex-end;">
+                <button class="btn" onclick="closeAlistModal()" style="background:#e2e8f0; color:#4a5568;">取消</button>
+                <button class="btn btn-primary" onclick="submitAlistModal()">创建</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

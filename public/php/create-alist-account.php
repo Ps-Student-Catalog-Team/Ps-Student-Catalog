@@ -19,7 +19,7 @@ if (!$data || !isset($data['username'])) {
 }
 
 $username = $data['username'];
-$password = generateRandomPassword(12);
+$password = isset($data['password']) && strlen($data['password']) > 0 ? $data['password'] : generateRandomPassword(12);
 
 // --- 核心逻辑 ---
 
@@ -62,8 +62,8 @@ function createAlistUser($username, $password) {
         'username' => $username,
         'password' => $password,
         'base_path' => '/' . $username,
-        'role' => [0],          // 0 为普通用户
-        'permission' => 0,    // 0 为基础权限，若需上传权限通常设为较高数值
+        // omit 'role' to let AList assign default role and avoid "record not found" errors
+        'permission' => 0,
         'disabled' => false
     ];
 
