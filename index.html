@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="http://10.88.202.59">
+    <link rel="preconnect" href="http://10.88.202.75">
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
     <title>学生目录</title>
 
@@ -346,10 +346,10 @@
 
             <div class="button-section" style="margin-top: 40px;">
                 <button class="nav-button" onclick="navigateToTutorials()">教程</button>
-                <button class="nav-button" onclick='location.href=("http://10.88.202.59:5244")'>共享目录</button>
+                <button class="nav-button" onclick='location.href=("http://10.88.202.75:5244")'>共享目录</button>
                 <button class="nav-button" onclick="navigateToTools()">更多工具</button>
                 <button class="nav-button" onclick="navigateToAbout()">关于</button>
-                <button class="nav-button" onclick='location.href=("http://10.88.202.59:40001")'>聊天室</button>
+                <button class="nav-button" onclick='location.href=("http://10.88.202.75:40001")'>聊天室</button>
 
                 <div style="text-align: center; margin-top: 10px;">
                     <a id="vpnStatusLink" style="color:rgb(128, 128, 128);" class="footer-link" href="public/pages/newest.html">查看当前VPN状态</a>
@@ -556,17 +556,17 @@
             <div class="tutorial-card">
                 <h3>VPN日志分析</h3>
                 <p>一个小小的日志分析网站</p>
-                <a href="http://10.88.202.59:3234" class="btn btn-outline-primary">进入</a>
+                <a href="http://10.88.202.75:3234" class="btn btn-outline-primary">进入</a>
             </div>
             <div class="tutorial-card">
                 <h3>我的世界管理</h3>
                 <p>我的世界管理服务器</p>
-                <a href="http://10.88.202.59:23333/#/login" class="btn btn-outline-primary">进入</a>
+                <a href="http://10.88.202.75:23333/#/login" class="btn btn-outline-primary">进入</a>
             </div>
             <div class="tutorial-card">
                 <h3>服务器管理</h3>
                 <p>管理服务器的小工具</p>
-                <a href="http://10.88.202.59:3232/login.html" class="btn btn-outline-primary">进入</a>
+                <a href="http://10.88.202.75:3232/login.html" class="btn btn-outline-primary">进入</a>
             </div>
         </div>
     </div>
@@ -734,7 +734,7 @@
     const ANNOUNCEMENT_HASH_KEY = 'announcementContentHash';
     const ANNOUNCEMENT_EXPIRE_HOURS = 3;
     const MOUSE_EFFECT_KEY = 'mouseEffectEnabled';
-    const API_BASE_URL = 'http://10.88.202.59:3132';
+    const API_BASE_URL = 'http://10.88.202.75:3132';
 
     async function fetchFromApi(endpoint, options) {
         options = options || {};
@@ -899,7 +899,7 @@
         var countElement = document.getElementById('vpnSessionCount');
 
         try {
-            var response = await fetchFromApi('/api/vpn-users?ip=10.88.202.59', { timeout: 5000 });
+            var response = await fetchFromApi('/api/vpn-users?ip=10.88.202.75', { timeout: 5000 });
             var data = await response.json();
 
             if (!data.success) throw new Error(data.error || '获取会话数失败');
@@ -935,7 +935,7 @@
         var resultDiv = document.getElementById('updateResult');
         resultDiv.innerHTML = '<p>正在拉取同步最新更改，请稍候...</p>';
 
-        fetch('10.88.202.59:3132/api/pull-updates')
+        fetch('10.88.202.75:3132/api/pull-updates')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data.success) {
