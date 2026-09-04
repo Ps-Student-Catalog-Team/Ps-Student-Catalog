@@ -8,7 +8,7 @@ Windows时间同步服务器（Windows Time Service）是Windows操作系统内�
 ## 如何配置Windows Time Server？
 ## 方法一:使用脚本（推荐）
 ### 1. 下载我们的脚本文件  
-[脚本文件下载](http://10.88.202.75:5244/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E8%BD%AF%E4%BB%B6/%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E8%84%9A%E6%9C%AC.bat)
+[脚本文件下载](http://10.88.202.77:5244/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E8%BD%AF%E4%BB%B6/%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E8%84%9A%E6%9C%AC.bat)
 
 ### 2.以管理员身份打开
 
@@ -28,7 +28,7 @@ Windows时间同步服务器（Windows Time Service）是Windows操作系统内�
 ![控制面板](../img/时间同步4.jpg)
 <div class="code-block-wrapper">
 <pre>
-<code class="language-javascript">10.88.202.75</code>
+<code class="language-javascript">10.88.202.77</code>
 </pre>
 </div>
 
