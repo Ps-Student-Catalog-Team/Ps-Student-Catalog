@@ -22,4 +22,4 @@ self.addEventListener('message', async (e) => {
   }
 });
 
-const backendUrl = 'http://10.88.202.77:3132/api/vpn-status';
+const backendUrl = 'http://10.88.202.78:3132/api/vpn-status';

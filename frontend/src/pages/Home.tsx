@@ -86,7 +86,7 @@ const navButtons: Array<{
   { text: '教程', path: '/tutorials', icon: '', subtitle: '快速入门与文档', accentColor: '#22c55e' },
   { text: '工具', path: '/tools', icon: '', subtitle: '效率工具箱', accentColor: '#22c55e' },
   { text: '关于', path: '/about', icon: '', subtitle: '项目与团队', accentColor: '#22c55e' },
-  { text: '共享目录', path: 'http://10.88.202.77:5244', icon: '', subtitle: '文件共享入口', accentColor: '#22c55e' },
+  { text: '共享目录', path: 'http://10.88.202.78:5244', icon: '', subtitle: '文件共享入口', accentColor: '#22c55e' },
 ];
 
 const titleStyleBase: Record<VPNSessionStatus, React.CSSProperties> = {
@@ -230,7 +230,7 @@ export function Home() {
       }
 
       try {
-        const response = await fetchFromApi(`/api/vpn-users?ip=${encodeURIComponent('10.88.202.77')}`, { timeout: 5000 });
+        const response = await fetchFromApi(`/api/vpn-users?ip=${encodeURIComponent('10.88.202.78')}`, { timeout: 5000 });
         const data = await response.json();
         if (!data.success) throw new Error(data.error || '获取会话数失败');
         const count: number = data.sessionCount;

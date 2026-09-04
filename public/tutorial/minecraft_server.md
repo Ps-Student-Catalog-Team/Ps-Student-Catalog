@@ -7,7 +7,7 @@
 
 ## 安装游戏
 
-如果你还没有安装Minecraft，你可以前往[学生目录下载](http://10.88.202.77:5244/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C/Minecraft.zip?sign=ADqTHeXhkwsqQw3_qc64iCnVEIAIWY8B5fXA8UStVhI=:0)，这是基于PCL2的Minecraft 1.21.7启动器
+如果你还没有安装Minecraft，你可以前往[学生目录下载](http://10.88.202.78:5244/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C/Minecraft.zip?sign=ADqTHeXhkwsqQw3_qc64iCnVEIAIWY8B5fXA8UStVhI=:0)，这是基于PCL2的Minecraft 1.21.7启动器
 
 前往学生目录下载无需网络
 
@@ -26,7 +26,7 @@
 ### 第三步：填写服务器信息
 
 - 服务器名称：任意自定义名称（例如：`Minecraft 服务器`）
-- 服务器地址：`10.88.202.77`（无需填写端口）
+- 服务器地址：`10.88.202.78`（无需填写端口）
 
 
 ### 第四步：连接服务器
@@ -38,7 +38,7 @@
 - 确认输入的IP地址 **完全一致**（注意`.`和数字正确）
 - 检查游戏版本是否为 **1.21.7** 精确匹配
 - 联系我们确认服务器状态
-- 如果遇到要下载Java库，可以点击这里[学生目录下载](http://10.88.202.77:5244/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C/Java%2025.exe?sign=y_AnoI64W3I5K8gPEmKF80Dn22SA-lv8eIDx5ilaFBk=:0)下载
+- 如果遇到要下载Java库，可以点击这里[学生目录下载](http://10.88.202.78:5244/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C/Java%2025.exe?sign=y_AnoI64W3I5K8gPEmKF80Dn22SA-lv8eIDx5ilaFBk=:0)下载
 
 ## 注意事项
 ⚠️ 该IP地址为 **局域网地址**，仅限同一网络下的设备访问  
