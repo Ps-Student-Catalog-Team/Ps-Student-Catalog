@@ -24,9 +24,9 @@ $password = isset($data['password']) && strlen($data['password']) > 0 ? $data['p
 // --- 核心逻辑 ---
 
 /**
- * 获取 AList 管理员 Token
+ * 获取 OpenList 管理员 Token
  */
-function getAlistToken() {
+function getOpenListToken() {
     $login_url = 'http://127.0.0.1:5244/api/auth/login'; // 建议用 127.0.0.1 避免 DNS 解析
     $login_data = [
         'username' => 'admin', 
@@ -50,19 +50,19 @@ function getAlistToken() {
 }
 
 /**
- * 调用 AList API 创建账户
+ * 调用 OpenList API 创建账户
  */
-function createAlistUser($username, $password) {
+function createOpenListUser($username, $password) {
     $api_url = 'http://127.0.0.1:5244/api/admin/user/create'; 
     
-    $token = getAlistToken();
+    $token = getOpenListToken();
     if (!$token) return ["success" => false, "msg" => "无法获取管理员Token"];
 
     $api_data = [
         'username' => $username,
         'password' => $password,
         'base_path' => '/' . $username,
-        // omit 'role' to let AList assign default role and avoid "record not found" errors
+        // omit 'role' to let OpenList assign the default role
         'permission' => 0,
         'disabled' => false
     ];
@@ -108,7 +108,7 @@ try {
         throw new Exception("服务器未安装 curl 扩展");
     }
 
-    $res = createAlistUser($username, $password);
+    $res = createOpenListUser($username, $password);
 
     if ($res['success']) {
         echo json_encode([
@@ -119,7 +119,7 @@ try {
     } else {
         echo json_encode([
             "success" => false, 
-            "error" => "AList创建失败: " . $res['msg']
+            "error" => "OpenList创建失败: " . $res['msg']
         ]);
     }
 } catch (Exception $e) {
