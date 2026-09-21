@@ -61,7 +61,7 @@ function createOpenListUser($username, $password) {
     $api_data = [
         'username' => $username,
         'password' => $password,
-        'base_path' => '/' . $username,
+        'base_path' => '/',
         // omit 'role' to let OpenList assign the default role
         'permission' => 0,
         'disabled' => false
