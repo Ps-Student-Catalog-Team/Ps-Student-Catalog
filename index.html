@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link rel="preconnect" href="http://10.88.202.78">
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
     <title>学生目录</title>
@@ -350,6 +353,7 @@
                 <button class="nav-button" onclick="navigateToTools()">更多工具</button>
                 <button class="nav-button" onclick="navigateToAbout()">关于</button>
                 <button class="nav-button" onclick='location.href=("http://10.88.202.78:8000")'>千问大模型</button>
+                <button class="nav-button" onclick='location.href=("http://10.88.202.78:30000/")'>音乐搜索器</button>
 
                 <div style="text-align: center; margin-top: 10px;">
                     <a id="vpnStatusLink" style="color:rgb(128, 128, 128);" class="footer-link" href="public/pages/newest.html">查看当前VPN状态</a>
@@ -590,6 +594,7 @@
     <a class="footer-link footer-links" id="announcementLink" href="javascript:void(0)" onclick="showAnnouncementModal(true)" style="display: none;">查看公告</a>
     <a class="footer-link footer-links" id="updateLogLink" href="public/pages/about_us.html" style="display: none;">关于我们</a>
     <a class="footer-link footer-links" id="moreContentLink" href="https://psstunet.github.io/" style="display: none;">更多内容</a>
+    <a class="footer-link footer-links" id="questionGroupLink" href="https://qm.qq.com/q/ORXbZyvt6e" style="display: none;">问题反映QQ群</a>
     <a class="version-info" href="javascript:void(0)" onclick="pullUpdates()" style="position: absolute; bottom: 10px; right: 20px; font-size: 0.8em; color: #666; cursor: pointer; text-decoration: underline;">版本: 2.3.4</a>
     <button id="mouseEffectToggle" class="mouse-effect-toggle" onclick="toggleMouseEffect()" style="position: absolute; bottom: 10px; right: 100px; font-size: 0.8em; padding: 4px 10px; border: 1px solid var(--accent-color); background: transparent; color: var(--accent-color); border-radius: 4px; cursor: pointer; transition: opacity 0.3s ease; opacity: 1; z-index: 10000;">鼠标特效: 开启</button>
 </div>
@@ -826,6 +831,7 @@
             document.getElementById('announcementLink').style.display = 'inline-block';
             document.getElementById('updateLogLink').style.display = 'inline-block';
             document.getElementById('moreContentLink').style.display = 'inline-block';
+            document.getElementById('questionGroupLink').style.display = 'inline-block';
 
             var progress = document.createElement('div');
             progress.className = 'progress-bar';
