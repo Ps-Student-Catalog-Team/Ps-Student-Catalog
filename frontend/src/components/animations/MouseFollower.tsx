@@ -39,12 +39,23 @@ export const MouseFollower = memo(function MouseFollower({ enabled: externalEnab
   const easeOutExpo = (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
   const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
 
+  const wasEmptyRef = useRef(true);
+
   const updateRipples = useCallback(() => {
     if (!rippleContainerRef.current) return;
-    
+
     const now = performance.now();
     ripples.current = ripples.current.filter(r => now - r.createdAt < 1000);
-    
+
+    if (ripples.current.length === 0) {
+      if (!wasEmptyRef.current) {
+        rippleContainerRef.current.innerHTML = '';
+        wasEmptyRef.current = true;
+      }
+      return;
+    }
+    wasEmptyRef.current = false;
+
     let html = '';
     ripples.current.forEach(ripple => {
       const age = now - ripple.createdAt;

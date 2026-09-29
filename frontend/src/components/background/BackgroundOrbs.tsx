@@ -1,6 +1,6 @@
+import { useEffect, useRef } from 'react';
 import { usePerformance } from '../../context/PerformanceContext';
-import { useMousePosition } from '../../hooks/useMousePosition';
-import { useState, useEffect, useRef } from 'react';
+import { useMousePositionRef } from '../../hooks/useMousePosition';
 import styles from './BackgroundOrbs.module.css';
 
 interface BackgroundOrbsProps {
@@ -9,62 +9,49 @@ interface BackgroundOrbsProps {
 
 export function BackgroundOrbs({ dimmed = false }: BackgroundOrbsProps) {
   const { settings } = usePerformance();
-  const mousePos = useMousePosition();
+  const mousePos = useMousePositionRef();
+  const containerRef = useRef<HTMLDivElement>(null);
   const isAnimated = !settings.reducedMotion;
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  
-  const [orb1Pos, setOrb1Pos] = useState({ x: 0, y: 0 });
-  const [orb2Pos, setOrb2Pos] = useState({ x: 0, y: 0 });
-  const [gridOffset, setGridOffset] = useState({ x: 0, y: 0 });
-  const animationFrameRef = useRef<number>(0);
 
   useEffect(() => {
     if (!isAnimated || isMobile) return;
+    const el = containerRef.current;
+    if (!el) return;
+
+    let raf = 0;
+    const pos = { orb1: { x: 0, y: 0 }, orb2: { x: 0, y: 0 }, grid: { x: 0, y: 0 } };
 
     const animate = () => {
-      const targetX = (mousePos.x - window.innerWidth / 2) / window.innerWidth;
-      const targetY = (mousePos.y - window.innerHeight / 2) / window.innerHeight;
+      const targetX = (mousePos.current.x - window.innerWidth / 2) / window.innerWidth;
+      const targetY = (mousePos.current.y - window.innerHeight / 2) / window.innerHeight;
 
-      setOrb1Pos(prev => ({
-        x: prev.x + (targetX * 25 - prev.x) * 0.08,
-        y: prev.y + (targetY * 20 - prev.y) * 0.08
-      }));
+      pos.orb1.x += (targetX * 25 - pos.orb1.x) * 0.08;
+      pos.orb1.y += (targetY * 20 - pos.orb1.y) * 0.08;
+      pos.orb2.x += (targetX * -35 - pos.orb2.x) * 0.06;
+      pos.orb2.y += (targetY * -25 - pos.orb2.y) * 0.06;
+      pos.grid.x += (targetX * 4 - pos.grid.x) * 0.12;
+      pos.grid.y += (targetY * 4 - pos.grid.y) * 0.12;
 
-      setOrb2Pos(prev => ({
-        x: prev.x + (targetX * -35 - prev.x) * 0.06,
-        y: prev.y + (targetY * -25 - prev.y) * 0.06
-      }));
+      el.style.setProperty('--orb1-x', `${pos.orb1.x}px`);
+      el.style.setProperty('--orb1-y', `${pos.orb1.y}px`);
+      el.style.setProperty('--orb2-x', `${pos.orb2.x}px`);
+      el.style.setProperty('--orb2-y', `${pos.orb2.y}px`);
+      el.style.setProperty('--grid-x', `${pos.grid.x}px`);
+      el.style.setProperty('--grid-y', `${pos.grid.y}px`);
 
-      setGridOffset(prev => ({
-        x: prev.x + (targetX * 4 - prev.x) * 0.12,
-        y: prev.y + (targetY * 4 - prev.y) * 0.12
-      }));
-
-      animationFrameRef.current = requestAnimationFrame(animate);
+      raf = requestAnimationFrame(animate);
     };
 
-    animationFrameRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
+    raf = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(raf);
   }, [mousePos, isAnimated, isMobile]);
 
   return (
-    <div 
+    <div
+      ref={containerRef}
       className={`${styles.container} ${isAnimated ? styles.animate : ''} ${dimmed ? styles.dimmed : ''}`}
-      style={{
-        '--orb1-x': `${orb1Pos.x}px`,
-        '--orb1-y': `${orb1Pos.y}px`,
-        '--orb2-x': `${orb2Pos.x}px`,
-        '--orb2-y': `${orb2Pos.y}px`,
-        '--grid-x': `${gridOffset.x}px`,
-        '--grid-y': `${gridOffset.y}px`
-      } as React.CSSProperties}
     >
-      {/* SVG 噪点纹理（GPGPU-free，一次性渲染） */}
       {!isMobile && (
         <div className={styles.noiseOverlay}>
           <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">

@@ -1,24 +1,24 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface AnimationFrameOptions {
   maxFps?: number;
   enabled?: boolean;
 }
 
+const MAX_DELTA = 50;
+
 export function useAnimationFrame(
   callback: (deltaTime: number, fps: number) => void,
   options: AnimationFrameOptions = {}
 ) {
   const { maxFps = 60, enabled = true } = options;
-  
-  const requestRef = useRef<number | undefined>(undefined);
-  const previousTimeRef = useRef<number | undefined>(undefined);
+
+  const requestRef = useRef<number>(0);
+  const previousTimeRef = useRef<number>(0);
   const callbackRef = useRef(callback);
-  const animateRef = useRef<(time: number) => void>((_) => {});
   const frameCountRef = useRef(0);
-  const lastFpsUpdateRef = useRef(0);
+  const fpsWindowStartRef = useRef(0);
   const currentFpsRef = useRef(60);
-  const enabledRef = useRef(enabled);
   const minFrameTime = 1000 / maxFps;
 
   useEffect(() => {
@@ -26,59 +26,49 @@ export function useAnimationFrame(
   }, [callback]);
 
   useEffect(() => {
-    enabledRef.current = enabled;
-  }, [enabled]);
+    if (!enabled) return;
 
-  const start = useCallback(() => {
-    if (requestRef.current) return;
-    previousTimeRef.current = performance.now();
-    requestRef.current = requestAnimationFrame(animateRef.current);
-  }, []);
+    let cancelled = false;
 
-  const stop = useCallback(() => {
-    if (requestRef.current) {
-      cancelAnimationFrame(requestRef.current);
-      requestRef.current = undefined;
-    }
-  }, []);
+    const frame = (time: number) => {
+      if (cancelled) return;
 
-  useEffect(() => {
-    animateRef.current = (time: number) => {
-      if (!enabledRef.current) {
-        requestRef.current = requestAnimationFrame(animateRef.current);
-        return;
+      if (previousTimeRef.current === 0) {
+        previousTimeRef.current = time;
+        fpsWindowStartRef.current = time;
+        frameCountRef.current = 0;
       }
 
-      if (previousTimeRef.current !== undefined) {
-        const deltaTime = time - previousTimeRef.current;
-        
-        if (deltaTime >= minFrameTime) {
-          frameCountRef.current++;
-          
-          if (time - lastFpsUpdateRef.current >= 1000) {
-            currentFpsRef.current = Math.round((frameCountRef.current * 1000) / (time - lastFpsUpdateRef.current));
-            frameCountRef.current = 0;
-            lastFpsUpdateRef.current = time;
-          }
-          
-          callbackRef.current(deltaTime, currentFpsRef.current);
-          previousTimeRef.current = time;
+      const deltaTime = time - previousTimeRef.current;
+
+      if (deltaTime >= minFrameTime) {
+        frameCountRef.current++;
+
+        const windowElapsed = time - fpsWindowStartRef.current;
+        if (windowElapsed >= 1000) {
+          currentFpsRef.current = Math.round(
+            (frameCountRef.current * 1000) / windowElapsed
+          );
+          frameCountRef.current = 0;
+          fpsWindowStartRef.current = time;
         }
-      } else {
+
+        callbackRef.current(Math.min(deltaTime, MAX_DELTA), currentFpsRef.current);
         previousTimeRef.current = time;
       }
-      
-      requestRef.current = requestAnimationFrame(animateRef.current);
+
+      requestRef.current = requestAnimationFrame(frame);
     };
 
-    requestRef.current = requestAnimationFrame(animateRef.current);
+    previousTimeRef.current = 0;
+    requestRef.current = requestAnimationFrame(frame);
 
     return () => {
+      cancelled = true;
       if (requestRef.current) {
         cancelAnimationFrame(requestRef.current);
+        requestRef.current = 0;
       }
     };
-  }, [minFrameTime]);
-
-  return { start, stop };
+  }, [enabled, minFrameTime]);
 }

@@ -1,183 +1,135 @@
-import { useRef, useEffect, useCallback, memo } from 'react';
+import { useRef, useEffect, memo } from 'react';
 import { useMousePositionRef } from '../../hooks/useMousePosition';
 import { useAnimationFrame } from '../../hooks/useAnimationFrame';
-
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  opacity: number;
-  life: number;
-  decay: number;
-  active: boolean;
-}
-
-class ParticlePool {
-  private pool: Particle[];
-  private activeCount: number;
-
-  constructor(size: number) {
-    this.pool = [];
-    this.activeCount = 0;
-    for (let i = 0; i < size; i++) {
-      this.pool.push(this.createInactiveParticle());
-    }
-  }
-
-  private createInactiveParticle(): Particle {
-    return {
-      x: 0,
-      y: 0,
-      vx: 0,
-      vy: 0,
-      size: 0,
-      opacity: 0,
-      life: 0,
-      decay: 0,
-      active: false,
-    };
-  }
-
-  acquire(x: number, y: number): Particle | null {
-    for (let i = 0; i < this.pool.length; i++) {
-      if (!this.pool[i].active) {
-        const p = this.pool[i];
-        p.x = x;
-        p.y = y;
-        p.vx = (Math.random() - 0.5) * 2;
-        p.vy = (Math.random() - 0.5) * 2;
-        p.size = Math.random() * 4 + 2;
-        p.opacity = Math.random() * 0.5 + 0.3;
-        p.life = 1;
-        p.decay = Math.random() * 0.02 + 0.01;
-        p.active = true;
-        this.activeCount++;
-        return p;
-      }
-    }
-    return null;
-  }
-
-  release(particle: Particle): void {
-    particle.active = false;
-    this.activeCount--;
-  }
-
-  getActiveParticles(): Particle[] {
-    return this.pool.filter(p => p.active);
-  }
-
-  getActiveCount(): number {
-    return this.activeCount;
-  }
-}
+import { usePerformance } from '../../context/PerformanceContext';
 
 interface CanvasParticleSystemProps {
-  maxParticles?: number;
   enabled?: boolean;
 }
 
-function CanvasParticleSystemComponent({
-  maxParticles = 100,
-  enabled = true,
-}: CanvasParticleSystemProps) {
+interface TrailState {
+  x: Float32Array;
+  y: Float32Array;
+  vx: Float32Array;
+  vy: Float32Array;
+  size: Float32Array;
+  life: Float32Array;
+  decay: Float32Array;
+  freeList: Int32Array;
+  freeCount: number;
+  capacity: number;
+  lastSpawn: number;
+}
+
+function createTrailState(capacity: number): TrailState {
+  const freeList = new Int32Array(capacity);
+  for (let i = 0; i < capacity; i++) freeList[i] = i;
+  return {
+    x: new Float32Array(capacity),
+    y: new Float32Array(capacity),
+    vx: new Float32Array(capacity),
+    vy: new Float32Array(capacity),
+    size: new Float32Array(capacity),
+    life: new Float32Array(capacity),
+    decay: new Float32Array(capacity),
+    freeList,
+    freeCount: capacity,
+    capacity,
+    lastSpawn: 0,
+  };
+}
+
+function CanvasParticleSystemComponent({ enabled = true }: CanvasParticleSystemProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useMousePositionRef();
-  const particlePoolRef = useRef<ParticlePool | null>(null);
-  const lastSpawnRef = useRef(0);
-  const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const offscreenCtxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const { tierConfig } = usePerformance();
 
-  const initOffscreenCanvas = useCallback((width: number, height: number) => {
-    offscreenCanvasRef.current = document.createElement('canvas');
-    offscreenCanvasRef.current.width = width;
-    offscreenCanvasRef.current.height = height;
-    offscreenCtxRef.current = offscreenCanvasRef.current.getContext('2d');
-  }, []);
+  const maxParticles = tierConfig.trailMaxParticles;
+  const spawnInterval = 50 / tierConfig.trailSpawnScale;
+
+  const stateRef = useRef<TrailState | null>(null);
+  if (stateRef.current === null || stateRef.current.capacity !== maxParticles) {
+    stateRef.current = createTrailState(maxParticles);
+  }
 
   useEffect(() => {
-    particlePoolRef.current = new ParticlePool(maxParticles);
-    if (canvasRef.current) {
-      initOffscreenCanvas(canvasRef.current.width, canvasRef.current.height);
-    }
-  }, [maxParticles, initOffscreenCanvas]);
-
-  const updateParticles = useCallback(() => {
-    const pool = particlePoolRef.current;
-    if (!pool) return;
-
-    const particles = pool.getActiveParticles();
-    for (const p of particles) {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.life -= p.decay;
-      p.opacity = p.life;
-
-      if (p.life <= 0) {
-        pool.release(p);
-      }
-    }
-  }, []);
-
-  const drawParticles = useCallback((ctx: CanvasRenderingContext2D) => {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    const pool = particlePoolRef.current;
-    if (!pool) return;
-
-    const particles = pool.getActiveParticles();
-    for (const p of particles) {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(0, 255, 157, ${p.opacity})`;
-      ctx.fill();
-    }
-  }, []);
-
-  useAnimationFrame(() => {
-    if (!enabled) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const pool = particlePoolRef.current;
-    if (!pool) return;
-
-    const mouse = mouseRef.current;
-    const now = Date.now();
-    if (now - lastSpawnRef.current > 50 && pool.getActiveCount() < maxParticles) {
-      pool.acquire(mouse.x, mouse.y);
-      lastSpawnRef.current = now;
-    }
-
-    updateParticles();
-    drawParticles(ctx);
-  });
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (canvasRef.current) {
-        canvasRef.current.width = window.innerWidth;
-        canvasRef.current.height = window.innerHeight;
-        initOffscreenCanvas(window.innerWidth, window.innerHeight);
-      }
+    const applySize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, tierConfig.dprCap);
+      canvas.width = Math.round(window.innerWidth * dpr);
+      canvas.height = Math.round(window.innerHeight * dpr);
+      canvas.getContext('2d')?.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
+    applySize();
+    window.addEventListener('resize', applySize);
+    return () => window.removeEventListener('resize', applySize);
+  }, [tierConfig.dprCap]);
 
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [initOffscreenCanvas]);
+  useAnimationFrame(
+    dt => {
+      if (!enabled) return;
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const s = stateRef.current;
+      const now = performance.now();
+      const step = dt / 1000;
+
+      if (now - s.lastSpawn >= spawnInterval && s.freeCount > 0) {
+        const idx = s.freeList[s.freeCount - 1];
+        s.freeCount--;
+        s.x[idx] = mouseRef.current.x;
+        s.y[idx] = mouseRef.current.y;
+        s.vx[idx] = (Math.random() - 0.5) * 120;
+        s.vy[idx] = (Math.random() - 0.5) * 120;
+        s.size[idx] = Math.random() * 3 + 1.5;
+        s.life[idx] = 1;
+        s.decay[idx] = 0.8 + Math.random() * 0.9;
+        s.lastSpawn = now;
+      }
+
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      ctx.fillStyle = 'rgb(0,255,157)';
+
+      for (let i = 0; i < s.capacity; i++) {
+        if (s.life[i] <= 0) continue;
+
+        s.x[i] += s.vx[i] * step;
+        s.y[i] += s.vy[i] * step;
+        s.life[i] -= s.decay[i] * step;
+
+        if (s.life[i] <= 0) {
+          s.life[i] = 0;
+          s.freeList[s.freeCount++] = i;
+          continue;
+        }
+
+        ctx.globalAlpha = s.life[i];
+        ctx.beginPath();
+        ctx.arc(s.x[i], s.y[i], s.size[i], 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    },
+    { enabled }
+  );
+
+  if (!enabled) return null;
 
   return (
     <canvas
       ref={canvasRef}
+      aria-hidden="true"
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
+        width: '100vw',
+        height: '100vh',
         pointerEvents: 'none',
         zIndex: 9999,
       }}

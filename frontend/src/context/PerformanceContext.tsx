@@ -1,65 +1,94 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  type ReactNode,
+} from 'react';
 import { useFpsMonitor } from '../hooks/useFpsMonitor';
+import {
+  TIER_CONFIG,
+  detectDeviceTier,
+  prefersReducedMotion,
+  type AdaptiveLevel,
+  type QualityPreference,
+  type TierConfig,
+} from '../utils/performanceTier';
 
 export interface PerformanceSettings {
   backgroundParticles: boolean;
+  particleConnections: boolean;
+  particleGlow: boolean;
   mouseFollower: boolean;
   canvasParticles: boolean;
   pageTransitions: boolean;
   reducedMotion: boolean;
+  qualityPreference: QualityPreference;
 }
 
-export type AdaptiveLevel = 'high' | 'medium' | 'low';
+const STORAGE_KEY = 'ps-student-catalog-performance';
 
 const DEFAULT_SETTINGS: PerformanceSettings = {
   backgroundParticles: true,
+  particleConnections: true,
+  particleGlow: true,
   mouseFollower: true,
   canvasParticles: true,
   pageTransitions: true,
   reducedMotion: false,
-};
-
-const STORAGE_KEY = 'ps-student-catalog-performance';
-
-const PARTICLE_MULTIPLIERS: Record<AdaptiveLevel, number> = {
-  high: 1.0,
-  medium: 0.7,
-  low: 0.5,
+  qualityPreference: 'auto',
 };
 
 function loadSettings(): PerformanceSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...DEFAULT_SETTINGS };
-    const parsed = JSON.parse(raw);
+    if (!raw) {
+      return { ...DEFAULT_SETTINGS, reducedMotion: prefersReducedMotion() };
+    }
+    const parsed = JSON.parse(raw) as Partial<PerformanceSettings>;
     return { ...DEFAULT_SETTINGS, ...parsed };
   } catch {
     return { ...DEFAULT_SETTINGS };
   }
 }
 
-interface PerformanceContextValue {
+const LEVEL_ORDER: AdaptiveLevel[] = ['low', 'medium', 'high'];
+
+interface SettingsContextValue {
   settings: PerformanceSettings;
   updateSetting: <K extends keyof PerformanceSettings>(
     key: K,
     value: PerformanceSettings[K]
   ) => void;
   resetSettings: () => void;
-  isLoaded: boolean;
-  currentFps: number;
+  deviceTier: AdaptiveLevel;
   adaptiveLevel: AdaptiveLevel;
-  particleCountMultiplier: number;
-  updateFps: (fps: number) => void;
+  effectiveTier: AdaptiveLevel;
+  tierConfig: TierConfig;
 }
 
-const PerformanceContext = createContext<PerformanceContextValue | null>(null);
+interface TelemetryContextValue {
+  currentFps: number;
+}
+
+const SettingsContext = createContext<SettingsContextValue | null>(null);
+const TelemetryContext = createContext<TelemetryContextValue>({ currentFps: 60 });
+
+const DOWNGRADE_SAMPLES = 3;
+const UPGRADE_SAMPLES = 4;
 
 export function PerformanceProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<PerformanceSettings>(loadSettings);
-  const [isLoaded, _setIsLoaded] = useState(true);
+  const [deviceTier] = useState<AdaptiveLevel>(detectDeviceTier);
+  const [adaptiveLevel, setAdaptiveLevel] = useState<AdaptiveLevel>(deviceTier);
   const [currentFps, setCurrentFps] = useState(60);
-  const [adaptiveLevel, setAdaptiveLevel] = useState<AdaptiveLevel>('high');
-  const lowFpsStartTimeRef = useRef<number | null>(null);
+
+  const levelRef = useRef(deviceTier);
+  const lowStreakRef = useRef(0);
+  const highStreakRef = useRef(0);
 
   useEffect(() => {
     try {
@@ -85,57 +114,91 @@ export function PerformanceProvider({ children }: { children: ReactNode }) {
   );
 
   const resetSettings = useCallback(() => {
-    setSettings({ ...DEFAULT_SETTINGS });
+    setSettings({ ...DEFAULT_SETTINGS, reducedMotion: prefersReducedMotion() });
   }, []);
 
-  const updateFps = useCallback((fps: number) => {
-    setCurrentFps(fps);
+  const handleFpsUpdate = useCallback(
+    (fps: number) => {
+      setCurrentFps(fps);
+      if (document.hidden) return;
 
-    const now = performance.now();
+      const levelIndex = LEVEL_ORDER.indexOf(levelRef.current);
 
-    if (fps < 30) {
-      if (lowFpsStartTimeRef.current === null) {
-        lowFpsStartTimeRef.current = now;
-      } else if (now - lowFpsStartTimeRef.current >= 5000) {
-        setAdaptiveLevel('low');
+      if (fps < 40) {
+        highStreakRef.current = 0;
+        lowStreakRef.current++;
+        if (
+          lowStreakRef.current >= DOWNGRADE_SAMPLES &&
+          levelIndex > 0
+        ) {
+          const next = LEVEL_ORDER[levelIndex - 1];
+          levelRef.current = next;
+          setAdaptiveLevel(next);
+          lowStreakRef.current = 0;
+        }
+      } else if (fps >= 55) {
+        lowStreakRef.current = 0;
+        highStreakRef.current++;
+        const capIndex = LEVEL_ORDER.indexOf(deviceTier);
+        if (
+          highStreakRef.current >= UPGRADE_SAMPLES &&
+          levelIndex < capIndex
+        ) {
+          const next = LEVEL_ORDER[levelIndex + 1];
+          levelRef.current = next;
+          setAdaptiveLevel(next);
+          highStreakRef.current = 0;
+        }
+      } else {
+        lowStreakRef.current = 0;
+        highStreakRef.current = 0;
       }
-    } else {
-      lowFpsStartTimeRef.current = null;
+    },
+    [deviceTier]
+  );
 
-      if (fps >= 50) {
-        setAdaptiveLevel('high');
-      } else if (fps >= 30) {
-        setAdaptiveLevel('medium');
-      }
-    }
-  }, []);
+  useFpsMonitor(handleFpsUpdate, 1000);
 
-  useFpsMonitor(updateFps, 1000);
+  const effectiveTier: AdaptiveLevel =
+    settings.qualityPreference === 'auto'
+      ? adaptiveLevel
+      : settings.qualityPreference;
 
-  const particleCountMultiplier = PARTICLE_MULTIPLIERS[adaptiveLevel];
+  const settingsValue = useMemo<SettingsContextValue>(
+    () => ({
+      settings,
+      updateSetting,
+      resetSettings,
+      deviceTier,
+      adaptiveLevel,
+      effectiveTier,
+      tierConfig: TIER_CONFIG[effectiveTier],
+    }),
+    [settings, updateSetting, resetSettings, deviceTier, adaptiveLevel, effectiveTier]
+  );
+
+  const telemetryValue = useMemo<TelemetryContextValue>(
+    () => ({ currentFps }),
+    [currentFps]
+  );
 
   return (
-    <PerformanceContext.Provider
-      value={{
-        settings,
-        updateSetting,
-        resetSettings,
-        isLoaded,
-        currentFps,
-        adaptiveLevel,
-        particleCountMultiplier,
-        updateFps,
-      }}
-    >
-      {children}
-    </PerformanceContext.Provider>
+    <SettingsContext.Provider value={settingsValue}>
+      <TelemetryContext.Provider value={telemetryValue}>
+        {children}
+      </TelemetryContext.Provider>
+    </SettingsContext.Provider>
   );
 }
 
-export function usePerformance(): PerformanceContextValue {
-  const ctx = useContext(PerformanceContext);
+export function usePerformance(): SettingsContextValue {
+  const ctx = useContext(SettingsContext);
   if (!ctx) {
     throw new Error('usePerformance must be used within <PerformanceProvider>');
   }
   return ctx;
+}
+
+export function usePerformanceTelemetry(): TelemetryContextValue {
+  return useContext(TelemetryContext);
 }
