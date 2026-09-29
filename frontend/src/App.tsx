@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { MouseFollower } from './components/animations/MouseFollower';
 import { ParticleNetwork } from './components/animations/ParticleNetwork';
+import { CanvasParticleSystem } from './components/animations/CanvasParticleSystem';
 import { PageTransitionWrapper } from './components/layout/PageTransition';
 import { PageLoader } from './components/ui/PageLoader';
 import { Home } from './pages/Home';
@@ -41,12 +42,17 @@ function AppInner() {
   const { settings } = usePerformance();
   const { isHovering } = useHover();
 
+  const animationsOn = !settings.reducedMotion;
+
   return (
     <HashRouter>
       <div style={{ margin: 0, padding: 0, position: 'relative' }}>
-        {settings.backgroundParticles && <ParticleNetwork dimmed={isHovering} />}
+        {animationsOn && settings.backgroundParticles && (
+          <ParticleNetwork dimmed={isHovering} />
+        )}
         <AnimatedApp />
-        {settings.mouseFollower && <MouseFollower />}
+        {animationsOn && settings.mouseFollower && <MouseFollower />}
+        {animationsOn && settings.canvasParticles && <CanvasParticleSystem />}
         <PerformancePanel />
       </div>
     </HashRouter>
