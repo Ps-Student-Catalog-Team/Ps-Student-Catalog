@@ -39,3 +39,15 @@
     transition: none !important;
   }
 }
+
+@media (max-width: 768px) {
+  .card3D {
+    padding: 18px;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .card3D {
+    transition: transform 0.15s ease-out;
+  }
+}

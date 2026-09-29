@@ -516,6 +516,217 @@
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
+
+        /* 宽表格横向滚动容器 */
+        .table-wrapper {
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table-wrapper table {
+            margin: 0;
+        }
+
+        /* 移动端目录抽屉控制元素，桌面端隐藏 */
+        .toc-toggle,
+        .toc-mask {
+            display: none;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            body {
+                display: block;
+                letter-spacing: 0.3px;
+            }
+
+            .page-layout {
+                flex-direction: column;
+                padding: 0;
+                gap: 0;
+            }
+
+            .fixed-buttons {
+                padding: 10px 16px;
+                gap: 10px;
+            }
+
+            .fixed-buttons .btn {
+                padding: 8px 16px;
+                font-size: 0.9em;
+                line-height: 1.4;
+            }
+
+            .markdown-container {
+                width: 100%;
+                margin-top: 72px;
+                padding: 18px 16px 84px;
+            }
+
+            .markdown-container h1,
+            .markdown-container h2,
+            .markdown-container h3 {
+                scroll-margin-top: 70px;
+            }
+
+            /* 关闭打字机与光标，允许长标题换行 */
+            .markdown-container h1 {
+                animation: none;
+                white-space: normal;
+                max-width: 100%;
+                overflow: visible;
+                border-right: none;
+                font-size: 1.45em;
+                line-height: 1.4;
+            }
+
+            .markdown-container h2 {
+                font-size: 1.25em;
+            }
+
+            .markdown-container h3 {
+                font-size: 1.1em;
+            }
+
+            .markdown-container p,
+            .markdown-container li {
+                font-size: 1em;
+                line-height: 1.75;
+            }
+
+            /* 移动端取消入场动画，避免内容长时间不可见 */
+            .markdown-container h1,
+            .markdown-container h2,
+            .markdown-container h3,
+            .markdown-container p,
+            .markdown-container li,
+            .markdown-container blockquote,
+            .markdown-container table,
+            .markdown-container img {
+                opacity: 1;
+                animation: none;
+                transform: none;
+            }
+
+            .markdown-container img {
+                max-width: 100%;
+                margin: 1rem auto;
+            }
+
+            .markdown-container img[src*=".gif"] {
+                max-width: 90%;
+            }
+
+            .markdown-container blockquote {
+                padding: 10px 12px;
+                margin: 1rem 0;
+            }
+
+            th, td {
+                padding: 0.6rem 0.7rem;
+            }
+
+            .code-block-wrapper {
+                padding: 0.7em 2.6em 0.7em 0.7em;
+                border-radius: 10px;
+            }
+
+            .copy-code-button {
+                padding: 0.4em 0.8em;
+                font-size: 0.78em;
+            }
+
+            /* 目录改为左侧抽屉 */
+            .toc-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: fixed;
+                right: 16px;
+                bottom: 20px;
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                background: rgba(42, 42, 42, 0.85);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border: 1.5px solid var(--accent-color);
+                color: var(--accent-color);
+                font-size: 20px;
+                line-height: 1;
+                cursor: pointer;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 255, 157, 0.15), 0 0 14px rgba(0, 255, 157, 0.25);
+                z-index: 1050;
+                transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, color 0.25s ease;
+                animation: tocFabPulse 3s ease-in-out infinite;
+            }
+
+            .toc-toggle:hover {
+                background: rgba(0, 255, 157, 0.12);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 20px rgba(0, 255, 157, 0.45);
+            }
+
+            .toc-toggle:active {
+                transform: translateY(0) scale(0.95);
+            }
+
+            .toc-toggle.open {
+                background: var(--accent-color);
+                color: var(--primary-color);
+                animation: none;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 22px rgba(0, 255, 157, 0.55);
+            }
+
+            @keyframes tocFabPulse {
+                0%, 100% { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 255, 157, 0.15), 0 0 10px rgba(0, 255, 157, 0.2); }
+                50% { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 255, 157, 0.25), 0 0 20px rgba(0, 255, 157, 0.45); }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .toc-toggle {
+                    animation: none;
+                }
+            }
+
+            .toc-mask {
+                display: block;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.55);
+                z-index: 1040;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.25s ease;
+            }
+
+            .toc-mask.show {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .toc-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 80%;
+                max-width: 300px;
+                height: 100%;
+                max-height: 100%;
+                margin: 0;
+                border-radius: 0;
+                border-right: 1px solid rgba(0, 255, 157, 0.35);
+                box-shadow: 0 0 40px rgba(0, 255, 157, 0.18), 8px 0 30px rgba(0, 0, 0, 0.5);
+                z-index: 1100;
+                transform: translateX(-100%);
+                transition: transform 0.25s ease;
+            }
+
+            .toc-sidebar.open {
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -523,6 +734,9 @@
     <a href="/index.html" class="btn">返回首页</a>
     <a href="javascript:history.back()" class="btn">返回</a>
   </div>
+
+  <button type="button" class="toc-toggle" id="tocToggle" aria-label="目录">📑</button>
+  <div class="toc-mask" id="tocMask"></div>
 
   <div class="page-layout">
     <aside class="toc-sidebar" id="tocSidebar">
@@ -638,6 +852,9 @@
                 // 生成目录
                 generateTOC();
 
+                // 宽表格包裹横向滚动容器
+                wrapTables();
+
                 // 添加复制按钮到代码块
                 setupCodeCopyButtons();
             } catch (error) {
@@ -656,6 +873,8 @@
 
             if (headings.length === 0) {
                 document.getElementById('tocSidebar').style.display = 'none';
+                const toggle = document.getElementById('tocToggle');
+                if (toggle) toggle.style.display = 'none';
                 return;
             }
 
@@ -678,6 +897,7 @@
                     // 在通过目录定位时移除入场动画类，避免每次滚动到新标题时触发逐项动画
                     const contentDiv = document.getElementById('content');
                     if (contentDiv && contentDiv.classList) contentDiv.classList.remove('animate');
+                    closeTocDrawer();
                     heading.scrollIntoView({ behavior: 'smooth' });
                     history.pushState(null, null, `#${id}`);
                 });
@@ -720,6 +940,65 @@
 
             headings.forEach(heading => observer.observe(heading));
         }
+
+        // 为宽表格包裹横向滚动容器
+        function wrapTables() {
+            const contentDiv = document.getElementById('content');
+            if (!contentDiv) return;
+
+            contentDiv.querySelectorAll('table').forEach(table => {
+                if (table.closest('.table-wrapper')) return;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-wrapper';
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            });
+        }
+
+        // 移动端目录抽屉
+        function openTocDrawer() {
+            document.getElementById('tocSidebar').classList.add('open');
+            document.getElementById('tocMask').classList.add('show');
+            const toggle = document.getElementById('tocToggle');
+            if (toggle) {
+                toggle.classList.add('open');
+                toggle.textContent = '✕';
+            }
+        }
+
+        function closeTocDrawer() {
+            const sidebar = document.getElementById('tocSidebar');
+            const mask = document.getElementById('tocMask');
+            if (sidebar) sidebar.classList.remove('open');
+            if (mask) mask.classList.remove('show');
+            const toggle = document.getElementById('tocToggle');
+            if (toggle) {
+                toggle.classList.remove('open');
+                toggle.textContent = '📑';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('tocToggle');
+            const mask = document.getElementById('tocMask');
+            if (toggle) {
+                toggle.addEventListener('click', () => {
+                    const sidebar = document.getElementById('tocSidebar');
+                    if (sidebar.classList.contains('open')) {
+                        closeTocDrawer();
+                    } else {
+                        openTocDrawer();
+                    }
+                });
+            }
+            if (mask) mask.addEventListener('click', closeTocDrawer);
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeTocDrawer();
+            });
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) closeTocDrawer();
+            });
+        });
 
         // 代码块复制按钮
         async function copyTextToClipboard(text) {

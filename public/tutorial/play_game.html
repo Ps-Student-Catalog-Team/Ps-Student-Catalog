@@ -376,25 +376,64 @@
 
         /* 响应式优化 */
         @media (max-width: 768px) {
+            body {
+                display: block;
+                padding: 1rem 0;
+            }
+
             .container {
-                padding: 1.5rem;
+                padding: 1.25rem 1rem;
+                margin-bottom: 1rem;
             }
-            
+
             h1 {
-                font-size: 2rem;
+                font-size: 1.55rem;
+                line-height: 1.4;
+                white-space: normal;
+                max-width: 100%;
+                overflow: visible;
+                border-right: none;
+                animation: none;
             }
-            
+
+            h2 {
+                font-size: 1.35rem;
+            }
+
+            h3 {
+                font-size: 1.15rem;
+            }
+
+            h1, h2, h3, h4, p, pre, blockquote, table, ul, ol,
+            .important-note, .server-info, .step, .warning,
+            .contact-info, .author-info, .image-placeholder {
+                opacity: 1;
+                animation: none;
+                transform: none;
+            }
+
+            .step {
+                padding: 1rem;
+            }
+
             table {
                 font-size: 0.9rem;
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
-            
+
+            th, td {
+                padding: 0.6rem 0.7rem;
+            }
+
             .image-placeholder {
                 height: auto;
-                min-height: 150px;
+                min-height: 0;
             }
-            
+
             img {
-                max-width: 95%;
+                max-width: 100%;
             }
         }
     </style>

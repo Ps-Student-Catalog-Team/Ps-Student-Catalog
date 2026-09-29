@@ -59,22 +59,12 @@ export function RippleButton({
     [disabled, createRipple]
   );
 
-  const handleTouchEnd = useCallback(
-    () => {
-      if (disabled) return;
-      onClick?.();
-    },
-    [onClick, disabled]
-  );
-
   return (
     <motion.button
       type={type}
       className={`${styles.rippleButton} ${className}`}
       onClick={handleClick}
       onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onTouchCancel={() => {}}
       disabled={disabled}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
