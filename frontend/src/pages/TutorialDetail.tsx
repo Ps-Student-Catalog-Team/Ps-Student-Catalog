@@ -33,6 +33,7 @@ export default function TutorialDetail() {
   const [isContentVisible, setIsContentVisible] = useState(false);
   const [pageTitle, setPageTitle] = useState('');
   const [animateOnLoad, setAnimateOnLoad] = useState(true);
+  const [isTocOpen, setIsTocOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const prevFileRef = useRef<string | null>(null);
 
@@ -135,6 +136,7 @@ export default function TutorialDetail() {
     if (file !== prevFileRef.current) {
       setLoading(true);
       setIsContentVisible(false);
+      setIsTocOpen(false);
       fetchMarkdown();
     }
   }, [file, sanitizeFileName]);
@@ -275,8 +277,11 @@ export default function TutorialDetail() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && selectedImage) {
-        handleImageOverlayClick();
+      if (e.key === 'Escape') {
+        if (selectedImage) {
+          handleImageOverlayClick();
+        }
+        setIsTocOpen(false);
       }
       if (e.key === 'j' || e.key === 'J') {
         window.scrollBy({ top: 100, behavior: 'smooth' });
@@ -289,6 +294,14 @@ export default function TutorialDetail() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedImage]);
+
+  useEffect(() => {
+    if (!isTocOpen) return;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isTocOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -412,8 +425,8 @@ export default function TutorialDetail() {
 
           <AnimatePresence>
             {headings.length > 0 && (
-              <motion.aside 
-                className="toc-sidebar"
+              <motion.aside
+                className={`toc-sidebar ${isTocOpen ? 'open' : ''}`}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
@@ -424,18 +437,29 @@ export default function TutorialDetail() {
                   <div className="toc-progress">
                     进度 {scrollProgress.toFixed(0)}%
                   </div>
+                  <button
+                    className="toc-close"
+                    onClick={() => setIsTocOpen(false)}
+                    aria-label="关闭目录"
+                  >
+                    ✕
+                  </button>
                 </div>
                 <div className="toc-list">
                   {headings.map((heading) => (
                     <motion.div
                       key={heading.id}
-                      onClick={() => scrollToHeading(heading.id)}
+                      onClick={() => {
+                        scrollToHeading(heading.id);
+                        setIsTocOpen(false);
+                      }}
                       className={`toc-item toc-h${heading.level} ${activeHeading === heading.id ? 'active' : ''}`}
                       role="button"
                       tabIndex={0}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           scrollToHeading(heading.id);
+                          setIsTocOpen(false);
                         }
                       }}
                       whileHover={{ x: 4 }}
@@ -450,6 +474,41 @@ export default function TutorialDetail() {
             )}
           </AnimatePresence>
         </div>
+
+        <AnimatePresence>
+          {isTocOpen && (
+            <motion.div
+              className="toc-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setIsTocOpen(false)}
+            />
+          )}
+        </AnimatePresence>
+
+        {headings.length > 0 && (
+          <button
+            className="toc-fab"
+            onClick={() => setIsTocOpen(true)}
+            aria-label="查看目录"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="4" y1="12" x2="20" y2="12" />
+              <line x1="4" y1="18" x2="14" y2="18" />
+            </svg>
+          </button>
+        )}
 
         <AnimatePresence>
           {showBackToTop && (
@@ -1140,6 +1199,18 @@ export default function TutorialDetail() {
           border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        .toc-close {
+          display: none;
+        }
+
+        .toc-overlay {
+          display: none;
+        }
+
+        .toc-fab {
+          display: none;
+        }
+
         .loading-container,
         .error-container {
           min-height: 100vh;
@@ -1212,7 +1283,7 @@ export default function TutorialDetail() {
         @media (max-width: 900px) {
           .page-layout {
             flex-direction: column;
-            padding: 70px 16px 16px;
+            padding: 76px 14px 20px;
             gap: 20px;
           }
 
@@ -1221,47 +1292,155 @@ export default function TutorialDetail() {
           }
 
           .toc-sidebar {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: auto;
+            bottom: 0;
             width: 100%;
-            position: relative;
-            top: 0;
-            max-height: 220px;
-            order: -1;
+            margin: 0;
+            max-height: 72vh;
+            border-radius: 18px 18px 0 0;
+            transform: translateY(calc(100% + 24px)) !important;
+            transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1) !important;
+            z-index: 1100;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+          }
+
+          .toc-sidebar.open {
+            transform: translateY(0) !important;
+          }
+
+          .toc-sidebar::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.25);
+            margin: 10px auto 0;
+            flex-shrink: 0;
           }
 
           .toc-header {
-            padding: 16px 18px 10px;
+            padding: 14px 48px 10px 20px;
+          }
+
+          .toc-close {
+            display: flex;
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            width: 30px;
+            height: 30px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.06);
+            color: #aaa;
+            font-size: 0.8rem;
+            cursor: pointer;
           }
 
           .toc-item {
-            padding: 7px 18px;
-            font-size: 0.82em;
+            padding: 10px 20px;
+            font-size: 0.9em;
           }
 
           .toc-h2 {
-            padding-left: 32px;
+            padding-left: 34px;
           }
 
           .toc-h3 {
-            padding-left: 44px;
+            padding-left: 48px;
+          }
+
+          .toc-overlay {
+            display: block;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(2px);
+            z-index: 1050;
+            cursor: pointer;
+          }
+
+          .toc-fab {
+            display: flex;
+            position: fixed;
+            right: 20px;
+            bottom: 82px;
+            width: 46px;
+            height: 46px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0, 255, 157, 0.2), rgba(0, 169, 255, 0.2));
+            border: 1px solid rgba(0, 255, 157, 0.4);
+            color: #00ff9d;
+            cursor: pointer;
+            z-index: 999;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            -webkit-tap-highlight-color: transparent;
           }
 
           .markdown-container {
-            padding: 20px;
+            padding: 20px 18px;
+          }
+
+          .markdown-container h1,
+          .markdown-container h2,
+          .markdown-container h3,
+          .markdown-container h4,
+          .markdown-container h5,
+          .markdown-container h6 {
+            scroll-margin-top: 80px;
           }
 
           .tutorial-title {
             font-size: 1.5em;
-            padding: 18px 22px;
+            padding: 18px 20px;
           }
 
           .markdown-container img {
-            max-width: 95%;
+            max-width: 100%;
+            margin: 1.2rem auto;
+          }
+
+          .markdown-container :not(pre) > code {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+          }
+
+          .markdown-container ul,
+          .markdown-container ol {
+            padding-left: 1.4rem;
+          }
+
+          .markdown-container blockquote {
+            padding: 14px 16px 14px 18px;
+            margin: 1.2rem 0;
+          }
+
+          .markdown-container table {
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            font-size: 0.88em;
+          }
+
+          .markdown-container th,
+          .markdown-container td {
+            padding: 10px 12px;
+            white-space: normal;
           }
 
           .fixed-buttons {
             padding: 10px 12px;
             gap: 10px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
           }
 
           .fixed-buttons button {
@@ -1300,7 +1479,7 @@ export default function TutorialDetail() {
 
           .code-block-wrapper {
             padding: 3em 0.8em 0.8em 0.8em;
-            font-size: 0.88em;
+            font-size: 13px;
           }
 
           .copy-code-button {
@@ -1308,17 +1487,94 @@ export default function TutorialDetail() {
             font-size: 0.75em;
           }
 
-          .markdown-container table {
-            font-size: 0.88em;
+          .img-overlay {
+            z-index: 1200;
           }
 
-          .markdown-container th, 
-          .markdown-container td {
-            padding: 0.8rem;
+          .img-overlay img {
+            max-width: 96%;
+            max-height: 90%;
           }
 
           .keyboard-hints {
             display: none;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .page-layout {
+            padding: 70px 10px 16px;
+          }
+
+          .markdown-container {
+            padding: 16px 14px;
+            border-radius: 12px;
+          }
+
+          .tutorial-title {
+            font-size: 1.35em;
+            padding: 14px 16px;
+            border-radius: 12px;
+          }
+
+          .markdown-container h1 {
+            font-size: 1.35em;
+          }
+
+          .markdown-container h2 {
+            font-size: 1.2em;
+          }
+
+          .markdown-container h3 {
+            font-size: 1.08em;
+          }
+
+          .markdown-container p,
+          .markdown-container li {
+            line-height: 1.7;
+          }
+
+          .markdown-container ul,
+          .markdown-container ol {
+            padding-left: 1.2rem;
+          }
+
+          .markdown-container img {
+            margin: 1rem auto;
+          }
+
+          .fixed-buttons {
+            padding: 8px 10px;
+            gap: 8px;
+          }
+
+          .fixed-buttons button {
+            padding: 6px 12px !important;
+            font-size: 0.72rem !important;
+          }
+
+          .code-block-wrapper {
+            padding: 2.8em 0.7em 0.7em 0.7em;
+            font-size: 12px;
+          }
+
+          .back-to-top-button {
+            bottom: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            font-size: 1.1rem;
+          }
+
+          .toc-fab {
+            right: 16px;
+            bottom: 72px;
+            width: 42px;
+            height: 42px;
+          }
+
+          .copy-code-button {
+            padding: 0.3em 0.7em;
           }
         }
       `}</style>

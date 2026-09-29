@@ -56,6 +56,9 @@ export function Tutorials() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [isKeyboardNav, setIsKeyboardNav] = useState(false);
+  const [isTouchDevice] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(hover: none), (pointer: coarse)').matches
+  );
   const searchInputRef = useRef<HTMLInputElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -112,6 +115,7 @@ export function Tutorials() {
   return (
     <PageTransition>
       <div
+        className="tutorials-page"
         style={{
           minHeight: '100vh',
           padding: '40px 20px',
@@ -120,7 +124,7 @@ export function Tutorials() {
       >
         <RippleButton
           onClick={() => navigate('/')}
-          className="fixed top-5 left-5 z-50"
+          className="tutorials-back"
         >
           返回首页
         </RippleButton>
@@ -129,6 +133,7 @@ export function Tutorials() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="tutorials-title"
           style={{
             fontFamily: 'Segoe UI, PingFang SC, Hiragino Sans GB, Arial, sans-serif',
             fontSize: 'clamp(1.5rem, 6vw, 2.5rem)',
@@ -146,6 +151,7 @@ export function Tutorials() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+          className="tutorials-controls"
           style={{
             maxWidth: '800px',
             margin: '0 auto 30px',
@@ -165,9 +171,10 @@ export function Tutorials() {
             <input
               ref={searchInputRef}
               type="text"
-              placeholder="搜索教程... (按 / 聚焦)"
+              placeholder={isTouchDevice ? '搜索教程...' : '搜索教程... (按 / 聚焦)'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              className="tutorials-search-input"
               style={{
                 width: '100%',
                 padding: '14px 20px 14px 48px',
@@ -241,6 +248,7 @@ export function Tutorials() {
           </div>
 
           <div
+            className="tutorials-categories"
             style={{
               display: 'flex',
               flexWrap: 'wrap',
@@ -254,6 +262,7 @@ export function Tutorials() {
                 onClick={() => setSelectedCategory(category)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                className="tutorials-category-btn"
                 style={{
                   padding: '10px 20px',
                   fontSize: '0.9rem',
@@ -314,6 +323,7 @@ export function Tutorials() {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
+            className="tutorials-grid"
             style={{
               maxWidth: '1200px',
               margin: '0 auto',
@@ -331,16 +341,18 @@ export function Tutorials() {
                   cardRefs.current[index] = el;
                 }}
                 tabIndex={-1}
+                className="tutorial-card-col"
                 style={{
                   outline: 'none',
                 }}
               >
                 <Link
                   to={`/tutorial/${tutorial.file}`}
+                  className="tutorial-card-link"
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
                   <Card3D
-                    className="w-full h-full cursor-pointer"
+                    className="tutorial-card"
                     glowColor={
                       isKeyboardNav && selectedIndex === index
                         ? 'rgba(0, 169, 255, 0.5)'
@@ -443,6 +455,7 @@ export function Tutorials() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
+          className="tutorials-hints"
           style={{
             textAlign: 'center',
             marginTop: '40px',
@@ -453,6 +466,84 @@ export function Tutorials() {
         >
           <p>使用 J/K 键导航，Enter 进入教程，/ 搜索，Esc 退出</p>
         </motion.div>
+
+        <style>{`
+          .tutorials-back {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 50;
+          }
+
+          .tutorial-card-col {
+            display: flex;
+          }
+
+          .tutorial-card-link {
+            display: flex;
+            width: 100%;
+          }
+
+          .tutorial-card-link > div {
+            width: 100%;
+          }
+
+          @media (max-width: 768px) {
+            .tutorials-page {
+              padding: 12px 12px 32px !important;
+            }
+
+            .tutorials-back {
+              top: 12px;
+              left: 12px;
+            }
+
+            .tutorials-title {
+              padding-top: 72px !important;
+              margin-bottom: 16px !important;
+            }
+
+            .tutorials-controls {
+              gap: 14px !important;
+              padding: 0 4px !important;
+              margin-bottom: 22px !important;
+            }
+
+            .tutorials-search-input {
+              font-size: 16px !important;
+              padding: 12px 16px 12px 44px !important;
+            }
+
+            .tutorials-categories {
+              gap: 8px !important;
+            }
+
+            .tutorials-category-btn {
+              padding: 8px 14px !important;
+              font-size: 0.82rem !important;
+            }
+
+            .tutorials-grid {
+              gap: 14px !important;
+              padding: 0 4px !important;
+            }
+
+            .tutorials-hints {
+              display: none;
+            }
+          }
+
+          @media (max-width: 380px) {
+            .tutorials-page {
+              padding-left: 8px !important;
+              padding-right: 8px !important;
+            }
+
+            .tutorials-category-btn {
+              padding: 7px 12px !important;
+            }
+          }
+        `}</style>
       </div>
     </PageTransition>
   );
