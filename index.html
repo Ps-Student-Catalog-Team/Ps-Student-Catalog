@@ -292,6 +292,222 @@
             transform: scale(1.5);
         }
 
+        /* 学生目录3.0 引导页 */
+        .v3-guide-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 12, 0.7);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            will-change: opacity;
+        }
+
+        .v3-guide-modal.show {
+            opacity: 1;
+        }
+
+        .v3-guide-content {
+            position: relative;
+            width: 90%;
+            max-width: 520px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 30px 28px 24px;
+            border-radius: 14px;
+            border: 1px solid rgba(0, 255, 157, 0.35);
+            background: linear-gradient(160deg, rgba(0, 45, 38, 0.96), rgba(0, 24, 25, 0.96));
+            box-shadow: 0 8px 40px rgba(0, 255, 157, 0.15);
+            color: var(--text-color);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(24px) scale(0.97);
+            transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.35s ease;
+            will-change: transform, opacity;
+        }
+
+        .v3-guide-modal.show .v3-guide-content {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .v3-guide-close {
+            position: absolute;
+            top: 10px;
+            right: 14px;
+            background: transparent;
+            border: none;
+            color: #888;
+            font-size: 1.5em;
+            line-height: 1;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .v3-guide-close:hover {
+            color: var(--accent-color);
+        }
+
+        .v3-guide-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 999px;
+            background: var(--accent-color);
+            color: #00251a;
+            font-size: 0.68em;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .v3-guide-title {
+            margin: 14px 0 4px;
+            font-size: 1.9em;
+        }
+
+        .v3-guide-version {
+            color: var(--accent-color);
+        }
+
+        .v3-guide-subtitle {
+            color: rgba(0, 255, 157, 0.8);
+            font-size: 0.95em;
+            margin-bottom: 12px;
+        }
+
+        .v3-guide-desc {
+            font-size: 0.88em;
+            color: #b8c4bf;
+            line-height: 1.7;
+        }
+
+        .v3-feature-list {
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+        }
+
+        .v3-feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: rgba(0, 255, 157, 0.05);
+            border: 1px solid rgba(0, 255, 157, 0.15);
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            will-change: transform, opacity;
+        }
+
+        .v3-guide-modal.show .v3-feature-item {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .v3-guide-modal.show .v3-feature-item:nth-child(1) { transition-delay: 0.08s; }
+        .v3-guide-modal.show .v3-feature-item:nth-child(2) { transition-delay: 0.16s; }
+
+        .v3-feature-icon {
+            flex: 0 0 36px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: rgba(0, 255, 157, 0.12);
+            color: var(--accent-color);
+        }
+
+        .v3-feature-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .v3-feature-text h3 {
+            margin: 0 0 4px;
+            font-size: 1em;
+            color: var(--accent-color);
+        }
+
+        .v3-feature-text p {
+            margin: 0;
+            font-size: 0.82em;
+            line-height: 1.6;
+            color: #b8c4bf;
+        }
+
+        .v3-guide-notice {
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            background: rgba(255, 193, 7, 0.08);
+            border: 1px solid rgba(255, 193, 7, 0.35);
+            color: #ffc107;
+            font-size: 0.8em;
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        .v3-guide-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .v3-btn {
+            padding: 10px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.92em;
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .v3-btn-ghost {
+            background: transparent;
+            border: 1px solid #5a6660;
+            color: var(--text-color);
+        }
+
+        .v3-btn-ghost:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .v3-btn-primary {
+            background: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            color: #00251a;
+            font-weight: 600;
+        }
+
+        .v3-btn-primary:hover {
+            background: #00cc80;
+            box-shadow: 0 4px 15px rgba(0, 255, 157, 0.35);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .v3-guide-modal,
+            .v3-guide-content,
+            .v3-feature-item {
+                transition: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
         @media (max-width: 640px) {
             .mouse-effect-toggle {
                 bottom: 50px !important;
@@ -318,6 +534,43 @@
                 <!--p>或联系管理员邮箱classicmcnet@outlook.com最迟在3个工作日内回复</p-->
                 <p style="font-size: 0.8em; margin-top: 10px;color:rgb(8, 255, 102)"><i>本网站仅向学生提供服务<br>使用服务产生的一切后果由使用者承担</i></p>
                 <button class="btn-accept" onclick="hideAnnouncementModal()">确认</button>
+            </div>
+        </div>
+        <!-- 学生目录3.0 引导页 -->
+        <div class="v3-guide-modal" id="v3GuideModal" onclick="if(event.target===this)closeV3Guide()">
+            <div class="v3-guide-content">
+                <button type="button" class="v3-guide-close" onclick="closeV3Guide()" aria-label="关闭引导页">&times;</button>
+                <div class="v3-guide-badge">预览版 PREVIEW</div>
+                <h2 class="v3-guide-title">学生目录 <span class="v3-guide-version">3.0</span></h2>
+                <p class="v3-guide-subtitle">全新一代学生目录</p>
+                <p class="v3-guide-desc">学生目录3.0 基于全新技术架构重构，在保留 2.0 全部服务的基础上，带来焕然一新的使用体验。</p>
+                <div class="v3-feature-list">
+                    <div class="v3-feature-item">
+                        <span class="v3-feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="1.6"/><circle cx="17" cy="9.5" r="1.6"/><circle cx="17" cy="14.5" r="1.6"/><circle cx="12" cy="18" r="1.6"/><circle cx="7" cy="14.5" r="1.6"/><circle cx="7" cy="9.5" r="1.6"/></svg>
+                        </span>
+                        <div class="v3-feature-text">
+                            <h3>优化的视觉设计</h3>
+                            <p>采用全新界面设计语言，统一的配色、排版与组件细节，视觉层次更清晰，浏览体验更舒适。</p>
+                        </div>
+                    </div>
+                    <div class="v3-feature-item">
+                        <span class="v3-feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+                        </span>
+                        <div class="v3-feature-text">
+                            <h3>增强的动画表现效果</h3>
+                            <p>页面切换与交互动画全面升级，过渡更顺滑、反馈更灵动，操作更具沉浸感。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="v3-guide-notice">
+                    <strong>性能提示：</strong>学生目录3.0 目前仍处于预览阶段，性能优化尚不完善。在部分设备或复杂动画场景下，可能出现加载偏慢、画面卡顿等情况，相关性能表现我们将持续记录与优化。
+                </div>
+                <div class="v3-guide-actions">
+                    <button type="button" class="v3-btn v3-btn-ghost" onclick="closeV3Guide()">暂不体验</button>
+                    <button type="button" class="v3-btn v3-btn-primary" onclick='location.href=("http://10.88.202.78:3132/")'>前往体验</button>
+                </div>
             </div>
         </div>
 
@@ -352,7 +605,7 @@
                 <button class="nav-button" onclick='location.href=("http://10.88.202.78:5244")'>共享目录</button>
                 <button class="nav-button" onclick="navigateToTools()">更多工具</button>
                 <button class="nav-button" onclick="navigateToAbout()">关于</button>
-                <button class="nav-button" onclick='location.href=("http://10.88.202.78:8000")'>千问大模型</button>
+                <button class="nav-button" onclick="openV3Guide()">体验新版教室目录</button>
                 <button class="nav-button" onclick='location.href=("http://10.88.202.78:30000/")'>音乐搜索器</button>
 
                 <div style="text-align: center; margin-top: 10px;">
@@ -550,7 +803,7 @@
             <div class="tutorial-card">
                 <h3>AI大模型</h3>
                 <p>和神入AI聊聊吧！</p>
-                <a href="10.88.202.78:8000" class="btn btn-outline-primary">进入</a>
+                <a href="http://10.88.202.78:8000" class="btn btn-outline-primary">进入</a>
             </div>
             
             <!--点击后显示二级工具视图 -->
@@ -970,6 +1223,58 @@
         document.getElementById('updateModal').style.display = 'none';
     }
 
+    // ========== 学生目录3.0 引导页 ==========
+    var v3GuideOpen = false;
+    var V3_GUIDE_PERF_KEY = 'v3GuidePerfLog';
+
+    function openV3Guide() {
+        if (v3GuideOpen) return;
+        v3GuideOpen = true;
+
+        performance.clearMarks();
+        performance.clearMeasures();
+        performance.mark('v3guide-click');
+
+        var modal = document.getElementById('v3GuideModal');
+        modal.style.display = 'flex';
+        void modal.offsetHeight;
+        modal.classList.add('show');
+        performance.mark('v3guide-shown');
+
+        performance.measure('v3Guide 点击到显示', 'v3guide-click', 'v3guide-shown');
+
+        var record = { time: new Date().toISOString() };
+        performance.getEntriesByType('measure').forEach(function(m) {
+            if (m.name.indexOf('v3Guide') === 0) {
+                record[m.name] = Math.round(m.duration * 100) / 100;
+                console.debug('[性能记录]', m.name + ':', m.duration.toFixed(2), 'ms');
+            }
+        });
+
+        try {
+            var log = JSON.parse(localStorage.getItem(V3_GUIDE_PERF_KEY) || '[]');
+            log.push(record);
+            localStorage.setItem(V3_GUIDE_PERF_KEY, JSON.stringify(log.slice(-20)));
+        } catch (e) {}
+
+        requestAnimationFrame(function() {
+            performance.mark('v3guide-firstframe');
+            performance.measure('v3Guide 显示到首帧', 'v3guide-shown', 'v3guide-firstframe');
+            var entry = performance.getEntriesByName('v3Guide 显示到首帧')[0];
+            if (entry) console.debug('[性能记录]', entry.name + ':', entry.duration.toFixed(2), 'ms');
+        });
+    }
+
+    function closeV3Guide() {
+        if (!v3GuideOpen) return;
+        v3GuideOpen = false;
+        var modal = document.getElementById('v3GuideModal');
+        modal.classList.remove('show');
+        setTimeout(function() {
+            if (!v3GuideOpen) modal.style.display = 'none';
+        }, 350);
+    }
+
     // ========== 初始化 ==========
     document.addEventListener('DOMContentLoaded', function() {
         showAnnouncementModal();
@@ -979,7 +1284,10 @@
         });
 
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeModal();
+            if (e.key === 'Escape') {
+                closeModal();
+                closeV3Guide();
+            }
             if (e.key === 'Enter' && document.getElementById('passwordModal').style.display === 'block') submitPassword();
         });
 
