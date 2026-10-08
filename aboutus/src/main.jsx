@@ -17,7 +17,7 @@ const members = [
     details: [
       "你好呀，我是悦笔，2026 届毕业生，也是学生目录项目创建者之一。",
       "我热衷于探索计算机领域的知识，尤其喜欢 C++ 和 Web 开发，也对区块链、人工智能与计算机网络保持实践和兴趣。这个网站由我独立开发。",
-      "是一个旅行者、开拓者、探索者、绳匠。开发过各类软件项目，欢迎访问 GitHub 主页交流。",
+      "是旅行者、开拓者、探索者、绳匠q(≧▽≦q)。开发过各类软件项目，欢迎来访问 GitHub 主页交流。",
       "如需联系，欢迎发邮件；邮件回复可能稍慢，但我会及时查看。",
     ],
     links: [
@@ -372,7 +372,7 @@ function App() {
           <a href="#about" onClick={() => setMenuOpen(false)}>关于我们</a>
           <a href="#team" onClick={() => setMenuOpen(false)}>开发成员</a>
           <a href="#contact" onClick={() => setMenuOpen(false)}>联系</a>
-          <a className="nav-home" href="/index.html">返回首页 <span aria-hidden="true">↗</span></a>
+          <a className="nav-home" href="http://10.88.202.78">返回首页 <span aria-hidden="true">↗</span></a>
         </nav>
       </header>
 
