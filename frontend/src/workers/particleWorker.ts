@@ -65,6 +65,8 @@ let head = new Int32Array(0);
 let next = new Int32Array(0);
 let pairBuf = new Int16Array(0);
 let pairAlphaBuf = new Uint8Array(0);
+let mouseCandidateIndices = new Int16Array(0);
+let mouseCandidateDistances = new Float64Array(0);
 let cols = 0;
 let rows = 0;
 
@@ -79,6 +81,8 @@ function initParticles(newCount: number, w: number, h: number) {
   pos = new Float32Array(count * 2);
   vel = new Float32Array(count * 2);
   next = new Int32Array(count);
+  mouseCandidateIndices = new Int16Array(count);
+  mouseCandidateDistances = new Float64Array(count);
 
   for (let i = 0; i < count; i++) {
     pos[i * 2] = Math.random() * w;
@@ -180,20 +184,35 @@ function buildFrame(): ParticleWorkerFrame {
   const mouseAlpha = new Uint8Array(mouseLinks);
 
   if (pointer.active && mouseLinks > 0) {
-    const candidates: Array<{ i: number; d: number }> = [];
+    let candidateCount = 0;
     for (let i = 0; i < count; i++) {
       const dx = pointer.x - pos[i * 2];
       const dy = pointer.y - pos[i * 2 + 1];
       const distSq = dx * dx + dy * dy;
       if (distSq < maxDistSq) {
-        candidates.push({ i, d: Math.sqrt(distSq) });
+        const distance = Math.sqrt(distSq);
+        let insertAt = 0;
+        while (
+          insertAt < candidateCount &&
+          mouseCandidateDistances[insertAt] <= distance
+        ) {
+          insertAt++;
+        }
+        if (insertAt < mouseLinks) {
+          const newCount = Math.min(candidateCount + 1, mouseLinks);
+          for (let j = newCount - 1; j > insertAt; j--) {
+            mouseCandidateIndices[j] = mouseCandidateIndices[j - 1];
+            mouseCandidateDistances[j] = mouseCandidateDistances[j - 1];
+          }
+          mouseCandidateIndices[insertAt] = i;
+          mouseCandidateDistances[insertAt] = distance;
+          candidateCount = newCount;
+        }
       }
     }
-    candidates.sort((a, b) => a.d - b.d);
-    const n = Math.min(mouseLinks, candidates.length);
-    for (let k = 0; k < n; k++) {
-      mouse[k] = candidates[k].i;
-      mouseAlpha[k] = ((1 - candidates[k].d / connectionDistance) * 255) | 0;
+    for (let k = 0; k < candidateCount; k++) {
+      mouse[k] = mouseCandidateIndices[k];
+      mouseAlpha[k] = ((1 - mouseCandidateDistances[k] / connectionDistance) * 255) | 0;
       mouseCount++;
     }
   }
