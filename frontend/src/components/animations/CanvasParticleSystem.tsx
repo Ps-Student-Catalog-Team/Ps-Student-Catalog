@@ -15,6 +15,9 @@ interface TrailState {
   size: Float32Array;
   life: Float32Array;
   decay: Float32Array;
+  renderedX: Float32Array;
+  renderedY: Float32Array;
+  wasDrawn: Uint8Array;
   freeList: Int32Array;
   freeCount: number;
   capacity: number;
@@ -32,6 +35,9 @@ function createTrailState(capacity: number): TrailState {
     size: new Float32Array(capacity),
     life: new Float32Array(capacity),
     decay: new Float32Array(capacity),
+    renderedX: new Float32Array(capacity),
+    renderedY: new Float32Array(capacity),
+    wasDrawn: new Uint8Array(capacity),
     freeList,
     freeCount: capacity,
     capacity,
@@ -41,6 +47,8 @@ function createTrailState(capacity: number): TrailState {
 
 function CanvasParticleSystemComponent({ enabled = true }: CanvasParticleSystemProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const contextRef = useRef<CanvasRenderingContext2D | null>(null);
+  const needsFullClearRef = useRef(false);
   const mouseRef = useMousePositionRef();
   const { tierConfig } = usePerformance();
 
@@ -50,6 +58,7 @@ function CanvasParticleSystemComponent({ enabled = true }: CanvasParticleSystemP
   const stateRef = useRef<TrailState | null>(null);
   if (stateRef.current === null || stateRef.current.capacity !== maxParticles) {
     stateRef.current = createTrailState(maxParticles);
+    needsFullClearRef.current = true;
   }
 
   useEffect(() => {
@@ -60,7 +69,10 @@ function CanvasParticleSystemComponent({ enabled = true }: CanvasParticleSystemP
       const dpr = Math.min(window.devicePixelRatio || 1, tierConfig.dprCap);
       canvas.width = Math.round(window.innerWidth * dpr);
       canvas.height = Math.round(window.innerHeight * dpr);
-      canvas.getContext('2d')?.setTransform(dpr, 0, 0, dpr, 0, 0);
+      contextRef.current = canvas.getContext('2d');
+      contextRef.current?.setTransform(dpr, 0, 0, dpr, 0, 0);
+      stateRef.current?.wasDrawn.fill(0);
+      needsFullClearRef.current = true;
     };
     applySize();
     window.addEventListener('resize', applySize);
@@ -72,12 +84,29 @@ function CanvasParticleSystemComponent({ enabled = true }: CanvasParticleSystemP
       if (!enabled) return;
       const canvas = canvasRef.current;
       if (!canvas) return;
-      const ctx = canvas.getContext('2d');
+      const ctx = contextRef.current;
       if (!ctx) return;
 
       const s = stateRef.current;
       const now = performance.now();
       const step = dt / 1000;
+
+      if (needsFullClearRef.current) {
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        needsFullClearRef.current = false;
+      }
+
+      for (let i = 0; i < s.capacity; i++) {
+        if (!s.wasDrawn[i]) continue;
+        const size = s.size[i] + 1;
+        ctx.clearRect(
+          s.renderedX[i] - size,
+          s.renderedY[i] - size,
+          size * 2,
+          size * 2
+        );
+        s.wasDrawn[i] = 0;
+      }
 
       if (now - s.lastSpawn >= spawnInterval && s.freeCount > 0) {
         const idx = s.freeList[s.freeCount - 1];
@@ -92,7 +121,6 @@ function CanvasParticleSystemComponent({ enabled = true }: CanvasParticleSystemP
         s.lastSpawn = now;
       }
 
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       ctx.fillStyle = 'rgb(0,255,157)';
 
       for (let i = 0; i < s.capacity; i++) {
@@ -112,6 +140,9 @@ function CanvasParticleSystemComponent({ enabled = true }: CanvasParticleSystemP
         ctx.beginPath();
         ctx.arc(s.x[i], s.y[i], s.size[i], 0, Math.PI * 2);
         ctx.fill();
+        s.renderedX[i] = s.x[i];
+        s.renderedY[i] = s.y[i];
+        s.wasDrawn[i] = 1;
       }
       ctx.globalAlpha = 1;
     },

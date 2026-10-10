@@ -9,20 +9,34 @@
   z-index: 0;
   pointer-events: none;
 
-  /* 基底 + 点阵 + 横光带 */
+  /* 基底 + 横光带 */
   background:
-    radial-gradient(circle at center, rgba(255,255,255,0.04) 0.5px, transparent 0.5px),
     radial-gradient(ellipse 80% 1px at 50% 55%, rgba(34,197,94,0.08) 0%, transparent 100%),
     #0a0a0a;
-  background-size: 24px 24px, 100% 100%, 100% 100%;
+  background-size: 100% 100%, 100% 100%;
   background-position: 
-    calc(var(--grid-x, 0)) calc(var(--grid-y, 0)),
     50% 55%,
     0 0;
 
   /* GPU 合成优化（不用 contain:paint，否则 blur 光球被裁剪） */
   transform: translateZ(0);
-  will-change: background-position, opacity;
+  will-change: opacity;
+}
+
+.gridOverlay {
+  position: absolute;
+  inset: -24px;
+  z-index: -1;
+  background-image: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.04) 0.5px,
+    transparent 0.5px
+  );
+  background-size: 24px 24px;
+  background-position: 24px 24px;
+  transform: translate3d(var(--grid-x, 0), var(--grid-y, 0), 0);
+  will-change: transform;
+  pointer-events: none;
 }
 
 /* ── 光球 1：中下方暖绿（扇形连线背光） ── */
@@ -140,9 +154,13 @@
     display: none;
   }
   .container {
-    background:
-      radial-gradient(circle at center, rgba(255,255,255,0.03) 0.5px, transparent 0.5px),
-      #0a0a0a;
-    background-size: 24px 24px, 100% 100%;
+    background: #0a0a0a;
+  }
+  .gridOverlay {
+    background-image: radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 0.03) 0.5px,
+      transparent 0.5px
+    );
   }
 }

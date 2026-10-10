@@ -90,6 +90,7 @@ export function BackgroundOrbs({ dimmed = false }: BackgroundOrbsProps) {
       ref={containerRef}
       className={`${styles.container} ${isAnimated ? styles.animate : ''} ${dimmed ? styles.dimmed : ''}`}
     >
+      <div className={styles.gridOverlay} aria-hidden="true" />
       {!isMobile && (
         <div className={styles.noiseOverlay}>
           <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
