@@ -9,11 +9,11 @@ interface MouseFollowerProps {
 }
 
 interface Ripple {
-  id: number;
   x: number;
   y: number;
   createdAt: number;
-  type: 'click' | 'press';
+  rings: HTMLDivElement[];
+  center: HTMLDivElement | null;
 }
 
 interface Point {
@@ -39,24 +39,19 @@ export const MouseFollower = memo(function MouseFollower({ enabled: externalEnab
   const easeOutExpo = (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
   const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
 
-  const wasEmptyRef = useRef(true);
-
   const updateRipples = useCallback(() => {
     if (!rippleContainerRef.current) return;
 
     const now = performance.now();
-    ripples.current = ripples.current.filter(r => now - r.createdAt < 1000);
-
-    if (ripples.current.length === 0) {
-      if (!wasEmptyRef.current) {
-        rippleContainerRef.current.innerHTML = '';
-        wasEmptyRef.current = true;
+    for (let index = ripples.current.length - 1; index >= 0; index--) {
+      const ripple = ripples.current[index];
+      if (now - ripple.createdAt >= 1000) {
+        ripple.rings.forEach(ring => ring.remove());
+        ripple.center?.remove();
+        ripples.current.splice(index, 1);
       }
-      return;
     }
-    wasEmptyRef.current = false;
 
-    let html = '';
     ripples.current.forEach(ripple => {
       const age = now - ripple.createdAt;
       const progress = Math.min(age / 1000, 1);
@@ -74,21 +69,13 @@ export const MouseFollower = memo(function MouseFollower({ enabled: externalEnab
         const left = ripple.x - radius;
         const top = ripple.y - radius;
         const size = radius * 2;
-
-        html += `
-          <div style="
-            position: fixed;
-            left: ${left}px;
-            top: ${top}px;
-            width: ${size}px;
-            height: ${size}px;
-            border-radius: 50%;
-            border: 1.5px solid rgba(0, 255, 157, ${borderOpacity});
-            box-shadow: 0 0 ${8 + i * 4}px rgba(0, 255, 157, ${0.2 * opacity}), inset 0 0 ${6 + i * 3}px rgba(0, 255, 157, ${0.1 * opacity});
-            pointer-events: none;
-            z-index: 9997;
-          "></div>
-        `;
+        const ring = ripple.rings[i];
+        ring.style.left = `${left}px`;
+        ring.style.top = `${top}px`;
+        ring.style.width = `${size}px`;
+        ring.style.height = `${size}px`;
+        ring.style.borderColor = `rgba(0, 255, 157, ${borderOpacity})`;
+        ring.style.boxShadow = `0 0 ${8 + i * 4}px rgba(0, 255, 157, ${0.2 * opacity}), inset 0 0 ${6 + i * 3}px rgba(0, 255, 157, ${0.1 * opacity})`;
       }
       
       if (progress < 0.2) {
@@ -96,27 +83,23 @@ export const MouseFollower = memo(function MouseFollower({ enabled: externalEnab
         const innerOpacity = (1 - innerProgress) * 0.8;
         const innerScale = 1 - innerProgress * 0.5;
         const centerSize = 8 * innerScale;
-        
-        html += `
-          <div style="
-            position: fixed;
-            left: ${ripple.x - centerSize / 2}px;
-            top: ${ripple.y - centerSize / 2}px;
-            width: ${centerSize}px;
-            height: ${centerSize}px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(0, 255, 157, ${innerOpacity}) 0%, rgba(0, 255, 157, 0) 70%);
-            pointer-events: none;
-            z-index: 9998;
-          "></div>
-        `;
+        if (ripple.center) {
+          ripple.center.style.left = `${ripple.x - centerSize / 2}px`;
+          ripple.center.style.top = `${ripple.y - centerSize / 2}px`;
+          ripple.center.style.width = `${centerSize}px`;
+          ripple.center.style.height = `${centerSize}px`;
+          ripple.center.style.background = `radial-gradient(circle, rgba(0, 255, 157, ${innerOpacity}) 0%, rgba(0, 255, 157, 0) 70%)`;
+        }
+      } else if (ripple.center) {
+        ripple.center.remove();
+        ripple.center = null;
       }
     });
-    
-    rippleContainerRef.current.innerHTML = html;
   }, []);
 
   useEffect(() => {
+    if (!isEnabled) return;
+
     const handleMouseDown = () => {
       isPressed.current = true;
       pressTimeRef.current = performance.now();
@@ -125,13 +108,31 @@ export const MouseFollower = memo(function MouseFollower({ enabled: externalEnab
       isPressed.current = false;
     };
     const handleClick = (e: MouseEvent) => {
-      ripples.current.push({
-        id: Date.now() + Math.random(),
+      const ripple: Ripple = {
         x: e.clientX,
         y: e.clientY,
         createdAt: performance.now(),
-        type: 'click',
-      });
+        rings: [],
+        center: null,
+      };
+      for (let i = 0; i < 3; i++) {
+        const ring = document.createElement('div');
+        ring.style.position = 'fixed';
+        ring.style.borderRadius = '50%';
+        ring.style.border = '1.5px solid rgba(0, 255, 157, 0)';
+        ring.style.pointerEvents = 'none';
+        ring.style.zIndex = '9997';
+        rippleContainerRef.current?.appendChild(ring);
+        ripple.rings.push(ring);
+      }
+      const center = document.createElement('div');
+      center.style.position = 'fixed';
+      center.style.borderRadius = '50%';
+      center.style.pointerEvents = 'none';
+      center.style.zIndex = '9998';
+      rippleContainerRef.current?.appendChild(center);
+      ripple.center = center;
+      ripples.current.push(ripple);
     };
 
     window.addEventListener('mousedown', handleMouseDown);
@@ -142,8 +143,13 @@ export const MouseFollower = memo(function MouseFollower({ enabled: externalEnab
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('click', handleClick);
+      ripples.current.forEach(ripple => {
+        ripple.rings.forEach(ring => ring.remove());
+        ripple.center?.remove();
+      });
+      ripples.current = [];
     };
-  }, []);
+  }, [isEnabled]);
 
   useAnimationFrame(() => {
     if (!isEnabled) return;
@@ -193,7 +199,7 @@ export const MouseFollower = memo(function MouseFollower({ enabled: externalEnab
       scaleY(${stretchY})
       scale(${scale / baseSize})
     `;
-  });
+  }, { enabled: isEnabled });
 
   if (!isEnabled) return null;
 
