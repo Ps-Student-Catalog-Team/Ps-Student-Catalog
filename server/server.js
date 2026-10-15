@@ -1,7 +1,7 @@
 const express = require('express');
 const net = require('net');
 const cors = require('cors');
-const { exec } = require('child_process');
+const { exec, execFile } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -203,25 +203,67 @@ app.get('/api/vpn-users', async (req, res) => {
     console.log(`[${new Date().toISOString()}] 查询本地VPN用户数`);
 
     const localhost = '127.0.0.1';
-    const command = `"C:\\Program Files\\SoftEther VPN Server Developer Edition\\vpncmd.exe" ${localhost} /server /password:adm1n5 /hub:vpn /cmd statusget`;
+    const installRoots = [
+        process.env.ProgramFiles,
+        process.env['ProgramFiles(x86)'],
+        'C:\\Program Files',
+        'C:\\Program Files (x86)'
+    ].filter(Boolean);
+    const installDirectories = [
+        'SoftEther VPN Server',
+        'SoftEther VPN Bridge',
+        'SoftEther VPN Server Developer Edition',
+        'SoftEther VPN Bridge Developer Edition'
+    ];
+    const vpnCmdPath = process.env.SOFTETHER_VPNCMD_PATH || installRoots
+        .flatMap(root => installDirectories.flatMap(directory => [
+            path.join(root, directory, 'vpncmd_x64.exe'),
+            path.join(root, directory, 'vpncmd.exe')
+        ]))
+        .find(candidate => fs.existsSync(candidate));
 
-    exec(command, (error, stdout, stderr) => {
+    if (!vpnCmdPath || !fs.existsSync(vpnCmdPath)) {
+        console.error('[ERROR] 找不到 SoftEther vpncmd_x64.exe 或 vpncmd.exe');
+        return res.status(500).json({
+            success: false,
+            error: 'vpncmd executable not found',
+            details: 'Set SOFTETHER_VPNCMD_PATH to the installed vpncmd_x64.exe or vpncmd.exe path.'
+        });
+    }
+
+    const password = process.env.SOFTETHER_VPN_PASSWORD || 'adm1n5';
+    const hub = process.env.SOFTETHER_VPN_HUB || 'vpn';
+
+    execFile(vpnCmdPath, [
+        localhost,
+        '/server',
+        `/password:${password}`,
+        `/hub:${hub}`,
+        '/cmd',
+        'statusget'
+    ], { windowsHide: true, timeout: 10000, encoding: 'utf8' }, (error, stdout, stderr) => {
         if (error) {
-            console.error(`[ERROR] 执行命令错误: ${error.message}`);
-            return res.json({ success: false, error: 'Failed to execute command', details: error.message });
+            console.error(`[ERROR] 执行 vpncmd 失败: ${error.code || (error.killed ? 'timeout' : 'unknown error')}`);
+            return res.status(502).json({
+                success: false,
+                error: 'Failed to execute vpncmd',
+                details: error.killed ? 'vpncmd.exe timed out.' : 'Check the SoftEther service and management password.'
+            });
         }
 
         const parseSessionCount = (output) => {
             const lines = output.split(/\r?\n/);
             for (const line of lines) {
-                if (/^\s*会话数[\s\u3000]*\|/.test(line) && !/会话数\s*\(客户端\)|会话数\s*\(网桥\)/.test(line)) {
-                    const m = line.match(/会话数[\s\u3000]*\|[\s\u3000]*([0-9]+)/);
-                    if (m) return parseInt(m[1].replace(/,/g, ''), 10);
-                }
-                if (/\b(SessionCount|CurrentSessions|Sessions)\b/i.test(line)) {
-                    const m = line.match(/\|[\s\u3000]*([0-9]+)/);
-                    if (m) return parseInt(m[1].replace(/,/g, ''), 10);
-                }
+                const columns = line.split('|');
+                if (columns.length < 2) continue;
+
+                const label = columns[0].trim();
+                const isSessionCount = /会话数/i.test(label) ||
+                    /^(?:Session\s*Count|Current\s*Sessions?|Sessions?)$/i.test(label);
+                if (!isSessionCount || /客户端|网桥|\b(?:client|bridge)\b/i.test(label)) continue;
+
+                const match = columns[1].trim().match(/^[\s\u3000]*([\d,]+)/);
+                if (match) return parseInt(match[1].replace(/,/g, ''), 10);
             }
             return null;
         };
@@ -229,7 +271,11 @@ app.get('/api/vpn-users', async (req, res) => {
         const sessionCount = parseSessionCount(stdout);
         if (sessionCount === null) {
             console.error('[ERROR] 无法从 vpncmd 输出解析会话数', { stdout, stderr });
-            return res.json({ success: false, error: 'Failed to parse session count', rawOutput: stdout.trim() });
+            return res.status(502).json({
+                success: false,
+                error: 'Failed to parse session count',
+                details: 'The vpncmd output did not contain a recognized session-count field.'
+            });
         }
 
         res.json({ success: true, ip: localhost, sessionCount: sessionCount });

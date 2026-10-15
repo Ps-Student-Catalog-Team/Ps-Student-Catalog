@@ -18,6 +18,7 @@ interface VPNStatus {
   ping: number;
   lastOnline: string;
   sessionCount?: number;
+  sessionError?: string;
 }
 
 interface Announcement {
@@ -81,8 +82,13 @@ export function Newest() {
         try {
           const sessionResponse = await fetchFromApi(`/api/vpn-users?ip=${encodeURIComponent(ip)}`);
           const sessionData = await sessionResponse.json();
+          if (!sessionData.success || !Number.isInteger(sessionData.sessionCount)) {
+            throw new Error(sessionData.error || '会话数数据无效');
+          }
           status.sessionCount = sessionData.sessionCount;
-        } catch (e) {
+        } catch (error) {
+          console.error(`获取 VPN 会话数失败 (${ip}):`, error);
+          status.sessionError = '会话数获取失败';
         }
       }
 
@@ -449,18 +455,20 @@ export function Newest() {
                         <>检测中...</>
                       )}
                     </div>
-                    {status?.online && status.sessionCount !== undefined && (
+                    {status?.online && (
                       <div
                         style={{
                           margin: '8px 0',
                           padding: '10px',
                           borderRadius: '8px',
                           fontWeight: 500,
-                          backgroundColor: 'rgba(0, 255, 157, 0.15)',
-                          color: '#00ff9d',
+                          backgroundColor: status.sessionError
+                            ? 'rgba(255, 107, 107, 0.15)'
+                            : 'rgba(0, 255, 157, 0.15)',
+                          color: status.sessionError ? '#ff6b6b' : '#00ff9d',
                         }}
                       >
-                        会话数: {status.sessionCount}
+                        {status.sessionError || `会话数: ${status.sessionCount}`}
                       </div>
                     )}
                   </div>
