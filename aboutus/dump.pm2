@@ -1281,7 +1281,7 @@
     "vizion": true,
     "merge_logs": true,
     "env": {
-      "PM2_SERVE_PORT": "5635",
+      "PM2_SERVE_PORT": "3133",
       "PM2_SERVE_PATH": "D:\\website\\aboutus\\dist"
     },
     "cwd": "D:\\website\\aboutus\\dist",
@@ -1350,7 +1350,7 @@
     "USERPROFILE": "C:\\Users\\1",
     "windir": "C:\\Windows",
     "PM2_SERVE_PATH": "D:\\website\\aboutus\\dist",
-    "PM2_SERVE_PORT": "5635",
+    "PM2_SERVE_PORT": "3133",
     "PM2_HOME": "C:\\Users\\1\\.pm2",
     "unique_id": "65110f7e-52ca-4b79-808d-cbf6a6c7f199",
     "status": "online",
