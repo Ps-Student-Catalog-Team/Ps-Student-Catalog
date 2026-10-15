@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 
 export interface VpnSpeedData {
   uploadSpeed: number;
@@ -60,22 +60,27 @@ export function VpnSpeedProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (speed.timestamp > 0) {
       setHistory(prev => {
-        const newHistory = [...prev, {
+        const newSample = {
           time: speed.timestamp,
           upload: speed.uploadSpeed,
           download: speed.downloadSpeed,
-        }];
+        };
         const maxHistoryLength = 30;
-        if (newHistory.length > maxHistoryLength) {
-          return newHistory.slice(-maxHistoryLength);
+        if (prev.length >= maxHistoryLength) {
+          return [...prev.slice(1), newSample];
         }
-        return newHistory;
+        return [...prev, newSample];
       });
     }
   }, [speed]);
 
+  const value = useMemo(
+    () => ({ speed, history, isLoading, error }),
+    [speed, history, isLoading, error]
+  );
+
   return (
-    <VpnSpeedContext.Provider value={{ speed, history, isLoading, error }}>
+    <VpnSpeedContext.Provider value={value}>
       {children}
     </VpnSpeedContext.Provider>
   );

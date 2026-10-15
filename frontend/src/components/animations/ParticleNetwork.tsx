@@ -67,6 +67,8 @@ function ParticleNetworkComponent({
   const countRef = useRef(0);
   const radiiRef = useRef<Float32Array>(new Float32Array(0));
   const spriteRef = useRef<HTMLCanvasElement | null>(null);
+  const lastRenderedFrameRef = useRef<ParticleWorkerFrame | null>(null);
+  const renderDirtyRef = useRef(true);
   const lastTickRef = useRef(0);
   const lastFrameTsRef = useRef(0);
   const dimFactorRef = useRef(1);
@@ -92,6 +94,7 @@ function ParticleNetworkComponent({
       showConnections: settings.particleConnections,
       dimTarget: dimmed ? 0.35 : 1,
     };
+    renderDirtyRef.current = true;
 
     const canvas = canvasRef.current;
     if (canvas) {
@@ -151,6 +154,7 @@ function ParticleNetworkComponent({
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       spriteRef.current = createGlowSprite(dpr);
+      renderDirtyRef.current = true;
     };
 
     const initWorker = () => {
@@ -193,6 +197,17 @@ function ParticleNetworkComponent({
 
       const cfg = cfgRef.current;
       const { w, h } = sizeRef.current;
+      const dimAnimating = Math.abs(cfg.dimTarget - dimFactorRef.current) > 0.001;
+      if (
+        frame === lastRenderedFrameRef.current &&
+        !renderDirtyRef.current &&
+        !dimAnimating
+      ) {
+        return;
+      }
+
+      lastRenderedFrameRef.current = frame;
+      renderDirtyRef.current = false;
       ctx.clearRect(0, 0, w, h);
 
       dimFactorRef.current += (cfg.dimTarget - dimFactorRef.current) * 0.08;
