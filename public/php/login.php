@@ -4,8 +4,8 @@ header('Content-Type: application/json');
 session_start();
 
 $servername = "localhost";
-$username = "root";
-$password = "114514";
+$username = "comment_user";
+$password = "Cmt@123456";
 $dbname = "commentdb";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
