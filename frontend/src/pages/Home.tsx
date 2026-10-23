@@ -205,7 +205,7 @@ export function Home() {
   }, [navigate, setIsHovering]);
 
   const handleReturnClick = useCallback(() => {
-    window.location.href = '/index.html';
+    window.location.href = 'http://10.88.202.78';
   }, []);
 
   // 移动端检测
