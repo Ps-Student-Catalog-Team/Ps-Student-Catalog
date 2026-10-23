@@ -4,6 +4,7 @@ const cors = require('cors');
 const { exec, execFile } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const iconv = require('iconv-lite');
 
 const app = express();
 
@@ -71,8 +72,11 @@ try {
 }
 `;
 
-    const tempFilePath = path.join(__dirname, 'temp_speed_check.ps1');
-    
+    const tempFilePath = path.join(
+        __dirname,
+        `temp_speed_check_${process.pid}_${Date.now()}_${Math.random().toString(36).slice(2)}.ps1`
+    );
+
     fs.writeFile(tempFilePath, psScript, (writeErr) => {
         if (writeErr) {
             console.error(`[ERROR] 写入临时文件失败: ${writeErr.message}`);
@@ -89,9 +93,9 @@ try {
 
             const output = stdout.trim();
             console.log(`[DEBUG] PowerShell output: "${output}"`);
-            
+
             const parts = output.split(',');
-            
+
             if (parts.length >= 2) {
                 const downloadSpeed = parseInt(parts[0] || '0', 10);
                 const uploadSpeed = parseInt(parts[1] || '0', 10);
@@ -113,7 +117,7 @@ try {
 app.get('/api/vpn-status', async (req, res) => {
     console.log(`[${new Date().toISOString()}] 检测IP: ${req.query.ip}`);
 
-    if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(req.query.ip)) {
+    if (net.isIP(req.query.ip) !== 4) {
         return res.status(400).json({ error: 'Invalid IP format' });
     }
 
@@ -199,10 +203,19 @@ app.get('/api/vpn-status', async (req, res) => {
     });
 });
 
+// 解码 vpncmd 输出：管道下通常是 UTF-8，控制台是 GBK，两种都兼容
+const decodeVpnCmdOutput = (buf) => {
+    if (!buf || buf.length === 0) return '';
+    const utf8 = buf.toString('utf8');
+    if (utf8.includes('会话数') || utf8.includes('Sessions') || utf8.includes('命令成功完成')) {
+        return utf8;
+    }
+    return iconv.decode(buf, 'gbk');
+};
+
 app.get('/api/vpn-users', async (req, res) => {
     console.log(`[${new Date().toISOString()}] 查询本地VPN用户数`);
 
-    const localhost = '127.0.0.1';
     const installRoots = [
         process.env.ProgramFiles,
         process.env['ProgramFiles(x86)'],
@@ -234,16 +247,31 @@ app.get('/api/vpn-users', async (req, res) => {
     const password = process.env.SOFTETHER_VPN_PASSWORD || 'adm1n5';
     const hub = process.env.SOFTETHER_VPN_HUB || 'vpn';
 
+    // 关键修复：
+    // 1. 第一个参数显式传 127.0.0.1，vpncmd 不再询问主机名
+    // 2. /CMD 和 StatusGet 用两个参数（和手动命令完全一致）
+    // 3. stdin 设为 ignore，杜绝任何输入等待
     execFile(vpnCmdPath, [
-        localhost,
-        '/server',
-        `/password:${password}`,
-        `/hub:${hub}`,
-        '/cmd',
-        'statusget'
-    ], { windowsHide: true, timeout: 10000, encoding: 'utf8' }, (error, stdout, stderr) => {
+        '127.0.0.1',
+        '/SERVER',
+        `/PASSWORD:${password}`,
+        `/HUB:${hub}`,
+        '/CMD',
+        'StatusGet'
+    ], {
+        windowsHide: true,
+        timeout: 10000,
+        encoding: 'buffer',
+        stdio: ['ignore', 'pipe', 'pipe']
+    }, (error, stdoutBuf, stderrBuf) => {
+
+        const stdout = decodeVpnCmdOutput(stdoutBuf);
+        const stderr = decodeVpnCmdOutput(stderrBuf);
+
         if (error) {
             console.error(`[ERROR] 执行 vpncmd 失败: ${error.code || (error.killed ? 'timeout' : 'unknown error')}`);
+            console.error(`[DEBUG] vpncmd stdout:\n${stdout}`);
+            console.error(`[DEBUG] vpncmd stderr:\n${stderr}`);
             return res.status(502).json({
                 success: false,
                 error: 'Failed to execute vpncmd',
@@ -251,18 +279,24 @@ app.get('/api/vpn-users', async (req, res) => {
             });
         }
 
+        console.log(`[DEBUG] vpncmd stdout:\n${stdout}`);
+
         const parseSessionCount = (output) => {
             const lines = output.split(/\r?\n/);
             for (const line of lines) {
-                const columns = line.split('|');
-                if (columns.length < 2) continue;
+                const idx = line.indexOf('|');
+                if (idx === -1) continue;
 
-                const label = columns[0].trim();
-                const isSessionCount = /会话数/i.test(label) ||
-                    /^(?:Session\s*Count|Current\s*Sessions?|Sessions?)$/i.test(label);
-                if (!isSessionCount || /客户端|网桥|\b(?:client|bridge)\b/i.test(label)) continue;
+                const label = line.slice(0, idx).trim();
+                const value = line.slice(idx + 1).trim();
 
-                const match = columns[1].trim().match(/^[\s\u3000]*([\d,]+)/);
+                const isExactSession =
+                    label === '会话数' ||
+                    /^Sessions?$/i.test(label);
+
+                if (!isExactSession) continue;
+
+                const match = value.match(/^[\s\u3000]*([\d,]+)/);
                 if (match) return parseInt(match[1].replace(/,/g, ''), 10);
             }
             return null;
@@ -270,7 +304,8 @@ app.get('/api/vpn-users', async (req, res) => {
 
         const sessionCount = parseSessionCount(stdout);
         if (sessionCount === null) {
-            console.error('[ERROR] 无法从 vpncmd 输出解析会话数', { stdout, stderr });
+            console.error('[ERROR] 无法从 vpncmd 输出解析会话数');
+            console.error(`[DEBUG] vpncmd stdout:\n${stdout}`);
             return res.status(502).json({
                 success: false,
                 error: 'Failed to parse session count',
@@ -278,7 +313,7 @@ app.get('/api/vpn-users', async (req, res) => {
             });
         }
 
-        res.json({ success: true, ip: localhost, sessionCount: sessionCount });
+        res.json({ success: true, ip: '127.0.0.1', sessionCount: sessionCount });
     });
 });
 
