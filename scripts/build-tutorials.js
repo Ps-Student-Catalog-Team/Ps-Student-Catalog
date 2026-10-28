@@ -180,13 +180,22 @@ function pageTemplate(title, bodyHtml, tocListHtml) {
         font-weight: bold;
         line-height: 1.4;
     }
-    .markdown-container h1 { font-size: 2em; color: #00ff9d; border-bottom: 1px solid rgba(0,255,157,0.25); padding-bottom: 8px; }
-    .markdown-container h2 { font-size: 1.6em; color: #00ff9d; }
-    .markdown-container h3 { font-size: 1.3em; color: #7dffce; }
-    .markdown-container h4 { font-size: 1.1em; color: #7dffce; }
+    /* 动画一律用 animation-fill-mode: both，不写基础 opacity:0——
+       不支持动画的旧浏览器会直接显示全部内容，不会空白 */
+    .markdown-container h1 {
+        font-size: 2em;
+        color: #00ff9d;
+        border-bottom: 1px solid rgba(0,255,157,0.25);
+        padding-bottom: 8px;
+        border-right: 3px solid transparent;
+        animation: typeIn 0.9s ease-out both, caretBlink 0.8s step-end infinite;
+    }
+    .markdown-container h2 { font-size: 1.6em; color: #00ff9d; animation: fadeInUp 0.6s ease-out 0.08s both; }
+    .markdown-container h3 { font-size: 1.3em; color: #7dffce; animation: fadeInUp 0.6s ease-out 0.14s both; }
+    .markdown-container h4 { font-size: 1.1em; color: #7dffce; animation: fadeInUp 0.6s ease-out 0.2s both; }
     .markdown-container p, .markdown-container li { line-height: 1.75; }
-    .markdown-container p { margin: 0.8em 0; }
-    .markdown-container ul, .markdown-container ol { margin: 0.8em 0 0.8em 2em; }
+    .markdown-container p { margin: 0.8em 0; animation: fadeInUp 0.6s ease-out 0.12s both; }
+    .markdown-container ul, .markdown-container ol { margin: 0.8em 0 0.8em 2em; animation: fadeInUp 0.6s ease-out 0.16s both; }
     .markdown-container li { margin: 0.3em 0; }
     .markdown-container a { color: #00d0ff; text-decoration: underline; }
     .markdown-container strong { color: #ffffff; }
@@ -222,8 +231,9 @@ function pageTemplate(title, bodyHtml, tocListHtml) {
         padding: 8px 14px;
         margin: 1em 0;
         color: #b9b9b9;
+        animation: fadeInUp 0.6s ease-out 0.14s both;
     }
-    .markdown-container table { width: 100%; border-collapse: collapse; margin: 1em 0; }
+    .markdown-container table { width: 100%; border-collapse: collapse; margin: 1em 0; animation: fadeInUp 0.6s ease-out 0.18s both; }
     .markdown-container th, .markdown-container td {
         border: 1px solid #444;
         padding: 8px 10px;
@@ -238,8 +248,50 @@ function pageTemplate(title, bodyHtml, tocListHtml) {
         margin: 1.5em auto;
         border-radius: 8px;
         box-shadow: 0 4px 15px rgba(0, 255, 157, 0.2);
+        animation: fadeInUp 0.7s ease-out 0.2s both;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
+    .markdown-container img:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(0, 255, 157, 0.3);
+    }
+    .markdown-container pre { animation: fadeInUp 0.6s ease-out 0.16s both; }
     .markdown-container hr { border: 0; border-top: 1px solid #444; margin: 2em 0; }
+
+    /* ===== 关键帧 ===== */
+    @keyframes typeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes caretBlink {
+        0%, 100% { border-color: transparent; }
+        50%      { border-color: #00ff9d; }
+    }
+
+    /* 背景绿色光晕呼吸动画 */
+    body:after {
+        content: "";
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        z-index: -1;
+        background: radial-gradient(circle at 50% 50%, rgba(0, 255, 157, 0.08) 0%, transparent 60%);
+        animation: glowPulse 8s ease-in-out infinite;
+    }
+    @keyframes glowPulse {
+        0%, 100% { opacity: 0.6; }
+        50%      { opacity: 1; }
+    }
+
+    /* 用户系统设置减少动画时，全部关闭 */
+    @media (prefers-reduced-motion: reduce) {
+        .markdown-container *, body:after { animation: none !important; }
+    }
 
     /* ===== 窄屏：目录放到内容上方 ===== */
     @media (max-width: 900px) {
