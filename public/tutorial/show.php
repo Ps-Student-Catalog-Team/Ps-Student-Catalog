@@ -3,9 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
     <?php
         // 获取URL参数
         $markdownFile = isset($_GET['file']) ? $_GET['file'] : 'powershadow.md'; // 默认文件
+
+        // 兼容无扩展名的请求（与show.html行为一致）
+        if (strtolower(substr($markdownFile, -3)) !== '.md' && !file_exists($markdownFile)) {
+            if (file_exists($markdownFile . '.md')) {
+                $markdownFile .= '.md';
+            }
+        }
 
         // 初始化标题
         $pageTitle = "默认标题";
