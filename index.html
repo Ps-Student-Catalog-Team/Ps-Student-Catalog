@@ -51,10 +51,10 @@
 
         .legacy-browser-notice-content,
         .legacy-fallback-page {
-            border: 1px solid #00a86b;
-            border-radius: 12px;
-            background: #101916;
-            box-shadow: 0 0 24px rgba(0, 255, 157, 0.16);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(14, 19, 17, 0.96), rgba(11, 15, 13, 0.96));
+            box-shadow: 0 18px 42px rgba(0, 0, 0, 0.35), inset 0 0 28px rgba(0, 255, 157, 0.04);
         }
 
         .legacy-browser-notice-content {
@@ -77,37 +77,112 @@
         }
 
         .legacy-browser-notice-content button,
-        .legacy-fallback-links a {
+        .legacy-fallback-card,
+        .legacy-fallback-back {
             display: inline-block;
             margin: 10px 6px 0;
             padding: 10px 16px;
             border: 1px solid #00ff9d;
-            border-radius: 6px;
-            background: #17241e;
+            border-radius: 8px;
+            background: rgba(23, 36, 30, 0.9);
             color: #00ff9d;
             text-decoration: none;
             cursor: pointer;
-            transition: background-color 0.25s ease, transform 0.25s ease;
+            transition: background-color 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
         }
 
         .legacy-browser-notice-content button:hover,
-        .legacy-fallback-links a:hover {
-            background: #20352b;
+        .legacy-fallback-card:hover,
+        .legacy-fallback-back:hover {
+            background: rgba(32, 53, 43, 1);
+            border-color: #7dffce;
             transform: translateY(-2px);
         }
 
         .legacy-fallback-page {
             box-sizing: border-box;
             width: calc(100% - 32px);
-            max-width: 900px;
+            max-width: 1100px;
             margin: 8vh auto;
-            padding: 32px;
+            padding: 28px 28px 34px;
             color: #e0e0e0;
             animation: legacyFadeIn 0.55s ease-out both;
         }
 
-        .legacy-fallback-links {
-            margin: 24px -6px 0;
+        .legacy-fallback-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .legacy-fallback-badge {
+            display: inline-block;
+            margin-bottom: 10px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: rgba(0, 255, 157, 0.08);
+            border: 1px solid rgba(0, 255, 157, 0.28);
+            color: #7dffce;
+            font-size: 0.75em;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .legacy-fallback-page h1 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.2;
+            letter-spacing: 0.04em;
+            text-shadow: 0 0 20px rgba(0, 255, 157, 0.15);
+        }
+
+        .legacy-fallback-copy {
+            margin: 12px 0 0;
+            color: #d9e6e0;
+        }
+
+        .legacy-fallback-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 28px;
+        }
+
+        .legacy-fallback-card {
+            margin: 0;
+            padding: 18px 16px;
+            min-height: 120px;
+            background: rgba(11, 19, 17, 0.72);
+            border-color: rgba(0, 255, 157, 0.28);
+            box-shadow: 0 0 0 1px rgba(0, 255, 157, 0.03);
+            text-align: left;
+        }
+
+        .legacy-fallback-card strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #00ff9d;
+            font-size: 1.08em;
+        }
+
+        .legacy-fallback-card span {
+            display: block;
+            color: #c9d8d0;
+            font-size: 0.82em;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 640px) {
+            .legacy-fallback-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .legacy-fallback-page {
+                padding: 22px 18px 26px;
+            }
         }
 
         @keyframes legacyFadeIn {
@@ -638,15 +713,39 @@
     </div>
 
     <main class="legacy-fallback-page" id="legacyFallbackPage" style="display: none;">
-        <h1>学生目录 · 兼容版</h1>
-        <p>当前浏览器未满足完整交互体验所需的能力基线。此页面提供常用入口；不支持的动态功能已省略。</p>
-        <nav class="legacy-fallback-links" aria-label="学生目录常用入口">
-            <a href="public/pages/readme.html">使用说明</a>
-            <a href="public/pages/newest.html">VPN 状态</a>
-            <a href="public/pages/clock.html">时钟</a>
-            <a href="public/pages/comment.html">留言簿</a>
-            <a href="public/tutorial/web.html">教程</a>
-            <a href="http://10.88.202.78:5244">共享目录</a>
+        <header class="legacy-fallback-header">
+            <div>
+                <div class="legacy-fallback-badge">compat</div>
+                <h1>学生目录 · 兼容版</h1>
+            </div>
+            <a class="legacy-fallback-back" href="public/pages/readme.html">返回首页</a>
+        </header>
+        <p class="legacy-fallback-copy">当前浏览器未满足完整交互体验所需的能力基线。此页面保留了主站的视觉风格，并提供常用入口与必要工具。</p>
+        <nav class="legacy-fallback-grid" aria-label="学生目录常用入口">
+            <a class="legacy-fallback-card" href="public/pages/readme.html">
+                <strong>使用说明</strong>
+                <span>查看基本操作与常见问题说明。</span>
+            </a>
+            <a class="legacy-fallback-card" href="public/pages/newest.html">
+                <strong>VPN 状态</strong>
+                <span>查看当前 VPN 连接状态与最新密码。</span>
+            </a>
+            <a class="legacy-fallback-card" href="public/pages/clock.html">
+                <strong>时钟</strong>
+                <span>查看与校时相关的辅助页面。</span>
+            </a>
+            <a class="legacy-fallback-card" href="public/pages/comment.html">
+                <strong>留言簿</strong>
+                <span>查看和发布校园留言与公告内容。</span>
+            </a>
+            <a class="legacy-fallback-card" href="public/tutorial/web.html">
+                <strong>教程</strong>
+                <span>进入说明页，了解常用功能的使用方法。</span>
+            </a>
+            <a class="legacy-fallback-card" href="http://10.88.202.78:5244">
+                <strong>共享目录</strong>
+                <span>访问校园共享目录中的常用文件资源。</span>
+            </a>
         </nav>
     </main>
 
