@@ -1,0 +1,51 @@
+/* Legacy browser compatibility layer (IE9+ / old browsers) */
+/* These rules are safe for modern browsers because they are either
+   overridden by more specific modern rules, or provide harmless defaults. */
+
+/* Basic reset that doesn't break anything */
+html {
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* IE9-10 box-sizing fallback (modern browsers use their own) */
+* {
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+/* Clearfix for floated layouts in old browsers */
+.clearfix:before,
+.clearfix:after {
+    content: " ";
+    display: table;
+}
+.clearfix:after {
+    clear: both;
+}
+.clearfix {
+    *zoom: 1;
+}
+
+/* Image max-width safe for old IE */
+img {
+    max-width: 100%;
+    height: auto;
+    -ms-interpolation-mode: bicubic;
+}
+
+/* Accessible focus visible for IE */
+:focus {
+    outline: 2px solid #00ff9d;
+    outline-offset: 2px;
+}
+
+/* Safe fallback font stack already present; ensure it applies broadly */
+body {
+    font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;
+}
+
+/* Print-safe colors for old browsers */
+@media print {
+    body { background: #fff; color: #000; }
+}

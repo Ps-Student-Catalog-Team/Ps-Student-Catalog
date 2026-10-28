@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -10,9 +11,117 @@
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
     <title>学生目录</title>
 
+    <!-- HTML5 Shiv for IE6-8 to recognize HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
     <link rel="stylesheet" href="public/css/main.css">
+    <!-- Legacy compatibility layer for IE/old browsers -->
+    <link rel="stylesheet" href="public/css/legacy-compat.css">
+    <!--[if IE]>
+    <link rel="stylesheet" href="public/css/ie-fallback.css">
+    <![endif]-->
+    <style>
+        @supports (display: grid) and (position: sticky) and (--legacy-browser-css-probe: 1) {
+            :root {
+                --legacy-browser-css-baseline: 1;
+            }
+        }
+    </style>
 
     <style>
+        .legacy-browser-notice {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(8, 12, 10, 0.9);
+            color: #e0e0e0;
+        }
+
+        .legacy-browser-notice-content,
+        .legacy-fallback-page {
+            border: 1px solid #00a86b;
+            border-radius: 12px;
+            background: #101916;
+            box-shadow: 0 0 24px rgba(0, 255, 157, 0.16);
+        }
+
+        .legacy-browser-notice-content {
+            width: 100%;
+            max-width: 520px;
+            padding: 28px;
+            text-align: center;
+            animation: legacyFadeIn 0.45s ease-out both;
+        }
+
+        .legacy-browser-notice-content h2,
+        .legacy-fallback-page h1 {
+            margin: 0 0 12px;
+            color: #00ff9d;
+        }
+
+        .legacy-browser-notice-content p,
+        .legacy-fallback-page p {
+            line-height: 1.7;
+        }
+
+        .legacy-browser-notice-content button,
+        .legacy-fallback-links a {
+            display: inline-block;
+            margin: 10px 6px 0;
+            padding: 10px 16px;
+            border: 1px solid #00ff9d;
+            border-radius: 6px;
+            background: #17241e;
+            color: #00ff9d;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.25s ease, transform 0.25s ease;
+        }
+
+        .legacy-browser-notice-content button:hover,
+        .legacy-fallback-links a:hover {
+            background: #20352b;
+            transform: translateY(-2px);
+        }
+
+        .legacy-fallback-page {
+            box-sizing: border-box;
+            width: calc(100% - 32px);
+            max-width: 900px;
+            margin: 8vh auto;
+            padding: 32px;
+            color: #e0e0e0;
+            animation: legacyFadeIn 0.55s ease-out both;
+        }
+
+        .legacy-fallback-links {
+            margin: 24px -6px 0;
+        }
+
+        @keyframes legacyFadeIn {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .legacy-browser-notice-content,
+            .legacy-fallback-page {
+                padding: 22px;
+            }
+        }
+
         /* 折叠内容样式 */
         .collapsed-content {
             max-height: 0;
@@ -520,6 +629,27 @@
 </head>
 
 <body>
+    <div class="legacy-browser-notice" id="legacyBrowserNotice" role="dialog" aria-modal="true" aria-labelledby="legacyBrowserTitle" style="display: none;">
+        <div class="legacy-browser-notice-content">
+            <h2 id="legacyBrowserTitle">检测到较旧的浏览器</h2>
+            <p>将打开学生目录兼容版。部分动态数据、交互功能或视觉效果可能无法使用；页面会尽量保留原有样式和动画。</p>
+            <button type="button" id="legacyBrowserContinue">确认并继续</button>
+        </div>
+    </div>
+
+    <main class="legacy-fallback-page" id="legacyFallbackPage" style="display: none;">
+        <h1>学生目录 · 兼容版</h1>
+        <p>当前浏览器未满足完整交互体验所需的能力基线。此页面提供常用入口；不支持的动态功能已省略。</p>
+        <nav class="legacy-fallback-links" aria-label="学生目录常用入口">
+            <a href="public/pages/readme.html">使用说明</a>
+            <a href="public/pages/newest.html">VPN 状态</a>
+            <a href="public/pages/clock.html">时钟</a>
+            <a href="public/pages/comment.html">留言簿</a>
+            <a href="public/tutorial/show.html?file=web.md">教程</a>
+            <a href="http://10.88.202.78:5244">共享目录</a>
+        </nav>
+    </main>
+
     <div class="container">
         <div class="announcement-modal" id="announcementModal">
             <div class="announcement-content">
@@ -859,7 +989,7 @@
     <button id="mouseEffectToggle" class="mouse-effect-toggle" onclick="toggleMouseEffect()" style="position: absolute; bottom: 10px; right: 100px; font-size: 0.8em; padding: 4px 10px; border: 1px solid var(--accent-color); background: transparent; color: var(--accent-color); border-radius: 4px; cursor: pointer; transition: opacity 0.3s ease; opacity: 1; z-index: 10000;">鼠标特效: 开启</button>
 </div>
 
-<script>
+<script type="text/plain" id="legacy-app-script">
     // ========== 导航函数 ==========
     function navigateToTutorials() {
         document.getElementById('home-page').classList.add('slide-out');
@@ -1410,6 +1540,30 @@
 
         animationLoop();
     });
+</script>
+<script src="public/js/legacy-browser.js"></script>
+<script>
+    (function() {
+        var legacyApp = document.getElementById('legacy-app-script');
+        var notice = document.getElementById('legacyBrowserNotice');
+        var fallbackPage = document.getElementById('legacyFallbackPage');
+        var appContainer = document.querySelector('.container');
+        var continueButton = document.getElementById('legacyBrowserContinue');
+
+        if (window.isLegacyBrowser()) {
+            appContainer.style.display = 'none';
+            notice.style.display = 'flex';
+            continueButton.addEventListener('click', function() {
+                notice.style.display = 'none';
+                fallbackPage.style.display = 'block';
+            });
+            return;
+        }
+
+        var appScript = document.createElement('script');
+        appScript.text = legacyApp.text || legacyApp.textContent;
+        document.body.appendChild(appScript);
+    })();
 </script>
 
 </body>

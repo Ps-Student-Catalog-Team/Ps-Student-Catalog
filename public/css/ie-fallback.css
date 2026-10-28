@@ -1,0 +1,27 @@
+/**
+ * IE-specific fallbacks (loaded only by IE via conditional comments).
+ * Modern browsers ignore this file entirely.
+ */
+
+/* Flexbox fallback using floats for IE9-10 where flex isn't supported well */
+.flex-fallback {
+    display: block;
+    float: left;
+    width: 100%;
+}
+
+/* Grid fallback: simple stacked layout */
+.grid-fallback,
+.grid-fallback > * {
+    width: 100%;
+    float: none;
+    display: block;
+}
+
+/* CSS variable fallback colors for elements using accent color */
+:root { --accent-color: #00ff9d; }
+
+.accent-fallback {
+    color: #00ff9d;
+    border-color: #00ff9d;
+}
