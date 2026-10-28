@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+<title>Windows 校园 SMB 共享服务使用指南</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+    body {
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+        font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.8;
+        letter-spacing: 0.5px;
+        padding: 20px 12px 60px;
+    }
+    .page { max-width: 1000px; margin: 0 auto; }
+    .toolbar {
+        margin-bottom: 24px;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(0, 255, 157, 0.35);
+    }
+    .toolbar a {
+        display: inline-block;
+        margin-right: 10px;
+        padding: 8px 22px;
+        border: 2px solid #00ff9d;
+        border-radius: 22px;
+        color: #00ff9d;
+        text-decoration: none;
+        font-size: 15px;
+        line-height: 1.2;
+    }
+    .toolbar a.back { border-color: #00ab6a; color: #00ab6a; }
+    .toolbar a:hover { background: rgba(0, 255, 157, 0.15); }
+    .markdown-container { overflow-x: hidden; word-wrap: break-word; }
+    .markdown-container h1, .markdown-container h2, .markdown-container h3,
+    .markdown-container h4, .markdown-container h5, .markdown-container h6 {
+        margin: 1.4em 0 0.6em;
+        font-weight: bold;
+        line-height: 1.4;
+    }
+    .markdown-container h1 { font-size: 2em; color: #00ff9d; border-bottom: 1px solid rgba(0,255,157,0.25); padding-bottom: 8px; }
+    .markdown-container h2 { font-size: 1.6em; color: #00ff9d; }
+    .markdown-container h3 { font-size: 1.3em; color: #7dffce; }
+    .markdown-container h4 { font-size: 1.1em; color: #7dffce; }
+    .markdown-container p, .markdown-container li { line-height: 1.75; }
+    .markdown-container p { margin: 0.8em 0; }
+    .markdown-container ul, .markdown-container ol { margin: 0.8em 0 0.8em 2em; }
+    .markdown-container li { margin: 0.3em 0; }
+    .markdown-container a { color: #00d0ff; text-decoration: underline; }
+    .markdown-container strong { color: #ffffff; }
+    .markdown-container code {
+        background: #1c1c1c;
+        color: #ffd479;
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.92em;
+    }
+    .markdown-container pre {
+        background: #1c1c1c;
+        color: #e8f0ff;
+        border: 1px solid #3a3a3a;
+        border-left: 4px solid #00ff9d;
+        padding: 14px 16px;
+        margin: 1em 0;
+        overflow: auto;
+        border-radius: 6px;
+        line-height: 1.6;
+    }
+    .markdown-container pre code {
+        background: none;
+        color: inherit;
+        padding: 0;
+        font-size: 0.9em;
+        white-space: pre;
+    }
+    .markdown-container blockquote {
+        border-left: 5px solid #00ff9d;
+        background: #232323;
+        padding: 8px 14px;
+        margin: 1em 0;
+        color: #b9b9b9;
+    }
+    .markdown-container table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1em 0;
+    }
+    .markdown-container th, .markdown-container td {
+        border: 1px solid #444;
+        padding: 8px 10px;
+        text-align: left;
+    }
+    .markdown-container th { background: #333; color: #00ff9d; }
+    .markdown-container tr:nth-child(even) td { background: #2f2f2f; }
+    .markdown-container img { max-width: 90%; height: auto; display: block; margin: 1.5em auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,255,157,0.2); }
+    .markdown-container hr { border: 0; border-top: 1px solid #444; margin: 2em 0; }
+    @media (max-width: 768px) {
+        body { padding: 12px 8px 40px; }
+        .markdown-container img { max-width: 100%; }
+    }
+</style>
+</head>
+<body>
+<div class="page">
+    <div class="toolbar">
+        <a href="/index.html">返回首页</a>
+        <a class="back" href="javascript:history.back()">返回</a>
+    </div>
+    <div class="markdown-container">
+<h1>Windows 校园 SMB 共享服务使用指南</h1>
+<blockquote>
+<p>?重要提示：如需添加游戏等资源，请联系管理员处理！</p>
+</blockquote>
+<h2>一、核心信息（必看）</h2>
+<ul>
+<li>服务器地址：<code>\\10.88.202.78</code>（复制即用，勿漏反斜杠）</li>
+<li>登录凭据：<ul>
+<li>用户名：<strong>user</strong></li>
+<li>密码：<strong>暂无</strong></li>
+</ul>
+</li>
+<li>适用网络：支持「校园网络」<del>（校外也可以连接）</del>（只是只有50mbps的速度。。。你懂的）</li>
+</ul>
+<h2>二、两种连接方法（任选其一）</h2>
+<h3>方法一：直接通过文件资源管理器访问（推荐）</h3>
+<ol>
+<li><p>打开浏览器，并登录Alist</p>
+<p><a href="10.88.202.78:5244%EF%BC%9B" title="学生目录">学生目录</a></p>
+</li>
+</ol>
+<p><del>2. 成功后直接进入共享文件夹，可查看/使用内部文件。</del>
+ 3、若没有密码，请点击</p>
+<blockquote>
+<p>以访客登录，点击临时文件夹，里面有一个文件叫“游戏.exe”。下载并点击，会弹出一个选择界面。如图
+<img src="2.png" alt="alt text"></p>
+</blockquote>
+<p>最后再点击里面的“游戏”。用户名及密码请参照<strong>核心信息</strong>
+<em><strong>PS：你想拥有专属的账户嘛？欢迎联系我们</strong></em></p>
+<h3>方法二：映射网络驱动器</h3>
+<ol>
+<li>打开「文件资源管理器」，右键点击左侧「此电脑」；</li>
+<li>选择「映射网络驱动器」；</li>
+<li>在「文件夹」输入框中，粘贴地址：<code>\\10.88.202.78\游戏</code></li>
+<li>勾选「使用其他凭据连接」，点击「完成」；</li>
+<li>弹出认证窗口，输入用户名「user」、密码「暂无」，勾选「记住我的凭据」，点击「确定」；</li>
+<li>成功后，「此电脑」会新增「网络驱动器图标」，下次直接双击即可打开，无需重复连接。</li>
+</ol>
+<h2>三、常见问题解决（连接失败看这里）</h2>
+<ol>
+<li>? 无法连接服务器？<br>检查：是否已连接「校园网络」（切换至校园WiFi/网线）；</li>
+<li>? 地址报错？<br>核对：服务器地址是否为 <code>\\10.88.202.78</code>（勿少输反斜杠、勿输错数字）；</li>
+<li>? 登录失败？<br>确认：用户名是「user」，密码为「暂无」（若无法登录，联系管理员确认）；</li>
+<li>? 仍无法连接？<br>尝试：退出文件资源管理器后重新操作，或重新输入凭据。</li>
+</ol>
+<h2>四、注意事项</h2>
+<ol>
+<li>仅在校内网络可用，校外（如家庭网络、手机热点）无法访问；</li>
+<li>勾选「记住我的凭据」后，同一台电脑下次无需重复输入账号密码；</li>
+<li>请勿修改/删除共享文件夹内的系统文件，避免影响所有用户使用。</li>
+</ol>
+<p>#若想添加游戏，请将游戏名称写在纸上并放到高一二班10226柜子</p>
+
+    </div>
+</div>
+</body>
+</html>

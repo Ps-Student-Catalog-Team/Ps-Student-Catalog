@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+<title>Network Repair 使用说明</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+    body {
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+        font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.8;
+        letter-spacing: 0.5px;
+        padding: 20px 12px 60px;
+    }
+    .page { max-width: 1000px; margin: 0 auto; }
+    .toolbar {
+        margin-bottom: 24px;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(0, 255, 157, 0.35);
+    }
+    .toolbar a {
+        display: inline-block;
+        margin-right: 10px;
+        padding: 8px 22px;
+        border: 2px solid #00ff9d;
+        border-radius: 22px;
+        color: #00ff9d;
+        text-decoration: none;
+        font-size: 15px;
+        line-height: 1.2;
+    }
+    .toolbar a.back { border-color: #00ab6a; color: #00ab6a; }
+    .toolbar a:hover { background: rgba(0, 255, 157, 0.15); }
+    .markdown-container { overflow-x: hidden; word-wrap: break-word; }
+    .markdown-container h1, .markdown-container h2, .markdown-container h3,
+    .markdown-container h4, .markdown-container h5, .markdown-container h6 {
+        margin: 1.4em 0 0.6em;
+        font-weight: bold;
+        line-height: 1.4;
+    }
+    .markdown-container h1 { font-size: 2em; color: #00ff9d; border-bottom: 1px solid rgba(0,255,157,0.25); padding-bottom: 8px; }
+    .markdown-container h2 { font-size: 1.6em; color: #00ff9d; }
+    .markdown-container h3 { font-size: 1.3em; color: #7dffce; }
+    .markdown-container h4 { font-size: 1.1em; color: #7dffce; }
+    .markdown-container p, .markdown-container li { line-height: 1.75; }
+    .markdown-container p { margin: 0.8em 0; }
+    .markdown-container ul, .markdown-container ol { margin: 0.8em 0 0.8em 2em; }
+    .markdown-container li { margin: 0.3em 0; }
+    .markdown-container a { color: #00d0ff; text-decoration: underline; }
+    .markdown-container strong { color: #ffffff; }
+    .markdown-container code {
+        background: #1c1c1c;
+        color: #ffd479;
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.92em;
+    }
+    .markdown-container pre {
+        background: #1c1c1c;
+        color: #e8f0ff;
+        border: 1px solid #3a3a3a;
+        border-left: 4px solid #00ff9d;
+        padding: 14px 16px;
+        margin: 1em 0;
+        overflow: auto;
+        border-radius: 6px;
+        line-height: 1.6;
+    }
+    .markdown-container pre code {
+        background: none;
+        color: inherit;
+        padding: 0;
+        font-size: 0.9em;
+        white-space: pre;
+    }
+    .markdown-container blockquote {
+        border-left: 5px solid #00ff9d;
+        background: #232323;
+        padding: 8px 14px;
+        margin: 1em 0;
+        color: #b9b9b9;
+    }
+    .markdown-container table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1em 0;
+    }
+    .markdown-container th, .markdown-container td {
+        border: 1px solid #444;
+        padding: 8px 10px;
+        text-align: left;
+    }
+    .markdown-container th { background: #333; color: #00ff9d; }
+    .markdown-container tr:nth-child(even) td { background: #2f2f2f; }
+    .markdown-container img { max-width: 90%; height: auto; display: block; margin: 1.5em auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,255,157,0.2); }
+    .markdown-container hr { border: 0; border-top: 1px solid #444; margin: 2em 0; }
+    @media (max-width: 768px) {
+        body { padding: 12px 8px 40px; }
+        .markdown-container img { max-width: 100%; }
+    }
+</style>
+</head>
+<body>
+<div class="page">
+    <div class="toolbar">
+        <a href="/index.html">返回首页</a>
+        <a class="back" href="javascript:history.back()">返回</a>
+    </div>
+    <div class="markdown-container">
+<h1>Network Repair 使用说明</h1>
+<p>打开软件，你会看到一个模仿 Windows 疑难解答的界面。别被它骗了，那些“正在扫描”的进度条和“已修复问题”列表都是<strong>气氛组</strong>。真正决定命运的，是下面这几个选项。</p>
+<h2>1. “高级” 链接</h2>
+<ul>
+<li><strong>长什么样</strong>：一个蓝色的、可点击的文字。</li>
+<li><strong>点一下会发生什么</strong>：<ul>
+<li>它会像变魔术一样，显示或隐藏一个叫 <strong>“启用快速修复”</strong> 的复选框。</li>
+<li>简单说，这就是一个<strong>隐藏菜单的开关</strong>。点一下，多两个选项；再点一下，又藏回去。</li>
+</ul>
+</li>
+</ul>
+<h2>2. “启用快速修复” 复选框</h2>
+<ul>
+<li><strong>长什么样</strong>：一个可以勾选的小方框，旁边写着“启用快速修复”。</li>
+<li><strong>它的意义</strong>：这是整个软件的 <strong>“模式选择器”</strong>。<ul>
+<li><strong>勾选它</strong> → 软件会进入 <strong>代理模式</strong>。点“下一步”后，它会帮你设置系统的代理服务器。</li>
+<li><strong>不勾选它</strong> → 软件会进入 <strong>VPN模式</strong>。点“下一步”后，它会帮你创建并连接一个VPN。</li>
+</ul>
+</li>
+</ul>
+<h2>3. “使用高级设置” 复选框</h2>
+<ul>
+<li><strong>长什么样</strong>：另一个小方框，在“启用快速修复”的右边，只有勾了“启用快速修复”后才会出现。</li>
+<li><strong>它的作用</strong>：它是代理模式的 <strong>“端口选择器”</strong>。<ul>
+<li><strong>不勾这个</strong> → 代理会使用 <strong>10001 端口</strong>（通常是普通办公网络）。</li>
+<li><strong>勾上这个</strong> → 代理会使用 <strong>10002 端口</strong>（通常是研发或特殊网络）。</li>
+<li>说白了，就是一个快速在两个代理端口之间切换的开关。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1>点下“下一步”后，到底会发生什么？</h1>
+<p>根据上面两个选项的不同组合，结果如下：</p>
+<table>
+<thead>
+<tr>
+<th>“启用快速修复”</th>
+<th>“使用高级设置”</th>
+<th>点“下一步”后实际效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>勾选</strong></td>
+<td>不勾</td>
+<td>设置系统代理，端口 10001</td>
+</tr>
+<tr>
+<td><strong>勾选</strong></td>
+<td>勾选</td>
+<td>设置系统代理，端口 10002</td>
+</tr>
+<tr>
+<td><strong>不勾选</strong></td>
+<td>（不管）</td>
+<td>创建并连接 VPN（连接名为“以太网 4”）</td>
+</tr>
+</tbody></table>
+<p>无论哪种模式，你都会看到一个假的进度条和假的“已修复问题”报告——那是为了让界面看起来像真的疑难解答，直接忽略就好。</p>
+<hr>
+<h1>结果页面的两个按钮</h1>
+<p>当进度条跑完，你会看到一个“疑难解答已完成”的页面。这里有两个按钮：</p>
+<h2>“关闭疑难解答”</h2>
+<ul>
+<li><strong>作用</strong>：关闭软件窗口。</li>
+<li><strong>背后的事</strong>：软件会自动把你刚才做的操作<strong>撤消</strong>。<ul>
+<li>如果刚才开了代理 → 它会帮你<strong>关掉代理，并删除代理设置</strong>。</li>
+<li>如果刚才连了VPN → 它会帮你<strong>断开并删除那个VPN连接</strong>。</li>
+</ul>
+</li>
+<li><strong>放心点</strong>：不会留下任何残留设置。</li>
+</ul>
+<h2>“重新运行疑难解答”</h2>
+<ul>
+<li><strong>作用</strong>：回到软件主界面，让你重新选择模式。</li>
+<li><strong>背后的事</strong>：同样会先<strong>清理刚才的设置</strong>（关代理或删VPN），然后回到开始界面，你可以换个模式再试一次。</li>
+</ul>
+<hr>
+<h1>总结</h1>
+<ul>
+<li><strong>想开代理？</strong> 点“高级”→ 勾选“启用快速修复”→ 根据网络需要决定是否勾“使用高级设置”→ 点“下一步”。</li>
+<li><strong>想连VPN？</strong> 确保“启用快速修复”<strong>不勾选</strong>（如果它被藏起来了，先点“高级”让它出现，然后取消勾选）→ 点“下一步”。</li>
+<li><strong>想回到初始状态（关代理/删VPN）？</strong> 点“重新运行疑难解答”或直接关掉窗口。</li>
+</ul>
+<p>此软件由yuebi与storm_snow开发</p>
+<div style="text-align: right;">
+<i>作者：Yuebi</i><br>
+<i>日期：2025年3月27日</i>
+</div>
+    </div>
+</div>
+</body>
+</html>

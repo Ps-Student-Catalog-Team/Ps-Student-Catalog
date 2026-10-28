@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+<title>怎么在学校访问互联网（进阶版）</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+    body {
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+        font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.8;
+        letter-spacing: 0.5px;
+        padding: 20px 12px 60px;
+    }
+    .page { max-width: 1000px; margin: 0 auto; }
+    .toolbar {
+        margin-bottom: 24px;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(0, 255, 157, 0.35);
+    }
+    .toolbar a {
+        display: inline-block;
+        margin-right: 10px;
+        padding: 8px 22px;
+        border: 2px solid #00ff9d;
+        border-radius: 22px;
+        color: #00ff9d;
+        text-decoration: none;
+        font-size: 15px;
+        line-height: 1.2;
+    }
+    .toolbar a.back { border-color: #00ab6a; color: #00ab6a; }
+    .toolbar a:hover { background: rgba(0, 255, 157, 0.15); }
+    .markdown-container { overflow-x: hidden; word-wrap: break-word; }
+    .markdown-container h1, .markdown-container h2, .markdown-container h3,
+    .markdown-container h4, .markdown-container h5, .markdown-container h6 {
+        margin: 1.4em 0 0.6em;
+        font-weight: bold;
+        line-height: 1.4;
+    }
+    .markdown-container h1 { font-size: 2em; color: #00ff9d; border-bottom: 1px solid rgba(0,255,157,0.25); padding-bottom: 8px; }
+    .markdown-container h2 { font-size: 1.6em; color: #00ff9d; }
+    .markdown-container h3 { font-size: 1.3em; color: #7dffce; }
+    .markdown-container h4 { font-size: 1.1em; color: #7dffce; }
+    .markdown-container p, .markdown-container li { line-height: 1.75; }
+    .markdown-container p { margin: 0.8em 0; }
+    .markdown-container ul, .markdown-container ol { margin: 0.8em 0 0.8em 2em; }
+    .markdown-container li { margin: 0.3em 0; }
+    .markdown-container a { color: #00d0ff; text-decoration: underline; }
+    .markdown-container strong { color: #ffffff; }
+    .markdown-container code {
+        background: #1c1c1c;
+        color: #ffd479;
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.92em;
+    }
+    .markdown-container pre {
+        background: #1c1c1c;
+        color: #e8f0ff;
+        border: 1px solid #3a3a3a;
+        border-left: 4px solid #00ff9d;
+        padding: 14px 16px;
+        margin: 1em 0;
+        overflow: auto;
+        border-radius: 6px;
+        line-height: 1.6;
+    }
+    .markdown-container pre code {
+        background: none;
+        color: inherit;
+        padding: 0;
+        font-size: 0.9em;
+        white-space: pre;
+    }
+    .markdown-container blockquote {
+        border-left: 5px solid #00ff9d;
+        background: #232323;
+        padding: 8px 14px;
+        margin: 1em 0;
+        color: #b9b9b9;
+    }
+    .markdown-container table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1em 0;
+    }
+    .markdown-container th, .markdown-container td {
+        border: 1px solid #444;
+        padding: 8px 10px;
+        text-align: left;
+    }
+    .markdown-container th { background: #333; color: #00ff9d; }
+    .markdown-container tr:nth-child(even) td { background: #2f2f2f; }
+    .markdown-container img { max-width: 90%; height: auto; display: block; margin: 1.5em auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,255,157,0.2); }
+    .markdown-container hr { border: 0; border-top: 1px solid #444; margin: 2em 0; }
+    @media (max-width: 768px) {
+        body { padding: 12px 8px 40px; }
+        .markdown-container img { max-width: 100%; }
+    }
+</style>
+</head>
+<body>
+<div class="page">
+    <div class="toolbar">
+        <a href="/index.html">返回首页</a>
+        <a class="back" href="javascript:history.back()">返回</a>
+    </div>
+    <div class="markdown-container">
+<h1>怎么在学校访问互联网（进阶版）</h1>
+<p>相信连接过学校Wi-Fi的同学一定有过这样的经历：明明已经连接到了学校Wi-Fi，却只有不到1MB/s的速度甚至只有1KB/s的速度。这一切的原因都是因为学校的AP（网络接入点）太烂了。那么有没有什么办法能较好的解决以上的问题呢？那当然是有的。下面我将教你利用班中电脑当作路由器使用。</p>
+<h2>注意⚠️：以下方法只适用于Windows 8及以上的系统，Windows 7目前还没办法支持。且一切的行为所带来的后果需自负！若还未配置VPN，请查看这里<a href="wed..md#%E5%A6%82%E4%BD%95%E8%BF%9E%E6%8E%A5VPN">VPN连接</a>。</h2>
+<p><img src="../img/windows7.jpg" alt="Windows 7" title="Windows 7">Windows7长这样
+<img src="../img/Windows10.AVIF" alt="Windows 10" title="Windows 10">Windows10长这样</p>
+<h3>让我们开始吧（使用Windows 10做演示）</h3>
+<h4>第一步：在键盘中按下win+i键。弹出后，点击“网络和Internat” 后，再点击“移动热点”（或点击这个<a href="ms-settings:network-mobilehotspot?activationSource=SMC-IA-4027762">打开 windows 网络设置</a>）</h4>
+<h4>第二步：点击“打开‘与其他设备共享我的 Internet 连接’”。</h4>
+<h4>这样就可以使能连接vpn的设备联网啦</h4>
+<h3>导言（若是不想看可以直接跳转到下面的解决方法。</h3>
+<hr>
+<p>&quot;主播主播，你的手法对我的mp4还是太吃操作啦，有没有不用我使用VPN就能联网的操作？&quot;有的，兄弟有的。下面我将介绍另一种方法</p>
+<p>依旧的，我们首先像上面一样打开热点。不过，在打开前，我们将电脑的VPN先挂上，挂好之后，我们打开热点后mp4就可以上网了。。吗？
+很快发现，打开了VPN之后，明明电脑可以正常上网，而设备却显示没网。这是为什么呢？这是因为Windows的移动热点基于“Internet连接共享”（ICS），它将主机的默认网络连接共享给热点设备。当VPN启用后，虽然主机的流量可能通过VPN接口转发，但VPN接口本身是虚拟的，它依赖于底层物理接口传输数据。热点功能默认选择的是物理接口作为共享源，因此热点设备只能通过物理接口直接访问互联网，而无法自动获得VPN的加密通道 。那么，我们该怎么才能让连接设备上网呢？</p>
+<h3>解决方法<a name="path 2"></a></h3>
+<p>既然了解了上述原理，那么是不是只要将Wi-Fi的连接源导向至VPN中，就可以使连接Wi-Fi的设备直接上网了呢？理论存在，实践开始！</p>
+<p>在键盘上按下&quot;win+r&quot;键，在弹出的窗口输入<code>ncpa..cpl </code>。</p>
+<p>在打开的网络连接列表中，找出VPN对应的网络连接（通常网卡名称是TAP-Windows***），下图中内容只是示意，抓图时没有连接上VPN，如果是连接上VPN后，上面不会显示小红叉的。
+<img src="../img/IMG_0805.PNG" alt="控制面板" title="控制面板"></p>
+<p>打开“属性”窗口，切换到“共享”Tab页：
+<img src="../img/%E5%85%B1%E4%BA%AB%E5%9B%BE%E5%83%8F.png" alt="共享" title="共享"></p>
+<p>选择上“允许其他网络用户通过此计算机的Internet连接来连接(N)”，此时会热点在使用其它网络在共享的话（如下图，此时在使用本地有线连接在共享）会弹出提示，选择“确定”即可。
+<img src="../img/%E5%85%B1%E4%BA%AB%E5%9B%BE%E5%83%8F2.png" alt="共享" title="共享">
+下边这个列表框选择的是共享给哪个网络，我这里选择的是热点对应的网络连接。</p>
+<p>上面的配置后，此时连接在热点的移动设备或其它电脑，就是在通过VPN上网啦。</p>
+<div style="text-align: right;">
+<i>作者：辰艾</i><br>
+<i>日期：2026年3月13日</i>
+</div>
+
+    </div>
+</div>
+</body>
+</html>
