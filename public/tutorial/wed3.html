@@ -19,16 +19,18 @@
         font-size: 16px;
         line-height: 1.8;
         letter-spacing: 0.5px;
-        padding: 20px 12px 60px;
+        padding-bottom: 40px;
     }
-    .page { max-width: 1000px; margin: 0 auto; }
+
+    /* ===== 顶部工具条 ===== */
     .toolbar {
-        margin-bottom: 24px;
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(0, 255, 157, 0.35);
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 14px 30px 0;
+        overflow: hidden;
     }
     .toolbar a {
-        display: inline-block;
+        float: left;
         margin-right: 10px;
         padding: 8px 22px;
         border: 2px solid #00ff9d;
@@ -40,7 +42,83 @@
     }
     .toolbar a.back { border-color: #00ab6a; color: #00ab6a; }
     .toolbar a:hover { background: rgba(0, 255, 157, 0.15); }
-    .markdown-container { overflow-x: hidden; word-wrap: break-word; }
+
+    /* ===== 双栏布局：旧浏览器用 float，现代浏览器用 flex ===== */
+    .page-layout {
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 30px;
+        overflow: hidden;
+        *zoom: 1;
+    }
+    .page-layout:after { content: ""; display: table; clear: both; }
+
+    .toc-sidebar {
+        float: left;
+        width: 280px;
+        margin-right: 30px;
+        background: #232323;
+        border: 1px solid rgba(0, 255, 157, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+    }
+    .markdown-container {
+        margin-left: 310px;
+        min-height: 60vh;
+        overflow-x: hidden;
+        word-wrap: break-word;
+    }
+
+    @supports (display: flex) {
+        .page-layout { display: flex; gap: 30px; }
+        .toc-sidebar {
+            float: none;
+            margin-right: 0;
+            flex-shrink: 0;
+            position: -webkit-sticky;
+            position: sticky;
+            top: 20px;
+            height: -webkit-fit-content;
+            height: fit-content;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        .markdown-container { margin-left: 0; flex: 1; min-width: 0; }
+    }
+
+    /* ===== 目录 ===== */
+    .toc-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #00ff9d;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid rgba(0, 255, 157, 0.3);
+    }
+    .toc-title:before { content: "📑 "; }
+    .toc-list { list-style: none; padding: 0; margin: 0; }
+    .toc-list li { margin: 0; padding: 0; }
+    .toc-list a {
+        display: block;
+        padding: 8px 12px;
+        color: #ccc;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.95em;
+        line-height: 1.4;
+        border-left: 3px solid transparent;
+    }
+    .toc-list a:hover {
+        background: rgba(0, 255, 157, 0.1);
+        color: #00ff9d;
+        padding-left: 15px;
+    }
+    .toc-list .toc-h1 { font-weight: 600; font-size: 1em; }
+    .toc-list .toc-h2 { padding-left: 20px; font-size: 0.9em; }
+    .toc-list .toc-h3 { padding-left: 35px; font-size: 0.85em; color: #aaa; }
+    .toc-list .toc-h3:hover { color: #00ff9d; }
+
+    /* ===== Markdown 内容 ===== */
     .markdown-container h1, .markdown-container h2, .markdown-container h3,
     .markdown-container h4, .markdown-container h5, .markdown-container h6 {
         margin: 1.4em 0 0.6em;
@@ -90,11 +168,7 @@
         margin: 1em 0;
         color: #b9b9b9;
     }
-    .markdown-container table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 1em 0;
-    }
+    .markdown-container table { width: 100%; border-collapse: collapse; margin: 1em 0; }
     .markdown-container th, .markdown-container td {
         border: 1px solid #444;
         padding: 8px 10px;
@@ -102,36 +176,63 @@
     }
     .markdown-container th { background: #333; color: #00ff9d; }
     .markdown-container tr:nth-child(even) td { background: #2f2f2f; }
-    .markdown-container img { max-width: 90%; height: auto; display: block; margin: 1.5em auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,255,157,0.2); }
+    .markdown-container img {
+        max-width: 90%;
+        height: auto;
+        display: block;
+        margin: 1.5em auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 255, 157, 0.2);
+    }
     .markdown-container hr { border: 0; border-top: 1px solid #444; margin: 2em 0; }
-    @media (max-width: 768px) {
-        body { padding: 12px 8px 40px; }
+
+    /* ===== 窄屏：目录放到内容上方 ===== */
+    @media (max-width: 900px) {
+        .toolbar { padding: 10px 12px 0; }
+        .page-layout { padding: 12px; }
+        .toc-sidebar {
+            float: none;
+            width: auto;
+            margin: 0 0 20px;
+            position: static;
+        }
+        .markdown-container { margin-left: 0; }
         .markdown-container img { max-width: 100%; }
     }
 </style>
 </head>
 <body>
-<div class="page">
-    <div class="toolbar">
-        <a href="/index.html">返回首页</a>
-        <a class="back" href="javascript:history.back()">返回</a>
+<div class="toolbar">
+    <a href="/index.html">返回首页</a>
+    <a class="back" href="javascript:history.back()">返回</a>
+</div>
+<div class="page-layout">
+    <div class="toc-sidebar">
+        <div class="toc-title">目录</div>
+    <ul class="toc-list">
+        <li><a class="toc-h1" href="#sec-1">怎么在学校访问互联网（进阶版）</a></li>
+        <li><a class="toc-h2" href="#sec-2">注意⚠️：以下方法只适用于Windows 8及以上的系统，Windows 7目前还没办法支持。且一切的行为所带来的后果需自负！若还未配置VPN，请查看这里VPN连接。</a></li>
+        <li><a class="toc-h3" href="#sec-3">让我们开始吧（使用Windows 10做演示）</a></li>
+        <li><a class="toc-h3" href="#sec-4">导言（若是不想看可以直接跳转到下面的解决方法。</a></li>
+        <li><a class="toc-h3" href="#sec-5">解决方法</a></li>
+    </ul>
     </div>
     <div class="markdown-container">
-<h1>怎么在学校访问互联网（进阶版）</h1>
+<h1 id="sec-1">怎么在学校访问互联网（进阶版）</h1>
 <p>相信连接过学校Wi-Fi的同学一定有过这样的经历：明明已经连接到了学校Wi-Fi，却只有不到1MB/s的速度甚至只有1KB/s的速度。这一切的原因都是因为学校的AP（网络接入点）太烂了。那么有没有什么办法能较好的解决以上的问题呢？那当然是有的。下面我将教你利用班中电脑当作路由器使用。</p>
-<h2>注意⚠️：以下方法只适用于Windows 8及以上的系统，Windows 7目前还没办法支持。且一切的行为所带来的后果需自负！若还未配置VPN，请查看这里<a href="wed..md#%E5%A6%82%E4%BD%95%E8%BF%9E%E6%8E%A5VPN">VPN连接</a>。</h2>
+<h2 id="sec-2">注意⚠️：以下方法只适用于Windows 8及以上的系统，Windows 7目前还没办法支持。且一切的行为所带来的后果需自负！若还未配置VPN，请查看这里<a href="wed..md#%E5%A6%82%E4%BD%95%E8%BF%9E%E6%8E%A5VPN">VPN连接</a>。</h2>
 <p><img src="../img/windows7.jpg" alt="Windows 7" title="Windows 7">Windows7长这样
 <img src="../img/Windows10.AVIF" alt="Windows 10" title="Windows 10">Windows10长这样</p>
-<h3>让我们开始吧（使用Windows 10做演示）</h3>
+<h3 id="sec-3">让我们开始吧（使用Windows 10做演示）</h3>
 <h4>第一步：在键盘中按下win+i键。弹出后，点击“网络和Internat” 后，再点击“移动热点”（或点击这个<a href="ms-settings:network-mobilehotspot?activationSource=SMC-IA-4027762">打开 windows 网络设置</a>）</h4>
 <h4>第二步：点击“打开‘与其他设备共享我的 Internet 连接’”。</h4>
 <h4>这样就可以使能连接vpn的设备联网啦</h4>
-<h3>导言（若是不想看可以直接跳转到下面的解决方法。</h3>
+<h3 id="sec-4">导言（若是不想看可以直接跳转到下面的解决方法。</h3>
 <hr>
 <p>&quot;主播主播，你的手法对我的mp4还是太吃操作啦，有没有不用我使用VPN就能联网的操作？&quot;有的，兄弟有的。下面我将介绍另一种方法</p>
 <p>依旧的，我们首先像上面一样打开热点。不过，在打开前，我们将电脑的VPN先挂上，挂好之后，我们打开热点后mp4就可以上网了。。吗？
 很快发现，打开了VPN之后，明明电脑可以正常上网，而设备却显示没网。这是为什么呢？这是因为Windows的移动热点基于“Internet连接共享”（ICS），它将主机的默认网络连接共享给热点设备。当VPN启用后，虽然主机的流量可能通过VPN接口转发，但VPN接口本身是虚拟的，它依赖于底层物理接口传输数据。热点功能默认选择的是物理接口作为共享源，因此热点设备只能通过物理接口直接访问互联网，而无法自动获得VPN的加密通道 。那么，我们该怎么才能让连接设备上网呢？</p>
-<h3>解决方法<a name="path 2"></a></h3>
+<h3 id="sec-5">解决方法<a name="path 2"></a></h3>
 <p>既然了解了上述原理，那么是不是只要将Wi-Fi的连接源导向至VPN中，就可以使连接Wi-Fi的设备直接上网了呢？理论存在，实践开始！</p>
 <p>在键盘上按下&quot;win+r&quot;键，在弹出的窗口输入<code>ncpa..cpl </code>。</p>
 <p>在打开的网络连接列表中，找出VPN对应的网络连接（通常网卡名称是TAP-Windows***），下图中内容只是示意，抓图时没有连接上VPN，如果是连接上VPN后，上面不会显示小红叉的。

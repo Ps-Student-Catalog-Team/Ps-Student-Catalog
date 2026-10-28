@@ -19,16 +19,18 @@
         font-size: 16px;
         line-height: 1.8;
         letter-spacing: 0.5px;
-        padding: 20px 12px 60px;
+        padding-bottom: 40px;
     }
-    .page { max-width: 1000px; margin: 0 auto; }
+
+    /* ===== 顶部工具条 ===== */
     .toolbar {
-        margin-bottom: 24px;
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(0, 255, 157, 0.35);
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 14px 30px 0;
+        overflow: hidden;
     }
     .toolbar a {
-        display: inline-block;
+        float: left;
         margin-right: 10px;
         padding: 8px 22px;
         border: 2px solid #00ff9d;
@@ -40,7 +42,83 @@
     }
     .toolbar a.back { border-color: #00ab6a; color: #00ab6a; }
     .toolbar a:hover { background: rgba(0, 255, 157, 0.15); }
-    .markdown-container { overflow-x: hidden; word-wrap: break-word; }
+
+    /* ===== 双栏布局：旧浏览器用 float，现代浏览器用 flex ===== */
+    .page-layout {
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 30px;
+        overflow: hidden;
+        *zoom: 1;
+    }
+    .page-layout:after { content: ""; display: table; clear: both; }
+
+    .toc-sidebar {
+        float: left;
+        width: 280px;
+        margin-right: 30px;
+        background: #232323;
+        border: 1px solid rgba(0, 255, 157, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+    }
+    .markdown-container {
+        margin-left: 310px;
+        min-height: 60vh;
+        overflow-x: hidden;
+        word-wrap: break-word;
+    }
+
+    @supports (display: flex) {
+        .page-layout { display: flex; gap: 30px; }
+        .toc-sidebar {
+            float: none;
+            margin-right: 0;
+            flex-shrink: 0;
+            position: -webkit-sticky;
+            position: sticky;
+            top: 20px;
+            height: -webkit-fit-content;
+            height: fit-content;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        .markdown-container { margin-left: 0; flex: 1; min-width: 0; }
+    }
+
+    /* ===== 目录 ===== */
+    .toc-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #00ff9d;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid rgba(0, 255, 157, 0.3);
+    }
+    .toc-title:before { content: "📑 "; }
+    .toc-list { list-style: none; padding: 0; margin: 0; }
+    .toc-list li { margin: 0; padding: 0; }
+    .toc-list a {
+        display: block;
+        padding: 8px 12px;
+        color: #ccc;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.95em;
+        line-height: 1.4;
+        border-left: 3px solid transparent;
+    }
+    .toc-list a:hover {
+        background: rgba(0, 255, 157, 0.1);
+        color: #00ff9d;
+        padding-left: 15px;
+    }
+    .toc-list .toc-h1 { font-weight: 600; font-size: 1em; }
+    .toc-list .toc-h2 { padding-left: 20px; font-size: 0.9em; }
+    .toc-list .toc-h3 { padding-left: 35px; font-size: 0.85em; color: #aaa; }
+    .toc-list .toc-h3:hover { color: #00ff9d; }
+
+    /* ===== Markdown 内容 ===== */
     .markdown-container h1, .markdown-container h2, .markdown-container h3,
     .markdown-container h4, .markdown-container h5, .markdown-container h6 {
         margin: 1.4em 0 0.6em;
@@ -90,11 +168,7 @@
         margin: 1em 0;
         color: #b9b9b9;
     }
-    .markdown-container table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 1em 0;
-    }
+    .markdown-container table { width: 100%; border-collapse: collapse; margin: 1em 0; }
     .markdown-container th, .markdown-container td {
         border: 1px solid #444;
         padding: 8px 10px;
@@ -102,26 +176,55 @@
     }
     .markdown-container th { background: #333; color: #00ff9d; }
     .markdown-container tr:nth-child(even) td { background: #2f2f2f; }
-    .markdown-container img { max-width: 90%; height: auto; display: block; margin: 1.5em auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,255,157,0.2); }
+    .markdown-container img {
+        max-width: 90%;
+        height: auto;
+        display: block;
+        margin: 1.5em auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 255, 157, 0.2);
+    }
     .markdown-container hr { border: 0; border-top: 1px solid #444; margin: 2em 0; }
-    @media (max-width: 768px) {
-        body { padding: 12px 8px 40px; }
+
+    /* ===== 窄屏：目录放到内容上方 ===== */
+    @media (max-width: 900px) {
+        .toolbar { padding: 10px 12px 0; }
+        .page-layout { padding: 12px; }
+        .toc-sidebar {
+            float: none;
+            width: auto;
+            margin: 0 0 20px;
+            position: static;
+        }
+        .markdown-container { margin-left: 0; }
         .markdown-container img { max-width: 100%; }
     }
 </style>
 </head>
 <body>
-<div class="page">
-    <div class="toolbar">
-        <a href="/index.html">返回首页</a>
-        <a class="back" href="javascript:history.back()">返回</a>
+<div class="toolbar">
+    <a href="/index.html">返回首页</a>
+    <a class="back" href="javascript:history.back()">返回</a>
+</div>
+<div class="page-layout">
+    <div class="toc-sidebar">
+        <div class="toc-title">目录</div>
+    <ul class="toc-list">
+        <li><a class="toc-h1" href="#sec-1">Windows 校园 SMB 共享服务使用指南</a></li>
+        <li><a class="toc-h2" href="#sec-2">一、核心信息（必看）</a></li>
+        <li><a class="toc-h2" href="#sec-3">二、两种连接方法（任选其一）</a></li>
+        <li><a class="toc-h3" href="#sec-4">方法一：直接通过文件资源管理器访问（推荐）</a></li>
+        <li><a class="toc-h3" href="#sec-5">方法二：映射网络驱动器</a></li>
+        <li><a class="toc-h2" href="#sec-6">三、常见问题解决（连接失败看这里）</a></li>
+        <li><a class="toc-h2" href="#sec-7">四、注意事项</a></li>
+    </ul>
     </div>
     <div class="markdown-container">
-<h1>Windows 校园 SMB 共享服务使用指南</h1>
+<h1 id="sec-1">Windows 校园 SMB 共享服务使用指南</h1>
 <blockquote>
 <p>?重要提示：如需添加游戏等资源，请联系管理员处理！</p>
 </blockquote>
-<h2>一、核心信息（必看）</h2>
+<h2 id="sec-2">一、核心信息（必看）</h2>
 <ul>
 <li>服务器地址：<code>\\10.88.202.78</code>（复制即用，勿漏反斜杠）</li>
 <li>登录凭据：<ul>
@@ -131,8 +234,8 @@
 </li>
 <li>适用网络：支持「校园网络」<del>（校外也可以连接）</del>（只是只有50mbps的速度。。。你懂的）</li>
 </ul>
-<h2>二、两种连接方法（任选其一）</h2>
-<h3>方法一：直接通过文件资源管理器访问（推荐）</h3>
+<h2 id="sec-3">二、两种连接方法（任选其一）</h2>
+<h3 id="sec-4">方法一：直接通过文件资源管理器访问（推荐）</h3>
 <ol>
 <li><p>打开浏览器，并登录Alist</p>
 <p><a href="10.88.202.78:5244%EF%BC%9B" title="学生目录">学生目录</a></p>
@@ -146,7 +249,7 @@
 </blockquote>
 <p>最后再点击里面的“游戏”。用户名及密码请参照<strong>核心信息</strong>
 <em><strong>PS：你想拥有专属的账户嘛？欢迎联系我们</strong></em></p>
-<h3>方法二：映射网络驱动器</h3>
+<h3 id="sec-5">方法二：映射网络驱动器</h3>
 <ol>
 <li>打开「文件资源管理器」，右键点击左侧「此电脑」；</li>
 <li>选择「映射网络驱动器」；</li>
@@ -155,14 +258,14 @@
 <li>弹出认证窗口，输入用户名「user」、密码「暂无」，勾选「记住我的凭据」，点击「确定」；</li>
 <li>成功后，「此电脑」会新增「网络驱动器图标」，下次直接双击即可打开，无需重复连接。</li>
 </ol>
-<h2>三、常见问题解决（连接失败看这里）</h2>
+<h2 id="sec-6">三、常见问题解决（连接失败看这里）</h2>
 <ol>
 <li>? 无法连接服务器？<br>检查：是否已连接「校园网络」（切换至校园WiFi/网线）；</li>
 <li>? 地址报错？<br>核对：服务器地址是否为 <code>\\10.88.202.78</code>（勿少输反斜杠、勿输错数字）；</li>
 <li>? 登录失败？<br>确认：用户名是「user」，密码为「暂无」（若无法登录，联系管理员确认）；</li>
 <li>? 仍无法连接？<br>尝试：退出文件资源管理器后重新操作，或重新输入凭据。</li>
 </ol>
-<h2>四、注意事项</h2>
+<h2 id="sec-7">四、注意事项</h2>
 <ol>
 <li>仅在校内网络可用，校外（如家庭网络、手机热点）无法访问；</li>
 <li>勾选「记住我的凭据」后，同一台电脑下次无需重复输入账号密码；</li>

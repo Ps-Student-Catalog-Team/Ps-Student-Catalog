@@ -19,16 +19,18 @@
         font-size: 16px;
         line-height: 1.8;
         letter-spacing: 0.5px;
-        padding: 20px 12px 60px;
+        padding-bottom: 40px;
     }
-    .page { max-width: 1000px; margin: 0 auto; }
+
+    /* ===== 顶部工具条 ===== */
     .toolbar {
-        margin-bottom: 24px;
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(0, 255, 157, 0.35);
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 14px 30px 0;
+        overflow: hidden;
     }
     .toolbar a {
-        display: inline-block;
+        float: left;
         margin-right: 10px;
         padding: 8px 22px;
         border: 2px solid #00ff9d;
@@ -40,7 +42,83 @@
     }
     .toolbar a.back { border-color: #00ab6a; color: #00ab6a; }
     .toolbar a:hover { background: rgba(0, 255, 157, 0.15); }
-    .markdown-container { overflow-x: hidden; word-wrap: break-word; }
+
+    /* ===== 双栏布局：旧浏览器用 float，现代浏览器用 flex ===== */
+    .page-layout {
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 30px;
+        overflow: hidden;
+        *zoom: 1;
+    }
+    .page-layout:after { content: ""; display: table; clear: both; }
+
+    .toc-sidebar {
+        float: left;
+        width: 280px;
+        margin-right: 30px;
+        background: #232323;
+        border: 1px solid rgba(0, 255, 157, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+    }
+    .markdown-container {
+        margin-left: 310px;
+        min-height: 60vh;
+        overflow-x: hidden;
+        word-wrap: break-word;
+    }
+
+    @supports (display: flex) {
+        .page-layout { display: flex; gap: 30px; }
+        .toc-sidebar {
+            float: none;
+            margin-right: 0;
+            flex-shrink: 0;
+            position: -webkit-sticky;
+            position: sticky;
+            top: 20px;
+            height: -webkit-fit-content;
+            height: fit-content;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        .markdown-container { margin-left: 0; flex: 1; min-width: 0; }
+    }
+
+    /* ===== 目录 ===== */
+    .toc-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #00ff9d;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid rgba(0, 255, 157, 0.3);
+    }
+    .toc-title:before { content: "📑 "; }
+    .toc-list { list-style: none; padding: 0; margin: 0; }
+    .toc-list li { margin: 0; padding: 0; }
+    .toc-list a {
+        display: block;
+        padding: 8px 12px;
+        color: #ccc;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.95em;
+        line-height: 1.4;
+        border-left: 3px solid transparent;
+    }
+    .toc-list a:hover {
+        background: rgba(0, 255, 157, 0.1);
+        color: #00ff9d;
+        padding-left: 15px;
+    }
+    .toc-list .toc-h1 { font-weight: 600; font-size: 1em; }
+    .toc-list .toc-h2 { padding-left: 20px; font-size: 0.9em; }
+    .toc-list .toc-h3 { padding-left: 35px; font-size: 0.85em; color: #aaa; }
+    .toc-list .toc-h3:hover { color: #00ff9d; }
+
+    /* ===== Markdown 内容 ===== */
     .markdown-container h1, .markdown-container h2, .markdown-container h3,
     .markdown-container h4, .markdown-container h5, .markdown-container h6 {
         margin: 1.4em 0 0.6em;
@@ -90,11 +168,7 @@
         margin: 1em 0;
         color: #b9b9b9;
     }
-    .markdown-container table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 1em 0;
-    }
+    .markdown-container table { width: 100%; border-collapse: collapse; margin: 1em 0; }
     .markdown-container th, .markdown-container td {
         border: 1px solid #444;
         padding: 8px 10px;
@@ -102,24 +176,55 @@
     }
     .markdown-container th { background: #333; color: #00ff9d; }
     .markdown-container tr:nth-child(even) td { background: #2f2f2f; }
-    .markdown-container img { max-width: 90%; height: auto; display: block; margin: 1.5em auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,255,157,0.2); }
+    .markdown-container img {
+        max-width: 90%;
+        height: auto;
+        display: block;
+        margin: 1.5em auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 255, 157, 0.2);
+    }
     .markdown-container hr { border: 0; border-top: 1px solid #444; margin: 2em 0; }
-    @media (max-width: 768px) {
-        body { padding: 12px 8px 40px; }
+
+    /* ===== 窄屏：目录放到内容上方 ===== */
+    @media (max-width: 900px) {
+        .toolbar { padding: 10px 12px 0; }
+        .page-layout { padding: 12px; }
+        .toc-sidebar {
+            float: none;
+            width: auto;
+            margin: 0 0 20px;
+            position: static;
+        }
+        .markdown-container { margin-left: 0; }
         .markdown-container img { max-width: 100%; }
     }
 </style>
 </head>
 <body>
-<div class="page">
-    <div class="toolbar">
-        <a href="/index.html">返回首页</a>
-        <a class="back" href="javascript:history.back()">返回</a>
+<div class="toolbar">
+    <a href="/index.html">返回首页</a>
+    <a class="back" href="javascript:history.back()">返回</a>
+</div>
+<div class="page-layout">
+    <div class="toc-sidebar">
+        <div class="toc-title">目录</div>
+    <ul class="toc-list">
+        <li><a class="toc-h1" href="#sec-1">Network Repair 使用说明</a></li>
+        <li><a class="toc-h2" href="#sec-2">1. “高级” 链接</a></li>
+        <li><a class="toc-h2" href="#sec-3">2. “启用快速修复” 复选框</a></li>
+        <li><a class="toc-h2" href="#sec-4">3. “使用高级设置” 复选框</a></li>
+        <li><a class="toc-h1" href="#sec-5">点下“下一步”后，到底会发生什么？</a></li>
+        <li><a class="toc-h1" href="#sec-6">结果页面的两个按钮</a></li>
+        <li><a class="toc-h2" href="#sec-7">“关闭疑难解答”</a></li>
+        <li><a class="toc-h2" href="#sec-8">“重新运行疑难解答”</a></li>
+        <li><a class="toc-h1" href="#sec-9">总结</a></li>
+    </ul>
     </div>
     <div class="markdown-container">
-<h1>Network Repair 使用说明</h1>
+<h1 id="sec-1">Network Repair 使用说明</h1>
 <p>打开软件，你会看到一个模仿 Windows 疑难解答的界面。别被它骗了，那些“正在扫描”的进度条和“已修复问题”列表都是<strong>气氛组</strong>。真正决定命运的，是下面这几个选项。</p>
-<h2>1. “高级” 链接</h2>
+<h2 id="sec-2">1. “高级” 链接</h2>
 <ul>
 <li><strong>长什么样</strong>：一个蓝色的、可点击的文字。</li>
 <li><strong>点一下会发生什么</strong>：<ul>
@@ -128,7 +233,7 @@
 </ul>
 </li>
 </ul>
-<h2>2. “启用快速修复” 复选框</h2>
+<h2 id="sec-3">2. “启用快速修复” 复选框</h2>
 <ul>
 <li><strong>长什么样</strong>：一个可以勾选的小方框，旁边写着“启用快速修复”。</li>
 <li><strong>它的意义</strong>：这是整个软件的 <strong>“模式选择器”</strong>。<ul>
@@ -137,7 +242,7 @@
 </ul>
 </li>
 </ul>
-<h2>3. “使用高级设置” 复选框</h2>
+<h2 id="sec-4">3. “使用高级设置” 复选框</h2>
 <ul>
 <li><strong>长什么样</strong>：另一个小方框，在“启用快速修复”的右边，只有勾了“启用快速修复”后才会出现。</li>
 <li><strong>它的作用</strong>：它是代理模式的 <strong>“端口选择器”</strong>。<ul>
@@ -148,7 +253,7 @@
 </li>
 </ul>
 <hr>
-<h1>点下“下一步”后，到底会发生什么？</h1>
+<h1 id="sec-5">点下“下一步”后，到底会发生什么？</h1>
 <p>根据上面两个选项的不同组合，结果如下：</p>
 <table>
 <thead>
@@ -176,9 +281,9 @@
 </tbody></table>
 <p>无论哪种模式，你都会看到一个假的进度条和假的“已修复问题”报告——那是为了让界面看起来像真的疑难解答，直接忽略就好。</p>
 <hr>
-<h1>结果页面的两个按钮</h1>
+<h1 id="sec-6">结果页面的两个按钮</h1>
 <p>当进度条跑完，你会看到一个“疑难解答已完成”的页面。这里有两个按钮：</p>
-<h2>“关闭疑难解答”</h2>
+<h2 id="sec-7">“关闭疑难解答”</h2>
 <ul>
 <li><strong>作用</strong>：关闭软件窗口。</li>
 <li><strong>背后的事</strong>：软件会自动把你刚才做的操作<strong>撤消</strong>。<ul>
@@ -188,13 +293,13 @@
 </li>
 <li><strong>放心点</strong>：不会留下任何残留设置。</li>
 </ul>
-<h2>“重新运行疑难解答”</h2>
+<h2 id="sec-8">“重新运行疑难解答”</h2>
 <ul>
 <li><strong>作用</strong>：回到软件主界面，让你重新选择模式。</li>
 <li><strong>背后的事</strong>：同样会先<strong>清理刚才的设置</strong>（关代理或删VPN），然后回到开始界面，你可以换个模式再试一次。</li>
 </ul>
 <hr>
-<h1>总结</h1>
+<h1 id="sec-9">总结</h1>
 <ul>
 <li><strong>想开代理？</strong> 点“高级”→ 勾选“启用快速修复”→ 根据网络需要决定是否勾“使用高级设置”→ 点“下一步”。</li>
 <li><strong>想连VPN？</strong> 确保“启用快速修复”<strong>不勾选</strong>（如果它被藏起来了，先点“高级”让它出现，然后取消勾选）→ 点“下一步”。</li>

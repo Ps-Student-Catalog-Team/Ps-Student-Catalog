@@ -1,6 +1,6 @@
 /**
- * 将 public/tutorial 下的 Markdown 教程预渲染为纯静态 HTML。
- * 生成的页面不依赖任何 JS 即可显示内容，兼容旧浏览器 / IE。
+ * 将 public/tutorial 下的 Markdown 教程预渲染为纯静态 HTML（左侧目录 + 右侧内容）。
+ * 生成的页面不依赖 JS / PHP 即可显示内容，兼容旧浏览器 / IE。
  *
  * 用法：node scripts/build-tutorials.js
  */
@@ -25,7 +25,35 @@ function extractTitle(md, fallback) {
     return m ? m[1].trim() : fallback;
 }
 
-function pageTemplate(title, bodyHtml) {
+/**
+ * 给 h1/h2/h3 加 id，并生成目录数据。
+ * 返回 { html, toc: [{ level, id, text }] }
+ */
+function buildToc(html) {
+    const toc = [];
+    let counter = 0;
+    const out = html.replace(/<h([1-3])>([\s\S]*?)<\/h\1>/g, (match, level, inner) => {
+        counter += 1;
+        const id = 'sec-' + counter;
+        const text = inner.replace(/<[^>]+>/g, '').trim();
+        toc.push({ level: Number(level), id, text });
+        return `<h${level} id="${id}">${inner}</h${level}>`;
+    });
+    return { html: out, toc };
+}
+
+function tocHtml(toc) {
+    if (!toc.length) return '';
+    const items = toc
+        .map((t) => {
+            const cls = 'toc-h' + t.level;
+            return `        <li><a class="${cls}" href="#${t.id}">${escapeHtml(t.text)}</a></li>`;
+        })
+        .join('\n');
+    return `    <ul class="toc-list">\n${items}\n    </ul>`;
+}
+
+function pageTemplate(title, bodyHtml, tocListHtml) {
     return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -47,16 +75,18 @@ function pageTemplate(title, bodyHtml) {
         font-size: 16px;
         line-height: 1.8;
         letter-spacing: 0.5px;
-        padding: 20px 12px 60px;
+        padding-bottom: 40px;
     }
-    .page { max-width: 1000px; margin: 0 auto; }
+
+    /* ===== 顶部工具条 ===== */
     .toolbar {
-        margin-bottom: 24px;
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(0, 255, 157, 0.35);
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 14px 30px 0;
+        overflow: hidden;
     }
     .toolbar a {
-        display: inline-block;
+        float: left;
         margin-right: 10px;
         padding: 8px 22px;
         border: 2px solid #00ff9d;
@@ -68,7 +98,83 @@ function pageTemplate(title, bodyHtml) {
     }
     .toolbar a.back { border-color: #00ab6a; color: #00ab6a; }
     .toolbar a:hover { background: rgba(0, 255, 157, 0.15); }
-    .markdown-container { overflow-x: hidden; word-wrap: break-word; }
+
+    /* ===== 双栏布局：旧浏览器用 float，现代浏览器用 flex ===== */
+    .page-layout {
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 30px;
+        overflow: hidden;
+        *zoom: 1;
+    }
+    .page-layout:after { content: ""; display: table; clear: both; }
+
+    .toc-sidebar {
+        float: left;
+        width: 280px;
+        margin-right: 30px;
+        background: #232323;
+        border: 1px solid rgba(0, 255, 157, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+    }
+    .markdown-container {
+        margin-left: 310px;
+        min-height: 60vh;
+        overflow-x: hidden;
+        word-wrap: break-word;
+    }
+
+    @supports (display: flex) {
+        .page-layout { display: flex; gap: 30px; }
+        .toc-sidebar {
+            float: none;
+            margin-right: 0;
+            flex-shrink: 0;
+            position: -webkit-sticky;
+            position: sticky;
+            top: 20px;
+            height: -webkit-fit-content;
+            height: fit-content;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        .markdown-container { margin-left: 0; flex: 1; min-width: 0; }
+    }
+
+    /* ===== 目录 ===== */
+    .toc-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #00ff9d;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid rgba(0, 255, 157, 0.3);
+    }
+    .toc-title:before { content: "📑 "; }
+    .toc-list { list-style: none; padding: 0; margin: 0; }
+    .toc-list li { margin: 0; padding: 0; }
+    .toc-list a {
+        display: block;
+        padding: 8px 12px;
+        color: #ccc;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.95em;
+        line-height: 1.4;
+        border-left: 3px solid transparent;
+    }
+    .toc-list a:hover {
+        background: rgba(0, 255, 157, 0.1);
+        color: #00ff9d;
+        padding-left: 15px;
+    }
+    .toc-list .toc-h1 { font-weight: 600; font-size: 1em; }
+    .toc-list .toc-h2 { padding-left: 20px; font-size: 0.9em; }
+    .toc-list .toc-h3 { padding-left: 35px; font-size: 0.85em; color: #aaa; }
+    .toc-list .toc-h3:hover { color: #00ff9d; }
+
+    /* ===== Markdown 内容 ===== */
     .markdown-container h1, .markdown-container h2, .markdown-container h3,
     .markdown-container h4, .markdown-container h5, .markdown-container h6 {
         margin: 1.4em 0 0.6em;
@@ -118,11 +224,7 @@ function pageTemplate(title, bodyHtml) {
         margin: 1em 0;
         color: #b9b9b9;
     }
-    .markdown-container table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 1em 0;
-    }
+    .markdown-container table { width: 100%; border-collapse: collapse; margin: 1em 0; }
     .markdown-container th, .markdown-container td {
         border: 1px solid #444;
         padding: 8px 10px;
@@ -130,19 +232,40 @@ function pageTemplate(title, bodyHtml) {
     }
     .markdown-container th { background: #333; color: #00ff9d; }
     .markdown-container tr:nth-child(even) td { background: #2f2f2f; }
-    .markdown-container img { max-width: 90%; height: auto; display: block; margin: 1.5em auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,255,157,0.2); }
+    .markdown-container img {
+        max-width: 90%;
+        height: auto;
+        display: block;
+        margin: 1.5em auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 255, 157, 0.2);
+    }
     .markdown-container hr { border: 0; border-top: 1px solid #444; margin: 2em 0; }
-    @media (max-width: 768px) {
-        body { padding: 12px 8px 40px; }
+
+    /* ===== 窄屏：目录放到内容上方 ===== */
+    @media (max-width: 900px) {
+        .toolbar { padding: 10px 12px 0; }
+        .page-layout { padding: 12px; }
+        .toc-sidebar {
+            float: none;
+            width: auto;
+            margin: 0 0 20px;
+            position: static;
+        }
+        .markdown-container { margin-left: 0; }
         .markdown-container img { max-width: 100%; }
     }
 </style>
 </head>
 <body>
-<div class="page">
-    <div class="toolbar">
-        <a href="/index.html">返回首页</a>
-        <a class="back" href="javascript:history.back()">返回</a>
+<div class="toolbar">
+    <a href="/index.html">返回首页</a>
+    <a class="back" href="javascript:history.back()">返回</a>
+</div>
+<div class="page-layout">
+    <div class="toc-sidebar">
+        <div class="toc-title">目录</div>
+${tocListHtml}
     </div>
     <div class="markdown-container">
 ${bodyHtml}
@@ -161,11 +284,12 @@ function build() {
         const md = fs.readFileSync(mdPath, 'utf8');
         const base = file.replace(/\.md$/i, '');
         const title = extractTitle(md, base);
-        const html = marked.parse(md);
-        const page = pageTemplate(title, html);
+        const rendered = marked.parse(md);
+        const { html, toc } = buildToc(rendered);
+        const page = pageTemplate(title, html, tocHtml(toc));
         fs.writeFileSync(path.join(TUTORIAL_DIR, base + '.html'), page, 'utf8');
         count++;
-        console.log(`generated: public/tutorial/${base}.html  (${title})`);
+        console.log(`generated: public/tutorial/${base}.html  (${title})  目录项: ${toc.length}`);
     });
     console.log(`\nDone. ${count} file(s) generated.`);
 }
