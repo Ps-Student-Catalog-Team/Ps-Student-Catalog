@@ -286,7 +286,7 @@
 <h2 id="sec-3">如何配置Windows Time Server？</h2>
 <h2 id="sec-4">方法一:使用脚本（推荐）</h2>
 <h3 id="sec-5">1. 下载我们的脚本文件</h3>
-<p><a href="http://10.88.202.78:5244/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E8%BD%AF%E4%BB%B6/%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E8%84%9A%E6%9C%AC.bat">脚本文件下载</a></p>
+<p><a href="#" data-svc-port="5244" data-svc-path="/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E8%BD%AF%E4%BB%B6/%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E8%84%9A%E6%9C%AC.bat">脚本文件下载</a></p>
 <h3 id="sec-6">2.以管理员身份打开</h3>
 <h2 id="sec-7">方法二:手动配置</h2>
 <h3 id="sec-8">1. 打开“控制面板”</h3>
@@ -364,6 +364,51 @@
         window.attachEvent('onscroll', stick);
         window.attachEvent('onresize', function () { measure(); stick(); });
     }
+})();
+</script>
+
+<script>
+/* ==== 站点服务地址动态解析（2026-11-01） ====
+   不写死 10.88.202.78，按当前访问主机名生成；支持 ?host= 或 ?ip= 覆盖。
+   用法：<a data-svc-port="5244" data-svc-path="/d/xxx"> */
+(function () {
+  var q = new URLSearchParams(location.search);
+  var host = q.get('host') || q.get('ip') || location.hostname;
+  window.svcUrl = function (port, path) {
+    return location.protocol + '//' + host + ':' + port + (path || '/');
+  };
+  function apply() {
+    var els = document.querySelectorAll('[data-svc-port]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var url = window.svcUrl(el.getAttribute('data-svc-port'), el.getAttribute('data-svc-path'));
+      if (el.tagName === 'A') {
+        el.setAttribute('href', url);
+      } else {
+        el.setAttribute('data-svc-url', url);
+        if (!el.__svcBound) {
+          el.__svcBound = 1;
+          el.addEventListener('click', function (e) {
+            e.preventDefault();
+            location.href = this.getAttribute('data-svc-url');
+          });
+        }
+      }
+    }
+    var links = document.querySelectorAll('a[href*="10.88.202.78"]');
+    for (var j = 0; j < links.length; j++) {
+      links[j].setAttribute('href', links[j].getAttribute('href').replace('10.88.202.78', host));
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', apply);
+  } else { apply(); }
+  try {
+    var t = null;
+    new MutationObserver(function () {
+      clearTimeout(t); t = setTimeout(apply, 50);
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
 })();
 </script>
 </body>

@@ -7,8 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="preconnect" href="http://10.88.202.78">
-    <link rel="icon" href="img/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="img/favicon.ico" type="image/x-icon">
     <title>学生目录</title>
 
     <!-- HTML5 Shiv for IE6-8 to recognize HTML5 elements -->
@@ -1155,7 +1154,7 @@
 
             <div class="ie-right">
                 <a class="ie-btn" href="public/tutorial/web.html">教程</a>
-                <a class="ie-btn" href="http://10.88.202.78:5244">共享目录</a>
+                <a class="ie-btn" href="#" data-svc-port="5244" data-svc-path="/">共享目录</a>
                 <a class="ie-btn" href="javascript:void(0)" onclick="toggleIeTools()">更多工具</a>
                 <div class="ie-tools" id="ieTools" style="display: none;">
                     <a href="public/pages/clock.html">时钟</a>
@@ -1163,13 +1162,13 @@
                     <a href="public/pages/comment.html">留言簿</a>
                     <a href="public/pages/user-center.html">用户中心</a>
                     <a href="https://psstunet.github.io/">学生目录日志</a>
-                    <a href="http://10.88.202.78:30000">音乐网站</a>
-                    <a href="http://10.88.202.78:3234">VPN 日志分析</a>
-                    <a href="http://10.88.202.78:10091">我的世界管理</a>
-                    <a href="http://10.88.202.78:3232/login.html">服务器管理</a>
+                    <a href="#" data-svc-port="30000" data-svc-path="/">音乐网站</a>
+                    <a href="#" data-svc-port="3234" data-svc-path="/">VPN 日志分析</a>
+                    <a href="#" data-svc-port="10091" data-svc-path="/">我的世界管理</a>
+                    <a href="#" data-svc-port="3232" data-svc-path="/login.html">服务器管理</a>
                 </div>
                 <a class="ie-btn" href="aboutus/about_us.html">关于</a>
-                <a class="ie-btn" href="http://10.88.202.78:3132/">体验新版学生目录</a>
+                <a class="ie-btn" href="http://66.92.249.243:3132/">体验新版学生目录</a>
 
                 <p class="ie-vpn">
                     <a href="public/pages/newest.html">查看当前VPN状态</a>
@@ -1260,7 +1259,7 @@
                 </div>
                 <div class="v3-guide-actions">
                     <button type="button" class="v3-btn v3-btn-ghost" onclick="closeV3Guide()">暂不体验</button>
-                    <button type="button" class="v3-btn v3-btn-primary" onclick='location.href=("http://10.88.202.78:3132/")'>前往体验</button>
+                    <button type="button" class="v3-btn v3-btn-primary" onclick='location.href=("http://66.92.249.243:3132/")'>前往体验</button>
                 </div>
             </div>
         </div>
@@ -1293,11 +1292,11 @@
 
             <div class="button-section" style="margin-top: 40px;">
                 <button class="nav-button" onclick="navigateToTutorials()">教程</button>
-                <button class="nav-button" onclick='location.href=("http://10.88.202.78:5244")'>共享目录</button>
+                <button class="nav-button" data-svc-port="5244">共享目录</button>
                 <button class="nav-button" onclick="navigateToTools()">更多工具</button>
                 <button class="nav-button" onclick="navigateToAbout()">关于</button>
                 <button class="nav-button" onclick="openV3Guide()">体验新版学生目录</button>
-                <!--button class="nav-button" onclick='location.href=("http://10.88.202.78:30000/")'>音乐搜索器</button-->
+                <!--button class="nav-button" data-svc-port="30000">音乐搜索器</button-->
 
                 <div style="text-align: center; margin-top: 10px;">
                     <a id="vpnStatusLink" style="color:rgb(128, 128, 128);" class="footer-link" href="public/pages/newest.html">查看当前VPN状态</a>
@@ -1489,7 +1488,7 @@
             <div class="tutorial-card">
                 <h3>音乐网站</h3>
                 <p>来听听Music吧</p>
-                <a href="http://10.88.202.78:30000" class="btn btn-outline-primary">进入</a>
+                <a href="#" data-svc-port="30000" data-svc-path="/" class="btn btn-outline-primary">进入</a>
             </div>
             <div class="tutorial-card">
                 <h3>AI大模型</h3>
@@ -1516,17 +1515,17 @@
             <div class="tutorial-card">
                 <h3>VPN日志分析</h3>
                 <p>一个小小的日志分析网站</p>
-                <a href="http://10.88.202.78:3234" class="btn btn-outline-primary">进入</a>
+                <a href="#" data-svc-port="3234" data-svc-path="/" class="btn btn-outline-primary">进入</a>
             </div>
             <div class="tutorial-card">
                 <h3>我的世界管理</h3>
                 <p>我的世界管理服务器</p>
-                <a href="http://10.88.202.78:10091" class="btn btn-outline-primary">进入</a>
+                <a href="#" data-svc-port="10091" data-svc-path="/" class="btn btn-outline-primary">进入</a>
             </div>
             <div class="tutorial-card">
                 <h3>服务器管理</h3>
                 <p>管理服务器的小工具</p>
-                <a href="http://10.88.202.78:3232/login.html" class="btn btn-outline-primary">进入</a>
+                <a href="#" data-svc-port="3232" data-svc-path="/login.html" class="btn btn-outline-primary">进入</a>
             </div>
         </div>
     </div>
@@ -1543,7 +1542,7 @@
 <div class="footer-container">
     <a class="footer-link footer-links" href="https://github.com/Ps-Student-Catalog-Team/Ps-Student-Catalog" target="_blank" title="GitHub仓库" style="position: absolute; bottom: 10px; left: 20px; font-size: 0.8em; color: #666;"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -0.125em;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
     <a class="footer-link footer-links" id="announcementLink" href="javascript:void(0)" onclick="showAnnouncementModal(true)" style="display: none;">查看公告</a>
-    <a class="footer-link footer-links" id="updateLogLink" href="http://10.88.202.78:3133/" style="display: none;">关于我们</a>
+    <a class="footer-link footer-links" id="updateLogLink" href="#" data-svc-port="3133" data-svc-path="/" style="display: none;">关于我们</a>
     <a class="footer-link footer-links" id="moreContentLink" href="https://psstunet.github.io/" style="display: none;">更多内容</a-->
     <a class="footer-link footer-links" id="questionGroupLink" href="https://qm.qq.com/q/ORXbZyvt6e" style="display: none;">联系我们ヾ(≧▽≦*)o</a>
     <a class="version-info" href="javascript:void(0)" onclick="pullUpdates()" style="position: absolute; bottom: 10px; right: 20px; font-size: 0.8em; color: #666; cursor: pointer; text-decoration: underline;">版本: 2.3.4</a>
@@ -1695,7 +1694,7 @@
     const ANNOUNCEMENT_HASH_KEY = 'announcementContentHash';
     const ANNOUNCEMENT_EXPIRE_HOURS = 3;
     const MOUSE_EFFECT_KEY = 'mouseEffectEnabled';
-    const API_BASE_URL = 'http://10.88.202.78:3132';
+    const API_BASE_URL = '';
 
     async function fetchFromApi(endpoint, options) {
         options = options || {};
@@ -1897,7 +1896,7 @@
         var resultDiv = document.getElementById('updateResult');
         resultDiv.innerHTML = '<p>正在拉取同步最新更改，请稍候...</p>';
 
-        fetch('10.88.202.78:3132/api/pull-updates')
+        fetch('/api/pull-updates')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data.success) {
@@ -2128,5 +2127,50 @@
     })();
 </script>
 
+
+<script>
+/* ==== 站点服务地址动态解析（2026-11-01） ====
+   不写死 10.88.202.78，按当前访问主机名生成；支持 ?host= 或 ?ip= 覆盖。
+   用法：<a data-svc-port="5244" data-svc-path="/d/xxx"> */
+(function () {
+  var q = new URLSearchParams(location.search);
+  var host = q.get('host') || q.get('ip') || location.hostname;
+  window.svcUrl = function (port, path) {
+    return location.protocol + '//' + host + ':' + port + (path || '/');
+  };
+  function apply() {
+    var els = document.querySelectorAll('[data-svc-port]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var url = window.svcUrl(el.getAttribute('data-svc-port'), el.getAttribute('data-svc-path'));
+      if (el.tagName === 'A') {
+        el.setAttribute('href', url);
+      } else {
+        el.setAttribute('data-svc-url', url);
+        if (!el.__svcBound) {
+          el.__svcBound = 1;
+          el.addEventListener('click', function (e) {
+            e.preventDefault();
+            location.href = this.getAttribute('data-svc-url');
+          });
+        }
+      }
+    }
+    var links = document.querySelectorAll('a[href*="10.88.202.78"]');
+    for (var j = 0; j < links.length; j++) {
+      links[j].setAttribute('href', links[j].getAttribute('href').replace('10.88.202.78', host));
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', apply);
+  } else { apply(); }
+  try {
+    var t = null;
+    new MutationObserver(function () {
+      clearTimeout(t); t = setTimeout(apply, 50);
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>

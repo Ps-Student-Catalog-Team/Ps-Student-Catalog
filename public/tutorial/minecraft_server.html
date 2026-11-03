@@ -281,7 +281,7 @@
 <li>关闭防火墙或添加Minecraft白名单（如遇连接问题）</li>
 </ul>
 <h2 id="sec-3">安装游戏</h2>
-<p>如果你还没有安装Minecraft，你可以前往<a href="http://10.88.202.78:5244/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C/Minecraft.zip?sign=ADqTHeXhkwsqQw3_qc64iCnVEIAIWY8B5fXA8UStVhI=:0">学生目录下载</a>，这是基于PCL2的Minecraft 1.21.7启动器</p>
+<p>如果你还没有安装Minecraft，你可以前往<a href="#" data-svc-port="5244" data-svc-path="/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C/Minecraft.zip?sign=ADqTHeXhkwsqQw3_qc64iCnVEIAIWY8B5fXA8UStVhI=:0">学生目录下载</a>，这是基于PCL2的Minecraft 1.21.7启动器</p>
 <p>前往学生目录下载无需网络</p>
 <h2 id="sec-4">连接步骤</h2>
 <h3 id="sec-5">第一步：启动游戏</h3>
@@ -312,7 +312,7 @@
 <li>确认输入的IP地址 <strong>完全一致</strong>（注意<code>.</code>和数字正确）</li>
 <li>检查游戏版本是否为 <strong>1.21.7</strong> 精确匹配</li>
 <li>联系我们确认服务器状态</li>
-<li>如果遇到要下载Java库，可以点击这里<a href="http://10.88.202.78:5244/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C/Java%2025.exe?sign=y_AnoI64W3I5K8gPEmKF80Dn22SA-lv8eIDx5ilaFBk=:0">学生目录下载</a>下载</li>
+<li>如果遇到要下载Java库，可以点击这里<a href="#" data-svc-port="5244" data-svc-path="/d/%E5%AD%A6%E7%94%9F%E7%9B%AE%E5%BD%95/%E6%88%91%E7%9A%84%E4%B8%96%E7%95%8C/Java%2025.exe?sign=y_AnoI64W3I5K8gPEmKF80Dn22SA-lv8eIDx5ilaFBk=:0">学生目录下载</a>下载</li>
 </ul>
 <h2 id="sec-10">注意事项</h2>
 <p>⚠️ 该IP地址为 <strong>局域网地址</strong>，仅限同一网络下的设备访问  </p>
@@ -371,6 +371,51 @@
         window.attachEvent('onscroll', stick);
         window.attachEvent('onresize', function () { measure(); stick(); });
     }
+})();
+</script>
+
+<script>
+/* ==== 站点服务地址动态解析（2026-11-01） ====
+   不写死 10.88.202.78，按当前访问主机名生成；支持 ?host= 或 ?ip= 覆盖。
+   用法：<a data-svc-port="5244" data-svc-path="/d/xxx"> */
+(function () {
+  var q = new URLSearchParams(location.search);
+  var host = q.get('host') || q.get('ip') || location.hostname;
+  window.svcUrl = function (port, path) {
+    return location.protocol + '//' + host + ':' + port + (path || '/');
+  };
+  function apply() {
+    var els = document.querySelectorAll('[data-svc-port]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var url = window.svcUrl(el.getAttribute('data-svc-port'), el.getAttribute('data-svc-path'));
+      if (el.tagName === 'A') {
+        el.setAttribute('href', url);
+      } else {
+        el.setAttribute('data-svc-url', url);
+        if (!el.__svcBound) {
+          el.__svcBound = 1;
+          el.addEventListener('click', function (e) {
+            e.preventDefault();
+            location.href = this.getAttribute('data-svc-url');
+          });
+        }
+      }
+    }
+    var links = document.querySelectorAll('a[href*="10.88.202.78"]');
+    for (var j = 0; j < links.length; j++) {
+      links[j].setAttribute('href', links[j].getAttribute('href').replace('10.88.202.78', host));
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', apply);
+  } else { apply(); }
+  try {
+    var t = null;
+    new MutationObserver(function () {
+      clearTimeout(t); t = setTimeout(apply, 50);
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
 })();
 </script>
 </body>
