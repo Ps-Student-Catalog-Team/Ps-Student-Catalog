@@ -943,6 +943,27 @@ export default function TutorialDetail() {
           left: 0;
         }
 
+        .markdown-container > * {
+          max-width: 100%;
+        }
+
+        .markdown-container p,
+        .markdown-container li,
+        .markdown-container blockquote,
+        .markdown-container td,
+        .markdown-container th,
+        .markdown-container a,
+        .markdown-container code {
+          overflow-wrap: anywhere;
+          word-break: break-word;
+        }
+
+        .markdown-container pre {
+          overflow-x: auto;
+          white-space: pre-wrap;
+          word-break: break-word;
+        }
+
         .markdown-container img {
           max-width: 85%;
           height: auto;
@@ -1283,12 +1304,18 @@ export default function TutorialDetail() {
         @media (max-width: 900px) {
           .page-layout {
             flex-direction: column;
-            padding: 76px 14px 20px;
+            padding: 76px 12px 20px;
             gap: 20px;
           }
 
           .content-wrapper {
             max-width: 100%;
+            min-width: 0;
+          }
+
+          .markdown-container {
+            overflow-wrap: anywhere;
+            word-break: break-word;
           }
 
           .toc-sidebar {
@@ -1388,6 +1415,8 @@ export default function TutorialDetail() {
 
           .markdown-container {
             padding: 20px 18px;
+            overflow-x: hidden;
+            word-break: break-word;
           }
 
           .markdown-container h1,
@@ -1406,6 +1435,8 @@ export default function TutorialDetail() {
 
           .markdown-container img {
             max-width: 100%;
+            width: auto;
+            height: auto;
             margin: 1.2rem auto;
           }
 
@@ -1426,6 +1457,8 @@ export default function TutorialDetail() {
 
           .markdown-container table {
             display: block;
+            width: max-content;
+            min-width: 100%;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             font-size: 0.88em;
@@ -1509,6 +1542,7 @@ export default function TutorialDetail() {
           .markdown-container {
             padding: 16px 14px;
             border-radius: 12px;
+            overflow-x: hidden;
           }
 
           .tutorial-title {
@@ -1532,6 +1566,7 @@ export default function TutorialDetail() {
           .markdown-container p,
           .markdown-container li {
             line-height: 1.7;
+            font-size: 0.95em;
           }
 
           .markdown-container ul,
@@ -1541,6 +1576,11 @@ export default function TutorialDetail() {
 
           .markdown-container img {
             margin: 1rem auto;
+            max-width: 100%;
+          }
+
+          .markdown-container pre {
+            white-space: pre-wrap;
           }
 
           .fixed-buttons {
